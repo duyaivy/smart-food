@@ -4,7 +4,7 @@ import { Button, View } from '@/components/ui';
 
 import { Title } from './title';
 
-export const Buttons = () => {
+export const Buttons = React.memo(() => {
   return (
     <>
       <Title text="Buttons" />
@@ -49,4 +49,4 @@ export const Buttons = () => {
       </View>
     </>
   );
-};
+});

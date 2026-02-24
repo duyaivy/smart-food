@@ -14,7 +14,13 @@ const images = [
   'https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?auto=format&fit=crop&w=800&q=80',
 ];
 
-export const Card = ({ title, body, id }: Props) => {
+// Get consistent image based on id
+const getImageForId = (id: number) => {
+  return images[id % images.length];
+};
+
+export const Card = React.memo(({ title, body, id }: Props) => {
+  const imageUri = React.useMemo(() => getImageForId(id), [id]);
   return (
     <Link href={`/feed/${id}`} asChild>
       <Pressable>
@@ -22,9 +28,7 @@ export const Card = ({ title, body, id }: Props) => {
           <Image
             className="h-56 w-full overflow-hidden rounded-t-xl"
             contentFit="cover"
-            source={{
-              uri: images[Math.floor(Math.random() * images.length)],
-            }}
+            source={{ uri: imageUri }}
           />
 
           <View className="p-2">
@@ -37,4 +41,4 @@ export const Card = ({ title, body, id }: Props) => {
       </Pressable>
     </Link>
   );
-};
+});

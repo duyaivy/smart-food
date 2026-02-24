@@ -1,6 +1,6 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { Env } from '@env';
 import { useColorScheme } from 'nativewind';
+import React from 'react';
 
 import { Item } from '@/components/settings/item';
 import { ItemsContainer } from '@/components/settings/items-container';
@@ -16,16 +16,19 @@ import {
 import { Github, Rate, Share, Support, Website } from '@/components/ui/icons';
 import { translate, useAuth } from '@/lib';
 
-export default function Settings() {
+function Settings() {
   const signOut = useAuth.use.signOut();
   const { colorScheme } = useColorScheme();
-  const iconColor =
-    colorScheme === 'dark' ? colors.neutral[400] : colors.neutral[500];
+
+  const iconColor = React.useMemo(
+    () => (colorScheme === 'dark' ? colors.neutral[400] : colors.neutral[500]),
+    [colorScheme]
+  );
   return (
     <>
       <FocusAwareStatusBar />
 
-      <ScrollView>
+      <ScrollView removeClippedSubviews>
         <View className="flex-1 px-4 pt-16 ">
           <Text className="text-xl font-bold">
             {translate('settings.title')}
@@ -83,3 +86,5 @@ export default function Settings() {
     </>
   );
 }
+
+export default React.memo(Settings);

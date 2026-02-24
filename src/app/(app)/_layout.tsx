@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unstable-nested-components */
 import { Link, Redirect, SplashScreen, Tabs } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 
@@ -30,14 +29,27 @@ export default function TabLayout() {
   if (status === 'signOut') {
     return <Redirect href="/login" />;
   }
+
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        freezeOnBlur: true,
+        lazy: false,
+        tabBarHideOnKeyboard: true,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Feed',
           tabBarIcon: ({ color }) => <FeedIcon color={color} />,
-          headerRight: () => <CreateNewPostLink />,
+          headerRight: () => (
+            <Link href="/feed/add-post" asChild>
+              <Pressable>
+                <Text className="px-3 text-primary-300">Create</Text>
+              </Pressable>
+            </Link>
+          ),
           tabBarButtonTestID: 'feed-tab',
         }}
       />
@@ -63,13 +75,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const CreateNewPostLink = () => {
-  return (
-    <Link href="/feed/add-post" asChild>
-      <Pressable>
-        <Text className="px-3 text-primary-300">Create</Text>
-      </Pressable>
-    </Link>
-  );
-};

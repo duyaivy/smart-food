@@ -6,11 +6,11 @@ import { Inputs } from '@/components/inputs';
 import { Typography } from '@/components/typography';
 import { FocusAwareStatusBar, SafeAreaView, ScrollView } from '@/components/ui';
 
-export default function Style() {
+function Style() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="px-4">
+      <ScrollView className="px-4" removeClippedSubviews>
         <SafeAreaView className="flex-1">
           <Typography />
           <Colors />
@@ -21,3 +21,5 @@ export default function Style() {
     </>
   );
 }
+
+export default React.memo(Style);

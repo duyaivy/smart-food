@@ -4,7 +4,7 @@ import { Text, View } from '@/components/ui';
 
 import { Title } from './title';
 
-export const Typography = () => {
+export const Typography = React.memo(() => {
   return (
     <>
       <Title text="Typography" />
@@ -24,4 +24,4 @@ export const Typography = () => {
       </View>
     </>
   );
-};
+});

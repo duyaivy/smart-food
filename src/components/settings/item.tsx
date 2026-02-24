@@ -11,7 +11,7 @@ type ItemProps = {
   icon?: React.ReactNode;
 };
 
-export const Item = ({ text, value, icon, onPress }: ItemProps) => {
+export const Item = React.memo(({ text, value, icon, onPress }: ItemProps) => {
   const isPressable = onPress !== undefined;
   return (
     <Pressable
@@ -33,4 +33,4 @@ export const Item = ({ text, value, icon, onPress }: ItemProps) => {
       </View>
     </Pressable>
   );
-};
+});

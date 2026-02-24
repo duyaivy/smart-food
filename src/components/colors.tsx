@@ -6,7 +6,7 @@ import colors from '@/components/ui/colors';
 import { Title } from './title';
 type ColorName = keyof typeof colors;
 
-export const Colors = () => {
+export const Colors = React.memo(() => {
   return (
     <>
       <Title text="Colors" />
@@ -15,9 +15,9 @@ export const Colors = () => {
       ))}
     </>
   );
-};
+});
 
-const Color = ({ name }: { name: ColorName }) => {
+const Color = React.memo(({ name }: { name: ColorName }) => {
   if (typeof colors[name] === 'string') return null;
   return (
     <View className="pt-2">
@@ -35,16 +35,18 @@ const Color = ({ name }: { name: ColorName }) => {
       </View>
     </View>
   );
-};
+});
 
-const ColorCard = ({ color, value }: { value: string; color: string }) => {
-  return (
-    <View className="flex-1">
-      <View
-        className="h-14 w-full rounded-sm"
-        style={{ backgroundColor: color }}
-      />
-      <Text className="text-sm">{value}</Text>
-    </View>
-  );
-};
+const ColorCard = React.memo(
+  ({ color, value }: { value: string; color: string }) => {
+    return (
+      <View className="flex-1">
+        <View
+          className="h-14 w-full rounded-sm"
+          style={{ backgroundColor: color }}
+        />
+        <Text className="text-sm">{value}</Text>
+      </View>
+    );
+  }
+);
