@@ -14,7 +14,7 @@ const colors = {
     100: '#F7F7F7',
     50: '#FAFAFA',
   },
-primary: {
+  primary: {
     700: '#E96A46',
     600: '#F47551',
     500: '#F68F72',
@@ -86,11 +86,11 @@ primary: {
     orange: '#FF5722',
     carbs: '#F8D558',
   },
- 
 };
 
 const fontFamily = {
-  inter: ['Inter'],
+  // Keep the existing `font-inter` utility, but point it to Be Vietnam Pro.
+  inter: ['BeVietnamPro-Regular'],
 };
 
 const fontSize = {
@@ -105,7 +105,10 @@ const fontSize = {
   sectionHeader: ['20px', { lineHeight: '24px', fontWeight: '600' }],
   label: ['12px', { lineHeight: '16px', fontWeight: '500' }],
   caption: ['12px', { lineHeight: '16px', fontWeight: '400' }],
-  overline: ['10px', { lineHeight: '14px', fontWeight: '500', letterSpacing: '0.4px' }],
+  overline: [
+    '10px',
+    { lineHeight: '14px', fontWeight: '500', letterSpacing: '0.4px' },
+  ],
 
   // Body
   'body-l': ['16px', { lineHeight: '24px', fontWeight: '400' }],

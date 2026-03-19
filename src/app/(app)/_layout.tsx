@@ -1,8 +1,3 @@
-/* eslint-disable react/no-unstable-nested-components */
-import { Redirect, SplashScreen, Tabs } from 'expo-router';
-import React, { useCallback, useEffect } from 'react';
-import { Platform } from 'react-native';
-
 import {
   FireIcon,
   HomeIcon,
@@ -10,6 +5,10 @@ import {
   ProfileIcon,
   RefrigeratorIcon,
 } from '@assets/icons';
+import { Redirect, SplashScreen, Tabs } from 'expo-router';
+import React, { useCallback, useEffect } from 'react';
+import { Platform } from 'react-native';
+
 import { View } from '@/components/ui';
 import { useAuth, useIsFirstTime } from '@/lib';
 
@@ -91,7 +90,7 @@ export default function TabLayout() {
             <View
               className={`absolute -top-7 items-center justify-center rounded-full ${
                 focused ? 'bg-[#D4623D]' : 'bg-[#E8734A]'
-              } h-14 w-14 shadow-lg shadow-orange-400/40`}
+              } size-14 shadow-lg shadow-orange-400/40`}
             >
               <FireIcon width={28} height={28} fill="#FFFFFF" />
             </View>
