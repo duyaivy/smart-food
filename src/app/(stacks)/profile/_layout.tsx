@@ -11,7 +11,7 @@ export default function ProfileStackLayout() {
       }}
     >
       <Stack.Screen
-        name="edit"
+        name="edit/index"
         options={stackHeaderOptions({ title: 'Chỉnh sửa thông tin' })}
       />
       <Stack.Screen
@@ -19,7 +19,7 @@ export default function ProfileStackLayout() {
         options={stackHeaderOptions({ title: 'Cài đặt' })}
       />
       <Stack.Screen
-        name="about-us"
+        name="about-us/index"
         options={stackHeaderOptions({ title: 'Về chúng tôi' })}
       />
       <Stack.Screen

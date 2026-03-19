@@ -1,8 +1,9 @@
 import { Redirect, SplashScreen, Tabs } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 
-import { useAuth, useIsFirstTime } from '@/lib';
 import { CustomTabBar } from '@/components/ui/tab-bar/custom-tab-bar';
+import { ROUTE } from '@/constants/route';
+import { useAuth, useIsFirstTime } from '@/lib';
 export default function TabLayout() {
   const status = useAuth.use.status();
   const [isFirstTime] = useIsFirstTime();
@@ -18,10 +19,10 @@ export default function TabLayout() {
   }, [hideSplash, status]);
 
   if (isFirstTime) {
-    return <Redirect href="/onboarding" />;
+    return <Redirect href={ROUTE.AUTH.ONBOARDING} />;
   }
   if (status === 'signOut') {
-    return <Redirect href="/login" />;
+    return <Redirect href={ROUTE.AUTH.LOGIN} />;
   }
 
   return (

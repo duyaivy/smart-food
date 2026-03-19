@@ -7,6 +7,8 @@ import {
   User,
 } from 'lucide-react-native';
 
+import { ROUTE } from '@/constants/route';
+
 export const TAB_ACTIVE_COLOR = '#E8734A';
 export const TAB_INACTIVE_COLOR = '#A0A0A0';
 export const TAB_BAR_BG = '#FFFFFF';
@@ -38,21 +40,21 @@ export interface TabItem {
 export const TAB_CONFIG: TabItem[] = [
   {
     name: 'index',
-    href: '/',
+    href: ROUTE.TAB.HOME,
     label: 'Trang chủ',
     Icon: Home,
     testID: 'home-tab',
   },
   {
     name: 'discover/index',
-    href: '/discover',
+    href: ROUTE.TAB.DISCOVER,
     label: 'Khám phá',
     Icon: Lightbulb,
     testID: 'discover-tab',
   },
   {
     name: 'cooking/index',
-    href: '/cooking',
+    href: ROUTE.TAB.COOKING,
     label: 'Nấu ăn',
     Icon: Flame,
     isCenter: true,
@@ -60,14 +62,14 @@ export const TAB_CONFIG: TabItem[] = [
   },
   {
     name: 'fridge/index',
-    href: '/fridge',
+    href: ROUTE.TAB.FRIDGE,
     label: 'Tủ lạnh',
     Icon: Refrigerator,
     testID: 'fridge-tab',
   },
   {
     name: 'profile/index',
-    href: '/profile',
+    href: ROUTE.TAB.PROFILE,
     label: 'Cá nhân',
     Icon: User,
     testID: 'profile-tab',

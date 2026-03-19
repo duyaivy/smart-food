@@ -1,14 +1,15 @@
 import { Env } from '@env';
-import axios, {
-  type AxiosError,
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
+import type {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
 } from 'axios';
+import axios from 'axios';
 import { router } from 'expo-router';
 
-import { signIn, signOut } from '@/lib';
-import { getToken, type TokenType } from '@/lib/auth/utils';
-import useAuthStore from '@/lib/stores/use-auth-store';
+import { ROUTE } from '@/constants/route';
+import { signIn, signOut, useAuth } from '@/lib/auth';
+import type { TokenType } from '@/lib/auth/utils';
 
 type RequestConfigWithRetry = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -44,14 +45,7 @@ function setAuthorizationHeader(
 }
 
 function getTokenFromState(): TokenType | null {
-  const { accessToken, refreshToken } = useAuthStore.getState();
-  if (accessToken || refreshToken) {
-    return {
-      access: accessToken,
-      refresh: refreshToken,
-    };
-  }
-  return getToken();
+  return useAuth.getState().token;
 }
 
 function extractTokenPair(data: unknown): TokenType | null {
@@ -95,17 +89,12 @@ function extractAccessToken(data: unknown): string | null {
 }
 
 function syncTokensToStores(tokens: TokenType) {
-  const { setAccessToken, setRefreshToken } = useAuthStore.getState();
-  setAccessToken(tokens.access);
-  setRefreshToken(tokens.refresh);
   signIn(tokens);
 }
 
 function clearAuthAndRedirectToLogin() {
-  const { clearAuth } = useAuthStore.getState();
-  clearAuth();
   signOut();
-  router.replace('/login');
+  router.replace(ROUTE.AUTH.LOGIN);
 }
 
 export class Http {

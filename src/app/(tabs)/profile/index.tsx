@@ -5,10 +5,11 @@ import { FocusAwareStatusBar, Text, View } from '@/components/ui';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ListItemIcon from '@/components/ui/list-item-icon';
 import { OTHER_LIST_ITEM, USER_LIST_ITEM } from '@/constants/navbar';
-import useAuthStore from '@/lib/stores/use-auth-store';
+import { useAuth } from '@/lib/auth';
 
 export default function ProfileScreen() {
-  const { name } = useAuthStore();
+  const user = useAuth.use.user();
+  const name = user?.name ?? '';
 
   return (
     <View className="flex min-h-screen w-full flex-col items-center bg-white px-6">

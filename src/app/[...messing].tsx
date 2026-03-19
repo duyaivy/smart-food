@@ -1,6 +1,7 @@
 import { Link, Stack } from 'expo-router';
 
 import { Text, View } from '@/components/ui';
+import { ROUTE } from '@/constants/route';
 
 export default function NotFoundScreen() {
   return (
@@ -11,7 +12,7 @@ export default function NotFoundScreen() {
           This screen doesn&apos;t exist.
         </Text>
 
-        <Link href="/" className="mt-4">
+        <Link href={ROUTE.TAB.HOME} className="mt-4">
           <Text className="text-blue-500 underline">Go to home screen!</Text>
         </Link>
       </View>

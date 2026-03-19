@@ -31,9 +31,9 @@ export const LEGAL_SECTIONS: LegalDocumentSection[] = [
     id: '1',
     title: 'Điều khoản sử dụng SmartFood',
     meta: {
-      effectiveDate: '[dd/mm/yyyy]',
-      operator: '[Tên công ty/nhóm phát triển]',
-      contact: '[email hỗ trợ]',
+      effectiveDate: '01/01/2026',
+      operator: 'Nhóm 2 - PBL5',
+      contact: 'help@smartfood.com',
     },
     subsections: [
       {
@@ -182,7 +182,7 @@ export const LEGAL_SECTIONS: LegalDocumentSection[] = [
           },
           {
             type: 'paragraph',
-            text: 'Các nội dung nêu trên đều thuộc quyền sở hữu của [Tên công ty/nhóm phát triển] hoặc bên cấp phép liên quan. Người dùng không được sử dụng trái phép các tài sản này.',
+            text: 'Các nội dung nêu trên đều thuộc quyền sở hữu của Nhóm 2 - PBL5 hoặc bên cấp phép liên quan. Người dùng không được sử dụng trái phép các tài sản này.',
           },
         ],
       },
@@ -315,9 +315,9 @@ export const LEGAL_SECTIONS: LegalDocumentSection[] = [
     id: '2',
     title: 'Chính sách bảo mật SmartFood',
     meta: {
-      effectiveDate: '[dd/mm/yyyy]',
-      operator: '[Tên công ty/nhóm phát triển]',
-      contact: '[email]',
+      effectiveDate: '01/01/2026',
+      operator: 'Nhóm 2 - PBL5',
+      contact: 'help@smartfood.com',
       contactLabel: 'Liên hệ bảo mật',
     },
     subsections: [
@@ -502,7 +502,7 @@ export const LEGAL_SECTIONS: LegalDocumentSection[] = [
           },
           {
             type: 'paragraph',
-            text: 'Người dùng có thể gửi yêu cầu qua [email hỗ trợ].',
+            text: 'Người dùng có thể gửi yêu cầu qua help@smartfood.com.',
           },
         ],
       },
@@ -561,9 +561,9 @@ export const LEGAL_SECTIONS: LegalDocumentSection[] = [
     id: '3',
     title: 'Điều khoản bổ sung khuyến nghị cho SmartFood',
     meta: {
-      effectiveDate: '[dd/mm/yyyy]',
-      operator: '[Tên công ty/nhóm phát triển]',
-      contact: '[email hỗ trợ]',
+      effectiveDate: '01/01/2026',
+      operator: 'Nhóm 2 - PBL5',
+      contact: 'help@smartfood.com',
     },
     subsections: [
       {

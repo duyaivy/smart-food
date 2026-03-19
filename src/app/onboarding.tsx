@@ -8,7 +8,8 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { useIsFirstTime } from '@/lib/hooks';
+import { ROUTE } from '@/constants/route';
+import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
 export default function Onboarding() {
   const [_, setIsFirstTime] = useIsFirstTime();
@@ -37,7 +38,7 @@ export default function Onboarding() {
           label="Bắt đầu nào!"
           onPress={() => {
             setIsFirstTime(false);
-            router.replace('/login');
+            router.replace(ROUTE.AUTH.LOGIN);
           }}
         />
       </SafeAreaView>

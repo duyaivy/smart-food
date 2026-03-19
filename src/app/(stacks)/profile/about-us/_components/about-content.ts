@@ -29,7 +29,7 @@ export type AboutDocumentSection = {
 
 export const ABOUT_SECTIONS: AboutDocumentSection[] = [
   {
-    id: 'about-1',
+    id: '1',
     title: 'Về SmartFood',
     meta: {
       project: 'Đồ án SmartFood',
@@ -40,7 +40,7 @@ export const ABOUT_SECTIONS: AboutDocumentSection[] = [
     },
     subsections: [
       {
-        id: 'about-1.1',
+        id: '1.1',
         title: 'SmartFood là gì?',
         blocks: [
           {
@@ -54,7 +54,7 @@ export const ABOUT_SECTIONS: AboutDocumentSection[] = [
         ],
       },
       {
-        id: 'about-1.2',
+        id: '1.2',
         title: 'Mục tiêu của dự án',
         blocks: [
           {
@@ -73,7 +73,7 @@ export const ABOUT_SECTIONS: AboutDocumentSection[] = [
         ],
       },
       {
-        id: 'about-1.3',
+        id: '1.3',
         title: 'Các chức năng nổi bật',
         blocks: [
           {
@@ -88,7 +88,7 @@ export const ABOUT_SECTIONS: AboutDocumentSection[] = [
         ],
       },
       {
-        id: 'about-1.4',
+        id: '1.4',
         title: 'Về nhóm phát triển',
         blocks: [
           {
@@ -102,7 +102,7 @@ export const ABOUT_SECTIONS: AboutDocumentSection[] = [
         ],
       },
       {
-        id: 'about-1.5',
+        id: '1.5',
         title: 'Định hướng phát triển',
         blocks: [
           {
@@ -121,7 +121,7 @@ export const ABOUT_SECTIONS: AboutDocumentSection[] = [
         ],
       },
       {
-        id: 'about-1.6',
+        id: '1.6',
         title: 'Lời cảm ơn',
         blocks: [
           {
