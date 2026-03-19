@@ -17,7 +17,8 @@ import { useThemeConfig } from '@/lib/use-theme-config';
 export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
-  initialRouteName: '(app)',
+  // (tabs) is the primary entry point after auth checks
+  initialRouteName: '(tabs)',
 };
 
 hydrateAuth();
@@ -34,34 +35,15 @@ export default function RootLayout() {
   return (
     <Providers>
       <Stack>
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        {/* Primary tab group — bottom tab bar is visible here */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+        {/* Child screen group — no tab bar, each domain _layout.tsx controls headers */}
+        <Stack.Screen name="(stacks)" options={{ headerShown: false }} />
+
+        {/* Auth / onboarding screens */}
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
-
-        {/* Secondary screens */}
-        <Stack.Screen
-          name="meal-detail"
-          options={{ title: 'Chi tiết món ăn' }}
-        />
-        <Stack.Screen name="settings" options={{ title: 'Cài đặt' }} />
-        <Stack.Screen
-          name="edit-profile"
-          options={{ title: 'Chỉnh sửa hồ sơ' }}
-        />
-        <Stack.Screen
-          name="search"
-          options={{ title: 'Tìm kiếm', headerShown: false }}
-        />
-        <Stack.Screen name="notifications" options={{ title: 'Thông báo' }} />
-        <Stack.Screen name="favourites" options={{ title: 'Yêu thích' }} />
-        <Stack.Screen
-          name="privacy"
-          options={{ title: 'Chính sách bảo mật' }}
-        />
-        <Stack.Screen
-          name="history-cooking"
-          options={{ title: 'Lịch sử nấu ăn' }}
-        />
       </Stack>
     </Providers>
   );

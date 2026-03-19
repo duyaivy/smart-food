@@ -2,7 +2,7 @@ import React from 'react';
 
 import { FocusAwareStatusBar, Text, View } from '@/components/ui';
 
-export default function HistoryScreen() {
+export default function FridgeScreen() {
   return (
     <View className="flex-1 items-center justify-center">
       <FocusAwareStatusBar />

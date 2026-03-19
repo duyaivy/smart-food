@@ -21,13 +21,14 @@ const USER_LIST_ITEM = [
     Icon: User2,
     text: 'Chỉnh sửa thông tin',
     isChevron: true,
-    href: '/edit-profile',
+    href: '/(stacks)/profile/edit',
     color: '#111',
   },
   {
     Icon: Settings,
     text: 'Cài đặt',
     isChevron: true,
+    href: '/(stacks)/profile/settings',
   },
   {
     Icon: LockKeyhole,
@@ -52,6 +53,7 @@ const OTHER_LIST_ITEM = [
     Icon: Handshake,
     text: 'Điều khoản và chính sách',
     isChevron: false,
+    href: '/(stacks)/profile/privacy',
   },
   {
     Icon: LogOut,
@@ -66,13 +68,14 @@ const OTHER_LIST_ITEM = [
   color?: string;
   href?: LinkProps['href'];
 }[];
+
 export default function ProfileScreen() {
   const { name } = useAuthStore();
 
   return (
     <View className="flex min-h-screen w-full flex-col items-center bg-white px-6">
       <FocusAwareStatusBar />
-      <View className="mt-10 flex items-center">
+      <View className="mt-32 flex items-center">
         <View>
           <Avatar alt="avatar" className="size-36 shadow-md">
             <AvatarImage source={avatar} />
@@ -105,11 +108,12 @@ export default function ProfileScreen() {
       <View className="flex w-full flex-col">
         <Text className="mt-6 text-lg font-semibold">Khác</Text>
 
-        {OTHER_LIST_ITEM.map(({ Icon, text, isChevron, color }, index) => (
+        {OTHER_LIST_ITEM.map(({ Icon, text, isChevron, color, href }, index) => (
           <ListItemIcon
             key={index}
             Icon={Icon}
             text={text}
+            href={href}
             color={color}
             isChevron={isChevron}
           />
