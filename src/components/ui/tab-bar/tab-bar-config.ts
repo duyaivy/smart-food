@@ -2,12 +2,10 @@ import {
   Flame,
   Home,
   Lightbulb,
+  type LucideIcon,
   Refrigerator,
   User,
-  type LucideIcon,
 } from 'lucide-react-native';
-
-// ─── Design Tokens ─────────────────────────────────────────────────────────────
 
 export const TAB_ACTIVE_COLOR = '#E8734A';
 export const TAB_INACTIVE_COLOR = '#A0A0A0';
@@ -18,8 +16,6 @@ export const TAB_BAR_BORDER_RADIUS = 24;
 export const CENTER_BTN_SIZE = 60;
 export const CENTER_BTN_COLOR_ACTIVE = '#D4623D';
 export const CENTER_BTN_COLOR_DEFAULT = '#E8734A';
-
-// ─── Tab Item Definition ───────────────────────────────────────────────────────
 
 export interface TabItem {
   /** Route name as registered in Tabs.Screen */

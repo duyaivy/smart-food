@@ -9,5 +9,12 @@ import React from 'react';
  * The tab bar is NOT rendered for any route inside this group.
  */
 export default function StacksLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+      }}
+    />
+  );
 }

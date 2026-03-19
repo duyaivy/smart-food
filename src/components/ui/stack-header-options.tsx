@@ -1,7 +1,7 @@
-import { router } from 'expo-router';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { TouchableOpacity, Platform } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
@@ -52,8 +52,8 @@ export function stackHeaderOptions({
     headerShadowVisible: false,
     headerStyle: { backgroundColor: bg },
     headerTitleStyle: {
-      fontSize: 17,
-      fontWeight: '700',
+      fontSize: 18,
+      fontWeight: '600',
       color: titleColor,
     },
     headerTintColor: iconColor,

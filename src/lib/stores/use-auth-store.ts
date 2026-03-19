@@ -6,6 +6,12 @@ interface AuthState {
   name: string;
   email: string;
   password: string;
+  accessToken: string;
+  refreshToken: string;
+
+  setAccessToken: (token: string) => void;
+  setRefreshToken: (token: string) => void;
+  clearAuth: () => void;
   setAuthenticated: (payload: {
     name: string;
     email: string;
@@ -21,8 +27,21 @@ const useAuthStore = create<AuthState>()(
       name: '',
       email: '',
       password: '',
+      accessToken: '',
+      refreshToken: '',
       setAuthenticated: ({ name, email, password, isAuthenticated }) =>
         set({ name, email, password, isAuthenticated }),
+      setAccessToken: (token) => set({ accessToken: token }),
+      setRefreshToken: (token) => set({ refreshToken: token }),
+      clearAuth: () =>
+        set({
+          isAuthenticated: false,
+          name: '',
+          email: '',
+          password: '',
+          accessToken: '',
+          refreshToken: '',
+        }),
     }),
     {
       name: 'auth-storage',

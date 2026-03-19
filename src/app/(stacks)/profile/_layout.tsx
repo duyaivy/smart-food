@@ -1,38 +1,35 @@
 import { Stack } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import React from 'react';
 
 import { stackHeaderOptions } from '@/components/ui/stack-header-options';
 
 export default function ProfileStackLayout() {
-  const { colorScheme } = useColorScheme();
-  const dark = colorScheme === 'dark';
-
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        animation: 'slide_from_right',
+      }}
+    >
       <Stack.Screen
         name="edit"
-        options={stackHeaderOptions({ title: 'Chỉnh sửa hồ sơ', dark })}
+        options={stackHeaderOptions({ title: 'Chỉnh sửa thông tin' })}
       />
       <Stack.Screen
         name="settings"
-        options={stackHeaderOptions({ title: 'Cài đặt', dark })}
+        options={stackHeaderOptions({ title: 'Cài đặt' })}
       />
       <Stack.Screen
-        name="privacy"
-        options={stackHeaderOptions({ title: 'Chính sách bảo mật', dark })}
+        name="about-us"
+        options={stackHeaderOptions({ title: 'Về chúng tôi' })}
       />
       <Stack.Screen
-        name="notifications"
-        options={stackHeaderOptions({ title: 'Thông báo', dark })}
+        name="privacy/index"
+        options={stackHeaderOptions({ title: 'Điều khoản và chính sách' })}
       />
-      <Stack.Screen
-        name="favourites"
-        options={stackHeaderOptions({ title: 'Yêu thích', dark })}
-      />
+
       <Stack.Screen
         name="history-cooking"
-        options={stackHeaderOptions({ title: 'Lịch sử nấu ăn', dark })}
+        options={stackHeaderOptions({ title: 'Lịch sử nấu ăn' })}
       />
     </Stack>
   );

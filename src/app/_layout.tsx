@@ -39,7 +39,13 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
         {/* Child screen group — no tab bar, each domain _layout.tsx controls headers */}
-        <Stack.Screen name="(stacks)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(stacks)"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        />
 
         {/* Auth / onboarding screens */}
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />

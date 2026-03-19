@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { FocusAwareStatusBar, Text, View } from '@/components/ui';
 
 export default function EditProfileScreen() {

@@ -1,73 +1,11 @@
 import { avatar } from '@assets/images';
-import type { LinkProps } from 'expo-router';
-import {
-  Handshake,
-  Info,
-  LockKeyhole,
-  LogOut,
-  type LucideIcon,
-  Settings,
-  User2,
-} from 'lucide-react-native';
 import React from 'react';
 
 import { FocusAwareStatusBar, Text, View } from '@/components/ui';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ListItemIcon from '@/components/ui/list-item-icon';
+import { OTHER_LIST_ITEM, USER_LIST_ITEM } from '@/constants/navbar';
 import useAuthStore from '@/lib/stores/use-auth-store';
-
-const USER_LIST_ITEM = [
-  {
-    Icon: User2,
-    text: 'Chỉnh sửa thông tin',
-    isChevron: true,
-    href: '/(stacks)/profile/edit',
-    color: '#111',
-  },
-  {
-    Icon: Settings,
-    text: 'Cài đặt',
-    isChevron: true,
-    href: '/(stacks)/profile/settings',
-  },
-  {
-    Icon: LockKeyhole,
-    text: 'Quên mật khẩu',
-    isChevron: false,
-  },
-] satisfies {
-  Icon: LucideIcon;
-  text: string;
-  isChevron: boolean;
-  color?: string;
-  href?: LinkProps['href'];
-}[];
-
-const OTHER_LIST_ITEM = [
-  {
-    Icon: Info,
-    text: 'Về chúng tôi',
-    isChevron: false,
-  },
-  {
-    Icon: Handshake,
-    text: 'Điều khoản và chính sách',
-    isChevron: false,
-    href: '/(stacks)/profile/privacy',
-  },
-  {
-    Icon: LogOut,
-    text: 'Đăng xuất',
-    isChevron: false,
-    color: '#FF3B30',
-  },
-] satisfies {
-  Icon: LucideIcon;
-  text: string;
-  isChevron: boolean;
-  color?: string;
-  href?: LinkProps['href'];
-}[];
 
 export default function ProfileScreen() {
   const { name } = useAuthStore();
@@ -108,16 +46,18 @@ export default function ProfileScreen() {
       <View className="flex w-full flex-col">
         <Text className="mt-6 text-lg font-semibold">Khác</Text>
 
-        {OTHER_LIST_ITEM.map(({ Icon, text, isChevron, color, href }, index) => (
-          <ListItemIcon
-            key={index}
-            Icon={Icon}
-            text={text}
-            href={href}
-            color={color}
-            isChevron={isChevron}
-          />
-        ))}
+        {OTHER_LIST_ITEM.map(
+          ({ Icon, text, isChevron, color, href }, index) => (
+            <ListItemIcon
+              key={index}
+              Icon={Icon}
+              text={text}
+              href={href}
+              color={color}
+              isChevron={isChevron}
+            />
+          )
+        )}
       </View>
     </View>
   );
