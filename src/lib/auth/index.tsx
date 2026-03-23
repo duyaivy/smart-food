@@ -1,47 +1,14 @@
-import { create } from 'zustand';
-
-import { createSelectors } from '../utils';
+import {
+  type AuthState,
+  type AuthStatus,
+  type AuthUser,
+  useAuth,
+} from './store';
 import type { TokenType } from './utils';
-import { getToken, removeToken, setToken } from './utils';
 
-interface AuthState {
-  token: TokenType | null;
-  status: 'idle' | 'signOut' | 'signIn';
-  signIn: (data: TokenType) => void;
-  signOut: () => void;
-  hydrate: () => void;
-}
+export { useAuth };
+export type { AuthState, AuthStatus, AuthUser, TokenType };
 
-const _useAuth = create<AuthState>((set, get) => ({
-  status: 'idle',
-  token: null,
-  signIn: (token) => {
-    setToken(token);
-    set({ status: 'signIn', token });
-  },
-  signOut: () => {
-    removeToken();
-    set({ status: 'signOut', token: null });
-  },
-  hydrate: () => {
-    try {
-      const userToken = getToken();
-      if (userToken !== null) {
-        get().signIn(userToken);
-      } else {
-        get().signOut();
-      }
-    } catch (e) {
-      // only to remove eslint error, handle the error properly
-      console.error(e);
-      // catch error here
-      // Maybe sign_out user!
-    }
-  },
-}));
-
-export const useAuth = createSelectors(_useAuth);
-
-export const signOut = () => _useAuth.getState().signOut();
-export const signIn = (token: TokenType) => _useAuth.getState().signIn(token);
-export const hydrateAuth = () => _useAuth.getState().hydrate();
+export const signOut = () => useAuth.getState().signOut();
+export const signIn = (token: TokenType) => useAuth.getState().signIn(token);
+export const hydrateAuth = () => useAuth.getState().hydrate();

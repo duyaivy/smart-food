@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 import type { ConfigContext, ExpoConfig } from '@expo/config';
 import type { AppIconBadgeConfig } from 'app-icon-badge/types';
 
@@ -69,7 +68,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-font',
       {
-        fonts: ['./assets/fonts/Inter.ttf'],
+        // Bundle custom fonts for native platforms.
+        // Using the Be_Vietnam_Pro directory ensures all weights are included.
+        fonts: ['./assets/fonts/Be_Vietnam_Pro/'],
       },
     ],
     'expo-localization',

@@ -1,0 +1,49 @@
+import { Link, type LinkProps } from 'expo-router';
+import { ChevronRight, type LucideIcon } from 'lucide-react-native';
+import { TouchableOpacity, View } from 'react-native';
+
+import { ICON_SIZE_LARGE } from '@/constants/common';
+
+import { Text } from './text';
+
+type Props = {
+  Icon: LucideIcon;
+  text: string;
+  isChevron?: boolean;
+  color?: string;
+  href?: LinkProps['href'];
+};
+
+const ListItemIcon = ({
+  Icon,
+  text,
+  isChevron = false,
+  color = '#222222',
+  href,
+}: Props) => {
+  const content = (
+    <TouchableOpacity
+      activeOpacity={href ? 0.7 : 1}
+      disabled={!href}
+      className="mt-3.5 flex w-full flex-row justify-between gap-2"
+    >
+      <View className="flex flex-row gap-2">
+        <Icon size={ICON_SIZE_LARGE} color={color} />
+        <Text className="text-body-l font-medium" style={{ color }}>
+          {text}
+        </Text>
+      </View>
+      {isChevron && <ChevronRight size={ICON_SIZE_LARGE} color={color} />}
+    </TouchableOpacity>
+  );
+
+  if (!href) return content;
+
+  return (
+    <Link href={href} asChild>
+      {content}
+    </Link>
+  );
+};
+
+export default ListItemIcon;
