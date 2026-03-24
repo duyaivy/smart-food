@@ -1,8 +1,13 @@
 export const ROUTE = {
   AUTH: {
-    LOGIN: '/login',
+    SIGNIN: '/signin',
+    SIGN_UP: '/signup',
+    FORGOT_PASSWORD: '/forgot-password',
+    RESET_PASSWORD: '/reset-password',
+    VERIFY_EMAIL: '/verify-email',
     ONBOARDING: '/onboarding',
   },
+
   TAB: {
     HOME: '/',
     DISCOVER: '/discover',
