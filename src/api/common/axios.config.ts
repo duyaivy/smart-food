@@ -13,12 +13,12 @@ import type { TokenType } from '@/lib/auth/utils';
 
 type RequestConfigWithRetry = InternalAxiosRequestConfig & { _retry?: boolean };
 
-// NOTE: Repo hiện chưa có constants auth URL; giữ cấu trúc logic cũ bằng default path.
-// Nếu backend khác path, chỉ cần update các hằng số này.
-const URL_LOGIN = '/login';
-const URL_SIGNUP = '/signup';
-const URL_LOGOUT = '/logout';
-const URL_SESSION_ACCESS_TOKEN = '/session/access-token';
+const AUTH_PREFIX = '/v1/auth';
+
+const URL_LOGIN = `${AUTH_PREFIX}/login`;
+const URL_SIGNUP = `${AUTH_PREFIX}/register`;
+const URL_LOGOUT = `${AUTH_PREFIX}/logout`;
+const URL_SESSION_ACCESS_TOKEN = `${AUTH_PREFIX}/refresh-tokens`;
 
 function isAxiosUnauthorizedError(error: AxiosError) {
   return error.response?.status === 401;
@@ -31,9 +31,9 @@ function setAuthorizationHeader(
   if (!config.headers) return;
   const value = `Bearer ${token}`;
 
-  // Axios v1 có thể dùng AxiosHeaders instance
   const headers = config.headers as unknown as {
     set?: (key: string, value: string) => void;
+    Authorization?: string;
   };
 
   if (typeof headers.set === 'function') {
@@ -48,43 +48,105 @@ function getTokenFromState(): TokenType | null {
   return useAuth.getState().token;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function extractErrorMessage(data: unknown): string {
+  if (!isRecord(data)) return 'Có lỗi xảy ra';
+
+  if (typeof data.message === 'string' && data.message.trim()) {
+    return data.message;
+  }
+
+  if (typeof data.error === 'string' && data.error.trim()) {
+    return data.error;
+  }
+
+  if (isRecord(data.data) && typeof data.data.message === 'string') {
+    return data.data.message;
+  }
+
+  return 'Có lỗi xảy ra';
+}
+
 function extractTokenPair(data: unknown): TokenType | null {
-  if (!data || typeof data !== 'object') return null;
+  if (!isRecord(data)) return null;
 
-  const record = data as Record<string, unknown>;
+  // Trường hợp backend trả:
+  // { code, message, data: { user, tokens: { access: { token }, refresh: { token } } } }
+  if (isRecord(data.data) && isRecord(data.data.tokens)) {
+    const tokens = data.data.tokens as Record<string, unknown>;
+    const access = isRecord(tokens.access) ? tokens.access.token : undefined;
+    const refresh = isRecord(tokens.refresh) ? tokens.refresh.token : undefined;
 
-  // { accessToken: { accessToken: string, refreshToken: string } }
-  const accessTokenContainer = record.accessToken;
-  if (accessTokenContainer && typeof accessTokenContainer === 'object') {
-    const inner = accessTokenContainer as Record<string, unknown>;
-    const access = inner.accessToken;
-    const refresh = inner.refreshToken;
     if (typeof access === 'string' && typeof refresh === 'string') {
       return { access, refresh };
     }
   }
 
-  // { accessToken: string, refreshToken: string }
-  if (
-    typeof record.accessToken === 'string' &&
-    typeof record.refreshToken === 'string'
-  ) {
-    return { access: record.accessToken, refresh: record.refreshToken };
+  // Trường hợp backend trả trực tiếp:
+  // { tokens: { access: { token }, refresh: { token } } }
+  if (isRecord(data.tokens)) {
+    const tokens = data.tokens as Record<string, unknown>;
+    const access = isRecord(tokens.access) ? tokens.access.token : undefined;
+    const refresh = isRecord(tokens.refresh) ? tokens.refresh.token : undefined;
+
+    if (typeof access === 'string' && typeof refresh === 'string') {
+      return { access, refresh };
+    }
   }
 
-  // { access: string, refresh: string }
-  if (typeof record.access === 'string' && typeof record.refresh === 'string') {
-    return { access: record.access, refresh: record.refresh };
+  // fallback cũ
+  if (typeof data.access === 'string' && typeof data.refresh === 'string') {
+    return {
+      access: data.access,
+      refresh: data.refresh,
+    };
+  }
+
+  if (
+    typeof data.accessToken === 'string' &&
+    typeof data.refreshToken === 'string'
+  ) {
+    return {
+      access: data.accessToken,
+      refresh: data.refreshToken,
+    };
   }
 
   return null;
 }
 
 function extractAccessToken(data: unknown): string | null {
-  if (!data || typeof data !== 'object') return null;
-  const record = data as Record<string, unknown>;
-  if (typeof record.access_token === 'string') return record.access_token;
-  if (typeof record.accessToken === 'string') return record.accessToken;
+  if (!isRecord(data)) return null;
+
+  // Trường hợp backend refresh trả:
+  // { code, message, data: { access: { token }, refresh: { token } } }
+  if (isRecord(data.data)) {
+    const inner = data.data as Record<string, unknown>;
+
+    if (isRecord(inner.access) && typeof inner.access.token === 'string') {
+      return inner.access.token;
+    }
+
+    if (typeof inner.accessToken === 'string') {
+      return inner.accessToken;
+    }
+
+    if (typeof inner.access_token === 'string') {
+      return inner.access_token;
+    }
+  }
+
+  // Trường hợp trả trực tiếp
+  if (isRecord(data.access) && typeof data.access.token === 'string') {
+    return data.access.token;
+  }
+
+  if (typeof data.accessToken === 'string') return data.accessToken;
+  if (typeof data.access_token === 'string') return data.access_token;
+
   return null;
 }
 
@@ -94,7 +156,7 @@ function syncTokensToStores(tokens: TokenType) {
 
 function clearAuthAndRedirectToLogin() {
   signOut();
-  router.replace(ROUTE.AUTH.LOGIN);
+  router.replace(ROUTE.AUTH.SIGNIN);
 }
 
 export class Http {
@@ -107,11 +169,13 @@ export class Http {
   constructor(baseUrl?: string) {
     const serverUrl = baseUrl ?? Env.API_URL;
     const tokens = getTokenFromState();
+
     this.token = tokens?.access ?? '';
     this.refreshToken = tokens?.refresh ?? '';
     this.refreshTokenRequest = null;
+
     this.instance = axios.create({
-      baseURL: `${serverUrl}`,
+      baseURL: serverUrl,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -119,7 +183,7 @@ export class Http {
     });
 
     this.refreshInstance = axios.create({
-      baseURL: `${serverUrl}`,
+      baseURL: serverUrl,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -128,22 +192,23 @@ export class Http {
 
     this.instance.interceptors.request.use(
       (config) => {
-        const tokens = getTokenFromState();
-        this.token = tokens?.access ?? '';
-        this.refreshToken = tokens?.refresh ?? '';
+        const latestTokens = getTokenFromState();
+        this.token = latestTokens?.access ?? '';
+        this.refreshToken = latestTokens?.refresh ?? '';
+
         if (this.token && config.headers) {
           setAuthorizationHeader(config, this.token);
         }
+
         return config;
       },
-      (error) => {
-        return Promise.reject(error);
-      }
+      (error) => Promise.reject(error)
     );
-    // Add a response interceptor
+
     this.instance.interceptors.response.use(
       (response) => {
-        const { url } = response.config;
+        const url = response.config.url ?? '';
+
         if (url === URL_LOGIN || url === URL_SIGNUP) {
           const tokens = extractTokenPair(response.data);
           if (tokens) {
@@ -156,31 +221,36 @@ export class Http {
           this.refreshToken = '';
           clearAuthAndRedirectToLogin();
         } else if (url === URL_SESSION_ACCESS_TOKEN) {
-          const accessToken = extractAccessToken(response.data);
-          if (accessToken) {
-            this.token = accessToken;
-            const tokens = getTokenFromState();
-            const refresh = tokens?.refresh ?? this.refreshToken;
-            if (refresh) syncTokensToStores({ access: accessToken, refresh });
+          const tokens = extractTokenPair(response.data);
+
+          if (tokens) {
+            this.token = tokens.access;
+            this.refreshToken = tokens.refresh;
+            syncTokensToStores(tokens);
+          } else {
+            const accessToken = extractAccessToken(response.data);
+            if (accessToken) {
+              this.token = accessToken;
+              const currentTokens = getTokenFromState();
+              const refresh = currentTokens?.refresh ?? this.refreshToken;
+              if (refresh) {
+                syncTokensToStores({ access: accessToken, refresh });
+              }
+            }
           }
         }
+
         return response;
       },
       (error: AxiosError) => {
-        // Unauthorized (401) has many cases
-        // - Token is not correct
-        // - Token is not passed
-        // - Token is expired
-
-        // If 401
         if (isAxiosUnauthorizedError(error)) {
           const config = error.config as RequestConfigWithRetry | undefined;
+
           if (!config) {
             clearAuthAndRedirectToLogin();
             return Promise.reject(error);
           }
 
-          // tránh loop: request refresh cũng 401 thì logout luôn
           if (config.url === URL_SESSION_ACCESS_TOKEN) {
             clearAuthAndRedirectToLogin();
             return Promise.reject(error);
@@ -213,6 +283,9 @@ export class Http {
             });
         }
 
+        const backendMessage = extractErrorMessage(error.response?.data);
+        error.message = backendMessage || error.message || 'Có lỗi xảy ra';
+
         return Promise.reject(error);
       }
     );
@@ -221,9 +294,11 @@ export class Http {
   private handleRefreshToken(): Promise<TokenType> {
     const tokens = getTokenFromState();
     const refresh = tokens?.refresh ?? this.refreshToken;
-    if (!refresh) return Promise.reject(new Error('Missing refresh token'));
 
-    // payload generic; backend có thể khác, nhưng vẫn giữ được flow retry/clear
+    if (!refresh) {
+      return Promise.reject(new Error('Thiếu refresh token'));
+    }
+
     return this.refreshInstance
       .post(URL_SESSION_ACCESS_TOKEN, { refreshToken: refresh })
       .then((response) => {
@@ -231,9 +306,14 @@ export class Http {
         if (nextTokens) return nextTokens;
 
         const accessToken = extractAccessToken(response.data);
-        if (accessToken) return { access: accessToken, refresh };
+        if (accessToken) {
+          return {
+            access: accessToken,
+            refresh,
+          };
+        }
 
-        return Promise.reject(new Error('Invalid refresh token response'));
+        return Promise.reject(new Error('Response refresh token không hợp lệ'));
       });
   }
 }
