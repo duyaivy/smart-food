@@ -1,6 +1,7 @@
 import * as AvatarPrimitive from '@rn-primitives/avatar';
 
-import { cn } from '@/lib/utils';
+import { Image } from '@/components/ui/image';
+import { cn } from '@/lib/common/utils';
 
 function Avatar({
   className,
@@ -20,12 +21,9 @@ function Avatar({
 function AvatarImage({
   className,
   ...props
-}: AvatarPrimitive.ImageProps & React.RefAttributes<AvatarPrimitive.ImageRef>) {
+}: React.ComponentPropsWithoutRef<typeof Image>) {
   return (
-    <AvatarPrimitive.Image
-      className={cn('aspect-square size-full', className)}
-      {...props}
-    />
+    <Image className={cn('aspect-square size-full', className)} {...props} />
   );
 }
 
@@ -37,7 +35,7 @@ function AvatarFallback({
   return (
     <AvatarPrimitive.Fallback
       className={cn(
-        'bg-muted flex size-full flex-row items-center justify-center rounded-full',
+        'bg-secondary-500 flex size-full flex-row items-center justify-center rounded-full',
         className
       )}
       {...props}

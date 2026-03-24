@@ -18,7 +18,7 @@ type RequestConfigWithRetry = InternalAxiosRequestConfig & { _retry?: boolean };
 const URL_LOGIN = '/login';
 const URL_SIGNUP = '/signup';
 const URL_LOGOUT = '/logout';
-const URL_SESSION_ACCESS_TOKEN = '/session/access-token';
+const URL_REFRESH_TOKEN = '/auth/refresh-tokens';
 
 function isAxiosUnauthorizedError(error: AxiosError) {
   return error.response?.status === 401;
@@ -53,6 +53,27 @@ function extractTokenPair(data: unknown): TokenType | null {
 
   const record = data as Record<string, unknown>;
 
+  const payload = record.data;
+  if (payload && typeof payload === 'object') {
+    const inner = payload as Record<string, unknown>;
+    const accessObj = inner.access;
+    const refreshObj = inner.refresh;
+
+    const access =
+      accessObj && typeof accessObj === 'object'
+        ? (accessObj as Record<string, unknown>).token
+        : undefined;
+
+    const refresh =
+      refreshObj && typeof refreshObj === 'object'
+        ? (refreshObj as Record<string, unknown>).token
+        : undefined;
+
+    if (typeof access === 'string' && typeof refresh === 'string') {
+      return { access, refresh };
+    }
+  }
+
   // { accessToken: { accessToken: string, refreshToken: string } }
   const accessTokenContainer = record.accessToken;
   if (accessTokenContainer && typeof accessTokenContainer === 'object') {
@@ -83,6 +104,19 @@ function extractTokenPair(data: unknown): TokenType | null {
 function extractAccessToken(data: unknown): string | null {
   if (!data || typeof data !== 'object') return null;
   const record = data as Record<string, unknown>;
+
+  // NEW SHAPE: { data: { access: { token: string } } }
+  const payload = record.data;
+  if (payload && typeof payload === 'object') {
+    const inner = payload as Record<string, unknown>;
+    const accessObj = inner.access;
+
+    if (accessObj && typeof accessObj === 'object') {
+      const token = (accessObj as Record<string, unknown>).token;
+      if (typeof token === 'string') return token;
+    }
+  }
+
   if (typeof record.access_token === 'string') return record.access_token;
   if (typeof record.accessToken === 'string') return record.accessToken;
   return null;
@@ -108,7 +142,8 @@ export class Http {
     const serverUrl = baseUrl ?? Env.API_URL;
     const tokens = getTokenFromState();
     this.token = tokens?.access ?? '';
-    this.refreshToken = tokens?.refresh ?? '';
+    this.refreshToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJ1c2VySWQiOjEyLCJpc0VtYWlsVmVyaWZpZWQiOnRydWUsImlhdCI6MTc3NDM2MjI0MCwiZXhwIjoxNzc2OTU0MjQwLCJ0eXBlIjoiUkVGUkVTSCJ9.N0Hzbly92Bu7HWTzVxm3PwrvTeoKCIPURxWdA--lddo';
     this.refreshTokenRequest = null;
     this.instance = axios.create({
       baseURL: `${serverUrl}`,
@@ -128,9 +163,8 @@ export class Http {
 
     this.instance.interceptors.request.use(
       (config) => {
-        const tokens = getTokenFromState();
-        this.token = tokens?.access ?? '';
-        this.refreshToken = tokens?.refresh ?? '';
+        this.token = this.token;
+        this.refreshToken = this.refreshToken;
         if (this.token && config.headers) {
           setAuthorizationHeader(config, this.token);
         }
@@ -155,13 +189,19 @@ export class Http {
           this.token = '';
           this.refreshToken = '';
           clearAuthAndRedirectToLogin();
-        } else if (url === URL_SESSION_ACCESS_TOKEN) {
-          const accessToken = extractAccessToken(response.data);
-          if (accessToken) {
-            this.token = accessToken;
-            const tokens = getTokenFromState();
-            const refresh = tokens?.refresh ?? this.refreshToken;
-            if (refresh) syncTokensToStores({ access: accessToken, refresh });
+        } else if (url === URL_REFRESH_TOKEN) {
+          const nextTokens = extractTokenPair(response.data);
+          if (nextTokens) {
+            this.token = nextTokens.access;
+            this.refreshToken = nextTokens.refresh;
+            syncTokensToStores(nextTokens);
+          } else {
+            const accessToken = extractAccessToken(response.data);
+            if (accessToken) {
+              this.token = accessToken;
+              const refresh = this.refreshToken || getTokenFromState()?.refresh;
+              if (refresh) syncTokensToStores({ access: accessToken, refresh });
+            }
           }
         }
         return response;
@@ -181,7 +221,7 @@ export class Http {
           }
 
           // tránh loop: request refresh cũng 401 thì logout luôn
-          if (config.url === URL_SESSION_ACCESS_TOKEN) {
+          if (config.url === URL_REFRESH_TOKEN) {
             clearAuthAndRedirectToLogin();
             return Promise.reject(error);
           }
@@ -201,6 +241,8 @@ export class Http {
 
           return this.refreshTokenRequest
             .then((tokens) => {
+              console.log({ tokens });
+
               this.token = tokens.access;
               this.refreshToken = tokens.refresh;
               syncTokensToStores(tokens);
@@ -220,23 +262,36 @@ export class Http {
 
   private handleRefreshToken(): Promise<TokenType> {
     const tokens = getTokenFromState();
-    const refresh = tokens?.refresh ?? this.refreshToken;
+
+    // ƯU TIÊN token bạn truyền tay / hardcode
+    const refresh = this.refreshToken || tokens?.refresh;
     if (!refresh) return Promise.reject(new Error('Missing refresh token'));
 
     // payload generic; backend có thể khác, nhưng vẫn giữ được flow retry/clear
     return this.refreshInstance
-      .post(URL_SESSION_ACCESS_TOKEN, { refreshToken: refresh })
+      .post(URL_REFRESH_TOKEN, { refreshToken: refresh })
       .then((response) => {
         const nextTokens = extractTokenPair(response.data);
-        if (nextTokens) return nextTokens;
+        if (nextTokens) {
+          this.token = nextTokens.access;
+          this.refreshToken = nextTokens.refresh;
+          syncTokensToStores(nextTokens);
+          return nextTokens;
+        }
 
         const accessToken = extractAccessToken(response.data);
-        if (accessToken) return { access: accessToken, refresh };
+        if (accessToken) {
+          const fallbackTokens = { access: accessToken, refresh };
+          this.token = fallbackTokens.access;
+          this.refreshToken = fallbackTokens.refresh;
+          syncTokensToStores(fallbackTokens);
+          return fallbackTokens;
+        }
 
         return Promise.reject(new Error('Invalid refresh token response'));
       });
   }
 }
 
-const request = new Http().instance;
-export default request;
+const http = new Http().instance;
+export default http;

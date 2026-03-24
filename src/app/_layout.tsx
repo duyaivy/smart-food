@@ -9,10 +9,11 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { red } from 'react-native-reanimated/lib/typescript/Colors';
 
 import { APIProvider } from '@/api';
 import { hydrateAuth, loadSelectedTheme } from '@/lib';
-import { useThemeConfig } from '@/lib/use-theme-config';
+import { useThemeConfig } from '@/lib/common/use-theme-config';
 
 export { ErrorBoundary } from 'expo-router';
 

@@ -111,7 +111,6 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 
   return (
     <View
-      className="rounded-t-3xl"
       style={[
         { backgroundColor: TAB_BAR_BG },
         containerStyle,
