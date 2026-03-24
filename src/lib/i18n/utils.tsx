@@ -6,7 +6,7 @@ import { I18nManager, NativeModules, Platform } from 'react-native';
 import { useMMKVString } from 'react-native-mmkv';
 import RNRestart from 'react-native-restart';
 
-import { storage } from '../storage';
+import { storage } from '../common/storage';
 import type { Language, resources } from './resources';
 import type { RecursiveKeyOf } from './types';
 

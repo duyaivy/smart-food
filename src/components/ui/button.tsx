@@ -102,7 +102,7 @@ export const Button = React.forwardRef<View, Props>(
       size = 'default',
       className = '',
       testID,
-      textClassName = '',
+      textClassName = 'text-lg text-white',
       ...props
     },
     ref

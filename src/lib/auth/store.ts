@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { storage } from '@/lib/storage';
+import { storage } from '@/lib/common/storage';
+import { createSelectors } from '@/lib/common/utils';
 import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
-import { createSelectors } from '@/lib/utils';
+import { type IUser } from '@/models/interfaces/user';
 
 import { getToken, removeToken, type TokenType } from './utils';
 
@@ -18,7 +19,9 @@ export type AuthState = {
   token: TokenType | null;
   user: AuthUser | null;
   status: AuthStatus;
+  userInfor: IUser | null;
 
+  setUserInfor: (userInfor: IUser) => void;
   signIn: (token: TokenType) => void;
   signOut: () => void;
   setUser: (user: AuthUser | null) => void;
@@ -34,9 +37,12 @@ const _useAuth = create<AuthState>()(
       status: 'idle',
       token: null,
       user: null,
-
+      userInfor: null,
       signIn: (token) => {
         set({ status: 'signIn', token });
+      },
+      setUserInfor: (userInfor) => {
+        set({ userInfor });
       },
 
       signOut: () => {
