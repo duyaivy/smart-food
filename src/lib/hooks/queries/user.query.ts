@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { showMessage } from 'react-native-flash-message';
 
 import { queryClient } from '@/api';
 import { userApi } from '@/api/user.api';
+import { showMessage } from '@/lib/common/show-message';
 
 export const useGetMeQuery = () =>
   useQuery({

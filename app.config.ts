@@ -77,6 +77,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
+    [
+      'expo-image-picker',
+      {
+        photosPermission:
+          'Cho phép $(PRODUCT_NAME) truy cập vào thư viện ảnh của bạn',
+        cameraPermission:
+          'Cho phép $(PRODUCT_NAME) truy cập vào máy ảnh của bạn',
+      },
+    ],
   ],
   extra: {
     ...ClientEnv,

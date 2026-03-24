@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
-import * as React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 
@@ -16,12 +16,14 @@ import {
   View,
 } from '@/components/ui';
 import { useAuth } from '@/lib';
+import { useUploadMediaMutation } from '@/lib/hooks/queries/upload.query';
 import { useUpdateMeMutation } from '@/lib/hooks/queries/user.query';
 import {
   type EditProfileFormValues,
   editProfileSchema,
 } from '@/schemas/profile.schema';
 
+import AvatarPickerField from './_components/avatar-picker-field';
 import NumberPickerField from './_components/number-picker-field';
 
 const SAFE_AREA_EDGES = ['bottom'] as const;
@@ -47,10 +49,13 @@ function buildRange(min: number, max: number, step: number = 1): number[] {
 export default function EditProfileScreen(): React.JSX.Element {
   const userInfor = useAuth((state) => state.userInfor);
   const { mutateAsync: updateMe } = useUpdateMeMutation();
-  const ageValues = React.useMemo(() => buildRange(10, 100), []);
-  const heightValues = React.useMemo(() => buildRange(80, 200), []);
-  const weightValues = React.useMemo(() => buildRange(20, 150), []);
+  const { mutateAsync: uploadMedia, isPending: isUploadingMedia } =
+    useUploadMediaMutation();
+  const ageValues = useMemo(() => buildRange(10, 100), []);
+  const heightValues = useMemo(() => buildRange(80, 200), []);
+  const weightValues = useMemo(() => buildRange(20, 150), []);
 
+  const [avatar, setAvatar] = useState<string | undefined>(userInfor?.avatar);
   const {
     control,
     reset,
@@ -67,7 +72,7 @@ export default function EditProfileScreen(): React.JSX.Element {
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!userInfor) return;
 
     reset(
@@ -82,7 +87,21 @@ export default function EditProfileScreen(): React.JSX.Element {
   }, [reset, userInfor]);
 
   const onSubmit = handleSubmit(async (values) => {
-    await updateMe(values);
+    let avatarValue: string | undefined = undefined;
+
+    if (avatar && avatar !== userInfor?.avatar) {
+      const formData = new FormData();
+      formData.append('file', {
+        uri: avatar,
+        name: `avatar_${userInfor?.id ?? 'temp'}.jpg`,
+        type: 'image/jpeg',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+      const avatarUrl = await uploadMedia(formData);
+      avatarValue = avatarUrl.data.data;
+    }
+    const data = { ...values, avatar: avatarValue };
+    await updateMe(data);
     queryClient.invalidateQueries({ queryKey: ['me'] });
     router.back();
   });
@@ -100,6 +119,11 @@ export default function EditProfileScreen(): React.JSX.Element {
           // Ensures taps still fire when the keyboard is open (common on Android).
           keyboardShouldPersistTaps="always"
         >
+          <AvatarPickerField
+            name={userInfor?.name || ''}
+            image={avatar}
+            setImage={setAvatar}
+          />
           <View className="gap-2">
             <ControlledInput<EditProfileFormValues>
               control={control}
@@ -148,9 +172,9 @@ export default function EditProfileScreen(): React.JSX.Element {
           <View className="mt-4">
             <Button
               label="Lưu thay đổi"
-              loading={isSubmitting}
+              loading={isSubmitting || isUploadingMedia}
               className="bg-primary "
-              disabled={!isValid || isSubmitting}
+              disabled={!isValid || isSubmitting || isUploadingMedia}
               onPress={onSubmit}
             />
           </View>
