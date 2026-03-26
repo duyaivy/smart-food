@@ -134,7 +134,6 @@ export function SignInForm() {
                 control={control}
                 name="password"
                 id="password"
-                inputRef={passwordInputRef}
                 className="border-zinc-700 bg-zinc-800 text-white"
                 secureTextEntry
                 returnKeyType="send"
