@@ -1,30 +1,30 @@
 export const ROUTE = {
   AUTH: {
-    SIGNIN: '/signin',
-    SIGN_UP: '/signup',
-    FORGOT_PASSWORD: '/forgot-password',
-    RESET_PASSWORD: '/reset-password',
-    VERIFY_EMAIL: '/verify-email',
-    ONBOARDING: '/onboarding',
+    SIGNIN: '/(stacks)/auth/signin',
+    SIGN_UP: '/(stacks)/auth/signup',
+    FORGOT_PASSWORD: '/(stacks)/auth/forgot-password',
+    RESET_PASSWORD: '/(stacks)/auth/reset-password',
+    VERIFY_EMAIL: '/(stacks)/auth/verify-email',
+    ONBOARDING: '/(stacks)/auth/onboarding',
   },
 
   TAB: {
-    HOME: '/',
-    DISCOVER: '/discover',
-    COOKING: '/cooking',
-    FRIDGE: '/fridge',
-    PROFILE: '/profile',
+    HOME: '/(tabs)/',
+    DISCOVER: '/(tabs)/discover',
+    COOKING: '/(tabs)/cooking',
+    FRIDGE: '/(tabs)/fridge',
+    PROFILE: '/(tabs)/profile',
   },
   STACK: {
     SEARCH: {
-      ROOT: '/search',
+      ROOT: '/(stacks)/search',
     },
     PROFILE: {
-      ABOUT_US: '/profile/about-us',
-      EDIT: '/profile/edit',
-      HISTORY_COOKING: '/profile/history-cooking',
-      PRIVACY: '/profile/privacy',
-      SETTINGS: '/profile/settings',
+      ABOUT_US: '/(stacks)/profile/about-us',
+      EDIT: '/(stacks)/profile/edit',
+      HISTORY_COOKING: '/(stacks)/profile/history-cooking',
+      PRIVACY: '/(stacks)/profile/privacy',
+      SETTINGS: '/(stacks)/profile/settings',
     },
   },
 } as const;

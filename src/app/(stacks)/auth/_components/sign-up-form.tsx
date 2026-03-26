@@ -1,4 +1,4 @@
-import { SocialConnections } from '@/components/social-connections';
+import { SocialConnections } from '@/app/(stacks)/auth/_components/social-connections';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,12 +13,11 @@ import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { ROUTE } from '@/constants/route';
 import { useSignUpMutation } from '@/lib/hooks/queries/auth.query';
-import { useAuth } from '@/lib/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, Pressable, type TextInput, View } from 'react-native';
+import { Pressable, type TextInput, View } from 'react-native';
 import { signupSchema, type SignupSchemaType } from '@/schemas/signup.schema';
 
 export function SignUpForm() {
@@ -26,9 +25,7 @@ export function SignUpForm() {
   const passwordInputRef = React.useRef<TextInput>(null);
   const confirmPasswordInputRef = React.useRef<TextInput>(null);
 
-  const signUpMutation = useSignUpMutation();
-  const signInStore = useAuth((state) => state.signIn);
-  const setUser = useAuth((state) => state.setUser);
+  const signUpMutation = useSignUpMutation(router);
 
   const {
     control,
@@ -56,30 +53,12 @@ export function SignUpForm() {
     confirmPasswordInputRef.current?.focus();
   }
 
-  async function onSubmit(values: SignupSchemaType) {
-    try {
-      const result = await signUpMutation.mutateAsync({
-        name: values.name,
-        email: values.email,
-        password: values.password,
-      });
-
-      signInStore({
-        access: result.tokens.access.token,
-        refresh: result.tokens.refresh.token,
-      });
-
-      setUser({
-        name: result.user.name,
-        email: result.user.email,
-      });
-
-      router.replace(ROUTE.AUTH.VERIFY_EMAIL);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Đăng ký thất bại, vui lòng thử lại.';
-      Alert.alert('Đăng ký thất bại', message);
-    }
+  function onSubmit(values: SignupSchemaType) {
+    signUpMutation.mutate({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+    });
   }
 
   return (
@@ -118,7 +97,9 @@ export function SignUpForm() {
                 )}
               />
               {errors.name?.message ? (
-                <Text className="text-destructive text-sm">{errors.name.message}</Text>
+                <Text className="text-destructive text-sm">
+                  {errors.name.message}
+                </Text>
               ) : null}
             </View>
 
@@ -147,7 +128,9 @@ export function SignUpForm() {
                 )}
               />
               {errors.email?.message ? (
-                <Text className="text-destructive text-sm">{errors.email.message}</Text>
+                <Text className="text-destructive text-sm">
+                  {errors.email.message}
+                </Text>
               ) : null}
             </View>
 
@@ -173,7 +156,9 @@ export function SignUpForm() {
                 )}
               />
               {errors.password?.message ? (
-                <Text className="text-destructive text-sm">{errors.password.message}</Text>
+                <Text className="text-destructive text-sm">
+                  {errors.password.message}
+                </Text>
               ) : null}
             </View>
 
@@ -211,7 +196,9 @@ export function SignUpForm() {
               disabled={signUpMutation.isPending}
             >
               <Text className="font-medium text-black">
-                {signUpMutation.isPending ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
+                {signUpMutation.isPending
+                  ? 'Đang tạo tài khoản...'
+                  : 'Tạo tài khoản'}
               </Text>
             </Button>
           </View>

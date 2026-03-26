@@ -1,4 +1,4 @@
-import { SocialConnections } from '@/components/social-connections';
+import { SocialConnections } from '@/app/(stacks)/auth/_components/social-connections';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,13 +13,12 @@ import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { ROUTE } from '@/constants/route';
 import { useSignInMutation } from '@/lib/hooks/queries/auth.query';
-import { useAuth } from '@/lib/auth';
 import { LoginSchema } from '@/schemas/login.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { Alert, Pressable, type TextInput, View } from 'react-native';
+import { Pressable, type TextInput, View } from 'react-native';
 import { z } from 'zod';
 
 type SignInFormValues = z.infer<typeof LoginSchema>;
@@ -28,9 +27,7 @@ export function SignInForm() {
   const router = useRouter();
   const passwordInputRef = React.useRef<TextInput>(null);
 
-  const signInMutation = useSignInMutation();
-  const signInStore = useAuth((state) => state.signIn);
-  const setUser = useAuth((state) => state.setUser);
+  const signInMutation = useSignInMutation(router);
 
   const {
     control,
@@ -48,34 +45,11 @@ export function SignInForm() {
     passwordInputRef.current?.focus();
   }
 
-  async function onSubmit(values: SignInFormValues) {
-    try {
-      const result = await signInMutation.mutateAsync({
-        email: values.email,
-        password: values.password,
-      });
-
-      setUser({
-        name: result.user.name,
-        email: result.user.email,
-      });
-
-      signInStore({
-        access: result.tokens.access.token,
-        refresh: result.tokens.refresh.token,
-      });
-
-      if (result.user.isEmailVerified) {
-        router.replace('/(tabs)');
-        return;
-      }
-
-      router.replace(ROUTE.AUTH.VERIFY_EMAIL);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Đăng nhập thất bại, vui lòng thử lại.';
-      Alert.alert('Đăng nhập thất bại', message);
-    }
+  function onSubmit(values: SignInFormValues) {
+    signInMutation.mutate({
+      email: values.email,
+      password: values.password,
+    });
   }
 
   return (
@@ -93,7 +67,7 @@ export function SignInForm() {
         <CardContent className="gap-6">
           <View className="gap-6">
             <View className="gap-1.5">
-              <Label htmlFor="email" className="text-zinc-200">
+              <Label htmlFor="email" className="!text-zinc-200">
                 Email
               </Label>
 
@@ -101,7 +75,7 @@ export function SignInForm() {
                 control={control}
                 name="email"
                 id="email"
-                className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                className="border-zinc-700 bg-zinc-800  text-white"
                 placeholder="m@example.com"
                 keyboardType="email-address"
                 autoComplete="email"
@@ -115,7 +89,7 @@ export function SignInForm() {
 
             <View className="gap-1.5">
               <View className="flex-row items-center">
-                <Label htmlFor="password" className="text-zinc-200">
+                <Label htmlFor="password" className="!text-zinc-200">
                   Mật khẩu
                 </Label>
                 <Button
@@ -145,7 +119,7 @@ export function SignInForm() {
             <Button
               className="w-full bg-white"
               onPress={handleSubmit(onSubmit)}
-              disabled={signInMutation.isPending}
+              loading={signInMutation.isPending}
             >
               <Text className="font-medium text-black">
                 {signInMutation.isPending ? 'Đang đăng nhập...' : 'Đăng nhập'}

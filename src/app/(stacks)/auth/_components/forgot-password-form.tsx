@@ -9,7 +9,6 @@ import {
 import { ControlledInput } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Text } from '@/components/ui/text';
-import { ROUTE } from '@/constants/route';
 import { useForgotPasswordMutation } from '@/lib/hooks/queries/auth.query';
 import {
   forgotPasswordSchema,
@@ -19,11 +18,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 
 export function ForgotPasswordForm() {
   const router = useRouter();
-  const forgotPasswordMutation = useForgotPasswordMutation();
+  const forgotPasswordMutation = useForgotPasswordMutation(router);
 
   const {
     control,
@@ -36,25 +35,10 @@ export function ForgotPasswordForm() {
     },
   });
 
-  async function onSubmit(values: ForgotPasswordSchemaType) {
-    try {
-      await forgotPasswordMutation.mutateAsync({
-        email: values.email,
-      });
-
-      Alert.alert(
-        'Đã gửi email đặt lại mật khẩu',
-        'Vui lòng kiểm tra email của bạn để lấy token đặt lại mật khẩu.'
-      );
-
-      router.push(ROUTE.AUTH.RESET_PASSWORD);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.';
-      Alert.alert('Gửi yêu cầu thất bại', message);
-    }
+  function onSubmit(values: ForgotPasswordSchemaType) {
+    forgotPasswordMutation.mutate({
+      email: values.email,
+    });
   }
 
   return (

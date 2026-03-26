@@ -12,7 +12,7 @@ import { useAuth } from '@/lib/auth';
 import { useSendVerificationEmailMutation } from '@/lib/hooks/queries/auth.query';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { Alert, type TextStyle, View } from 'react-native';
+import { type TextStyle, View } from 'react-native';
 
 const RESEND_CODE_INTERVAL_SECONDS = 30;
 const TABULAR_NUMBERS_STYLE: TextStyle = { fontVariant: ['tabular-nums'] };
@@ -20,27 +20,18 @@ const TABULAR_NUMBERS_STYLE: TextStyle = { fontVariant: ['tabular-nums'] };
 export function VerifyEmailForm() {
   const router = useRouter();
   const user = useAuth((state) => state.user);
-  const sendVerificationEmailMutation = useSendVerificationEmailMutation();
-  const { countdown, restartCountdown } = useCountdown(RESEND_CODE_INTERVAL_SECONDS);
+  const { countdown, restartCountdown } = useCountdown(
+    RESEND_CODE_INTERVAL_SECONDS
+  );
 
-  const isResendDisabled = countdown > 0 || sendVerificationEmailMutation.isPending;
+  const sendVerificationEmailMutation =
+    useSendVerificationEmailMutation(restartCountdown);
 
-  async function onResendEmail() {
-    try {
-      await sendVerificationEmailMutation.mutateAsync();
-      restartCountdown();
+  const isResendDisabled =
+    countdown > 0 || sendVerificationEmailMutation.isPending;
 
-      Alert.alert(
-        'Đã gửi lại email',
-        'Vui lòng kiểm tra hộp thư của bạn và nhấn vào liên kết xác thực email.'
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Không thể gửi lại email xác thực. Vui lòng thử lại.';
-      Alert.alert('Gửi lại email thất bại', message);
-    }
+  function onResendEmail() {
+    sendVerificationEmailMutation.mutate();
   }
 
   function onContinue() {
@@ -84,7 +75,8 @@ export function VerifyEmailForm() {
               </Button>
 
               <Text className="text-center text-xs text-zinc-500">
-                Không nhận được email? Hãy kiểm tra thư mục spam hoặc gửi lại email mới.
+                Không nhận được email? Hãy kiểm tra thư mục spam hoặc gửi lại
+                email mới.
               </Text>
 
               {countdown > 0 ? (

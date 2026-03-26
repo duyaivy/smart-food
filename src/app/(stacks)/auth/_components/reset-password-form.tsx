@@ -19,14 +19,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, type TextInput, View } from 'react-native';
+import { type TextInput, View } from 'react-native';
 
 export function ResetPasswordForm() {
   const router = useRouter();
   const passwordInputRef = React.useRef<TextInput>(null);
   const confirmPasswordInputRef = React.useRef<TextInput>(null);
 
-  const resetPasswordMutation = useResetPasswordMutation();
+  const resetPasswordMutation = useResetPasswordMutation(router);
 
   const {
     control,
@@ -49,30 +49,11 @@ export function ResetPasswordForm() {
     confirmPasswordInputRef.current?.focus();
   }
 
-  async function onSubmit(values: ResetPasswordSchemaType) {
-    try {
-      await resetPasswordMutation.mutateAsync({
-        token: values.token,
-        password: values.password,
-      });
-
-      Alert.alert(
-        'Đặt lại mật khẩu thành công',
-        'Bạn có thể đăng nhập lại bằng mật khẩu mới.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.replace(ROUTE.AUTH.SIGNIN),
-          },
-        ]
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Không thể đặt lại mật khẩu. Vui lòng kiểm tra token và thử lại.';
-      Alert.alert('Đặt lại mật khẩu thất bại', message);
-    }
+  function onSubmit(values: ResetPasswordSchemaType) {
+    resetPasswordMutation.mutate({
+      token: values.token,
+      password: values.password,
+    });
   }
 
   return (
@@ -112,7 +93,9 @@ export function ResetPasswordForm() {
                 )}
               />
               {errors.token?.message ? (
-                <Text className="text-destructive text-sm">{errors.token.message}</Text>
+                <Text className="text-destructive text-sm">
+                  {errors.token.message}
+                </Text>
               ) : null}
             </View>
 
@@ -138,7 +121,9 @@ export function ResetPasswordForm() {
                 )}
               />
               {errors.password?.message ? (
-                <Text className="text-destructive text-sm">{errors.password.message}</Text>
+                <Text className="text-destructive text-sm">
+                  {errors.password.message}
+                </Text>
               ) : null}
             </View>
 

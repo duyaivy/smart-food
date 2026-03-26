@@ -13,7 +13,7 @@ import type { TokenType } from '@/lib/auth/utils';
 
 type RequestConfigWithRetry = InternalAxiosRequestConfig & { _retry?: boolean };
 
-const AUTH_PREFIX = '/v1/auth';
+const AUTH_PREFIX = '/auth';
 
 const URL_LOGIN = `${AUTH_PREFIX}/login`;
 const URL_SIGNUP = `${AUTH_PREFIX}/register`;
