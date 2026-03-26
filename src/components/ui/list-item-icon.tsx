@@ -25,7 +25,7 @@ const ListItemIcon = ({
 }: Props) => {
   const content = (
     <TouchableOpacity
-      activeOpacity={0.7}
+      activeOpacity={href ? 0.7 : 1}
       disabled={!href && !onPress}
       onPress={onPress}
       className="mt-3.5 flex w-full flex-row justify-between gap-2"

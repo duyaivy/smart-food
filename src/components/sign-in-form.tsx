@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { ControlledInput } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
@@ -18,7 +18,7 @@ import { LoginSchema } from '@/schemas/login.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Alert, Pressable, type TextInput, View } from 'react-native';
 import { z } from 'zod';
 
@@ -97,30 +97,20 @@ export function SignInForm() {
                 Email
               </Label>
 
-              <Controller
+              <ControlledInput
                 control={control}
                 name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    id="email"
-                    className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
-                    placeholder="m@example.com"
-                    keyboardType="email-address"
-                    autoComplete="email"
-                    autoCapitalize="none"
-                    onSubmitEditing={onEmailSubmitEditing}
-                    returnKeyType="next"
-                    submitBehavior="submit"
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                  />
-                )}
+                id="email"
+                className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                placeholder="m@example.com"
+                keyboardType="email-address"
+                autoComplete="email"
+                autoCapitalize="none"
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={onEmailSubmitEditing}
+                error={errors.email?.message}
               />
-
-              {errors.email?.message ? (
-                <Text className="text-destructive text-sm">{errors.email.message}</Text>
-              ) : null}
             </View>
 
             <View className="gap-1.5">
@@ -140,27 +130,17 @@ export function SignInForm() {
                 </Button>
               </View>
 
-              <Controller
+              <ControlledInput
                 control={control}
                 name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    ref={passwordInputRef}
-                    id="password"
-                    className="border-zinc-700 bg-zinc-800 text-white"
-                    secureTextEntry
-                    returnKeyType="send"
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    onSubmitEditing={handleSubmit(onSubmit)}
-                  />
-                )}
+                id="password"
+                inputRef={passwordInputRef}
+                className="border-zinc-700 bg-zinc-800 text-white"
+                secureTextEntry
+                returnKeyType="send"
+                onSubmitEditing={handleSubmit(onSubmit)}
+                error={errors.password?.message}
               />
-
-              {errors.password?.message ? (
-                <Text className="text-destructive text-sm">{errors.password.message}</Text>
-              ) : null}
             </View>
 
             <Button

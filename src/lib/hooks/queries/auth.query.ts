@@ -1,23 +1,4 @@
-import {
-  forgotPassword,
-  getMyProfile,
-  logout,
-  refreshTokens,
-  resetPassword,
-  sendVerificationEmail,
-  signIn,
-  signUp,
-  type AuthPayload,
-  type AuthTokens,
-  type ForgotPasswordInput,
-  type MyProfile,
-  type RefreshTokenInput,
-  type ResetPasswordInput,
-  type SignInInput,
-  type SignUpInput,
-  type UpdateMyProfileInput,
-  updateMyProfile,
-} from '@/api/auth.api';
+import { authApi } from '@/api/auth.api';
 import {
   useMutation,
   type UseMutationResult,
@@ -26,28 +7,39 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth';
+import type {
+  IAuthPayload,
+  IAuthTokens,
+  IForgotPasswordInput,
+  IMyProfile,
+  IRefreshTokenInput,
+  IResetPasswordInput,
+  ISignInInput,
+  ISignUpInput,
+  IUpdateMyProfileInput,
+} from '@/interfaces/auth';
 
 export const authQueryKeys = {
   all: ['auth'] as const,
   myProfile: () => [...authQueryKeys.all, 'my-profile'] as const,
 };
 
-export function useMyProfileQuery(): UseQueryResult<MyProfile, unknown> {
+export function useMyProfileQuery(): UseQueryResult<IMyProfile, unknown> {
   return useQuery({
     queryKey: authQueryKeys.myProfile(),
-    queryFn: getMyProfile,
+    queryFn: authApi.getMyProfile,
   });
 }
 
 export function useUpdateProfileMutation(): UseMutationResult<
-  MyProfile,
+  IMyProfile,
   unknown,
-  UpdateMyProfileInput
+  IUpdateMyProfileInput
 > {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateMyProfile,
+    mutationFn: authApi.updateMyProfile,
     onSuccess: async (profile) => {
       useAuth.getState().updateUser({
         name: profile.name,
@@ -61,26 +53,25 @@ export function useUpdateProfileMutation(): UseMutationResult<
   });
 }
 
-export function useSignInMutation(): UseMutationResult<AuthPayload, unknown, SignInInput> {
+export function useSignInMutation(): UseMutationResult<IAuthPayload, unknown, ISignInInput> {
   return useMutation({
-    mutationFn: signIn,
+    mutationFn: authApi.signIn,
   });
 }
 
-export function useSignUpMutation(): UseMutationResult<AuthPayload, unknown, SignUpInput> {
+export function useSignUpMutation(): UseMutationResult<IAuthPayload, unknown, ISignUpInput> {
   return useMutation({
-    mutationFn: signUp,
+    mutationFn: authApi.signUp,
   });
 }
 
-export function useLogoutMutation(): UseMutationResult<void, unknown, { refreshToken: string }> {
+export function useLogoutMutation(): UseMutationResult<null, unknown, { refreshToken: string }> {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: logout,
+    mutationFn: authApi.logout,
     onSuccess: async () => {
       useAuth.getState().signOut();
-
       await queryClient.clear();
     },
     onError: () => {
@@ -90,37 +81,37 @@ export function useLogoutMutation(): UseMutationResult<void, unknown, { refreshT
 }
 
 export function useRefreshTokensMutation(): UseMutationResult<
-  AuthTokens,
+  IAuthTokens,
   unknown,
-  RefreshTokenInput
+  IRefreshTokenInput
 > {
   return useMutation({
-    mutationFn: refreshTokens,
+    mutationFn: authApi.refreshTokens,
   });
 }
 
 export function useForgotPasswordMutation(): UseMutationResult<
-  void,
+  null,
   unknown,
-  ForgotPasswordInput
+  IForgotPasswordInput
 > {
   return useMutation({
-    mutationFn: forgotPassword,
+    mutationFn: authApi.forgotPassword,
   });
 }
 
 export function useResetPasswordMutation(): UseMutationResult<
-  void,
+  null,
   unknown,
-  ResetPasswordInput
+  IResetPasswordInput
 > {
   return useMutation({
-    mutationFn: resetPassword,
+    mutationFn: authApi.resetPassword,
   });
 }
 
-export function useSendVerificationEmailMutation(): UseMutationResult<void, unknown, void> {
+export function useSendVerificationEmailMutation(): UseMutationResult<null, unknown, void> {
   return useMutation({
-    mutationFn: sendVerificationEmail,
+    mutationFn: authApi.sendVerificationEmail,
   });
 }

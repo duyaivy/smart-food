@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { ControlledInput } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Text } from '@/components/ui/text';
 import { ROUTE } from '@/constants/route';
@@ -18,7 +18,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Alert, View } from 'react-native';
 
 export function ForgotPasswordForm() {
@@ -76,29 +76,19 @@ export function ForgotPasswordForm() {
                 Email
               </Label>
 
-              <Controller
+              <ControlledInput
                 control={control}
                 name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    id="email"
-                    className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
-                    placeholder="m@example.com"
-                    keyboardType="email-address"
-                    autoComplete="email"
-                    autoCapitalize="none"
-                    returnKeyType="send"
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    onSubmitEditing={handleSubmit(onSubmit)}
-                  />
-                )}
+                id="email"
+                className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                placeholder="m@example.com"
+                keyboardType="email-address"
+                autoComplete="email"
+                autoCapitalize="none"
+                returnKeyType="send"
+                onSubmitEditing={handleSubmit(onSubmit)}
+                error={errors.email?.message}
               />
-
-              {errors.email?.message ? (
-                <Text className="text-destructive text-sm">{errors.email.message}</Text>
-              ) : null}
             </View>
 
             <Button

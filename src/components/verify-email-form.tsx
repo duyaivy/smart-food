@@ -15,7 +15,6 @@ import * as React from 'react';
 import { Alert, type TextStyle, View } from 'react-native';
 
 const RESEND_CODE_INTERVAL_SECONDS = 30;
-
 const TABULAR_NUMBERS_STYLE: TextStyle = { fontVariant: ['tabular-nums'] };
 
 export function VerifyEmailForm() {
@@ -23,6 +22,8 @@ export function VerifyEmailForm() {
   const user = useAuth((state) => state.user);
   const sendVerificationEmailMutation = useSendVerificationEmailMutation();
   const { countdown, restartCountdown } = useCountdown(RESEND_CODE_INTERVAL_SECONDS);
+
+  const isResendDisabled = countdown > 0 || sendVerificationEmailMutation.isPending;
 
   async function onResendEmail() {
     try {
@@ -72,7 +73,7 @@ export function VerifyEmailForm() {
               <Button
                 variant="outline"
                 className="w-full border-zinc-700 bg-zinc-800"
-                disabled={countdown > 0 || sendVerificationEmailMutation.isPending}
+                disabled={isResendDisabled}
                 onPress={onResendEmail}
               >
                 <Text className="text-white">
