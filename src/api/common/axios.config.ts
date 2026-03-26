@@ -18,7 +18,7 @@ const AUTH_PREFIX = '/v1/auth';
 const URL_LOGIN = `${AUTH_PREFIX}/login`;
 const URL_SIGNUP = `${AUTH_PREFIX}/register`;
 const URL_LOGOUT = `${AUTH_PREFIX}/logout`;
-const URL_SESSION_ACCESS_TOKEN = `${AUTH_PREFIX}/refresh-tokens`;
+const URL_REFRESH_TOKEN = `${AUTH_PREFIX}/refresh-tokens`;
 
 function isAxiosUnauthorizedError(error: AxiosError) {
   return error.response?.status === 401;
@@ -73,7 +73,6 @@ function extractErrorMessage(data: unknown): string {
 function extractTokenPair(data: unknown): TokenType | null {
   if (!isRecord(data)) return null;
 
-  // Trường hợp backend trả:
   // { code, message, data: { user, tokens: { access: { token }, refresh: { token } } } }
   if (isRecord(data.data) && isRecord(data.data.tokens)) {
     const tokens = data.data.tokens as Record<string, unknown>;
@@ -85,7 +84,17 @@ function extractTokenPair(data: unknown): TokenType | null {
     }
   }
 
-  // Trường hợp backend trả trực tiếp:
+  // { data: { access: { token }, refresh: { token } } }
+  if (isRecord(data.data)) {
+    const inner = data.data as Record<string, unknown>;
+    const access = isRecord(inner.access) ? inner.access.token : undefined;
+    const refresh = isRecord(inner.refresh) ? inner.refresh.token : undefined;
+
+    if (typeof access === 'string' && typeof refresh === 'string') {
+      return { access, refresh };
+    }
+  }
+
   // { tokens: { access: { token }, refresh: { token } } }
   if (isRecord(data.tokens)) {
     const tokens = data.tokens as Record<string, unknown>;
@@ -97,7 +106,7 @@ function extractTokenPair(data: unknown): TokenType | null {
     }
   }
 
-  // fallback cũ
+  // { access: string, refresh: string }
   if (typeof data.access === 'string' && typeof data.refresh === 'string') {
     return {
       access: data.access,
@@ -105,6 +114,7 @@ function extractTokenPair(data: unknown): TokenType | null {
     };
   }
 
+  // { accessToken: string, refreshToken: string }
   if (
     typeof data.accessToken === 'string' &&
     typeof data.refreshToken === 'string'
@@ -121,8 +131,7 @@ function extractTokenPair(data: unknown): TokenType | null {
 function extractAccessToken(data: unknown): string | null {
   if (!isRecord(data)) return null;
 
-  // Trường hợp backend refresh trả:
-  // { code, message, data: { access: { token }, refresh: { token } } }
+  // { data: { access: { token } } }
   if (isRecord(data.data)) {
     const inner = data.data as Record<string, unknown>;
 
@@ -139,7 +148,7 @@ function extractAccessToken(data: unknown): string | null {
     }
   }
 
-  // Trường hợp trả trực tiếp
+  // { access: { token } }
   if (isRecord(data.access) && typeof data.access.token === 'string') {
     return data.access.token;
   }
@@ -220,7 +229,7 @@ export class Http {
           this.token = '';
           this.refreshToken = '';
           clearAuthAndRedirectToLogin();
-        } else if (url === URL_SESSION_ACCESS_TOKEN) {
+        } else if (url === URL_REFRESH_TOKEN) {
           const tokens = extractTokenPair(response.data);
 
           if (tokens) {
@@ -233,6 +242,7 @@ export class Http {
               this.token = accessToken;
               const currentTokens = getTokenFromState();
               const refresh = currentTokens?.refresh ?? this.refreshToken;
+
               if (refresh) {
                 syncTokensToStores({ access: accessToken, refresh });
               }
@@ -251,7 +261,8 @@ export class Http {
             return Promise.reject(error);
           }
 
-          if (config.url === URL_SESSION_ACCESS_TOKEN) {
+          // refresh request mà cũng 401 thì logout luôn
+          if (config.url === URL_REFRESH_TOKEN) {
             clearAuthAndRedirectToLogin();
             return Promise.reject(error);
           }
@@ -300,17 +311,27 @@ export class Http {
     }
 
     return this.refreshInstance
-      .post(URL_SESSION_ACCESS_TOKEN, { refreshToken: refresh })
+      .post(URL_REFRESH_TOKEN, { refreshToken: refresh })
       .then((response) => {
         const nextTokens = extractTokenPair(response.data);
-        if (nextTokens) return nextTokens;
+        if (nextTokens) {
+          this.token = nextTokens.access;
+          this.refreshToken = nextTokens.refresh;
+          syncTokensToStores(nextTokens);
+          return nextTokens;
+        }
 
         const accessToken = extractAccessToken(response.data);
         if (accessToken) {
-          return {
+          const fallbackTokens = {
             access: accessToken,
             refresh,
           };
+
+          this.token = fallbackTokens.access;
+          this.refreshToken = fallbackTokens.refresh;
+          syncTokensToStores(fallbackTokens);
+          return fallbackTokens;
         }
 
         return Promise.reject(new Error('Response refresh token không hợp lệ'));

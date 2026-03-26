@@ -1,83 +1,27 @@
-import { avatar } from '@assets/images';
-import React from 'react';
+import { useEffect } from 'react';
 
-import { FocusAwareStatusBar, Text, View } from '@/components/ui';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import ListItemIcon from '@/components/ui/list-item-icon';
-import { OTHER_LIST_ITEM, USER_LIST_ITEM } from '@/constants/navbar';
-import { useAuth } from '@/lib/auth';
-import { useLogoutMutation } from '@/lib/hooks/queries/auth.query';
+import { FocusAwareStatusBar, SafeAreaView } from '@/components/ui';
+import { useAuth } from '@/lib';
+import { useGetMeQuery } from '@/lib/hooks/queries/user.query';
+
+import InfoSection from './_components/info-section';
+import UtilSection from './_components/util-section';
 
 export default function ProfileScreen() {
-  const user = useAuth.use.user();
-  const token = useAuth.use.token();
-  const name = user?.name ?? '';
+  const { data, isLoading } = useGetMeQuery();
+  const setUserInfor = useAuth((state) => state.setUserInfor);
 
-  const logoutMutation = useLogoutMutation();
-
-  const handleLogout = () => {
-    
-    const refreshToken = token?.refresh;
-
-    if (!refreshToken) {
-      useAuth.getState().signOut();
-      return;
+  useEffect(() => {
+    if (data?.data.data) {
+      setUserInfor(data.data.data);
     }
-
-    logoutMutation.mutate({ refreshToken });
-  };
+  }, [data, setUserInfor]);
 
   return (
-    <View className="flex min-h-screen w-full flex-col items-center bg-white px-6">
+    <SafeAreaView className="flex min-h-screen w-full flex-col items-center bg-white px-6">
       <FocusAwareStatusBar />
-      <View className="mt-32 flex items-center">
-        <View>
-          <Avatar alt="avatar" className="size-36 shadow-md">
-            <AvatarImage source={avatar} />
-            <AvatarFallback>
-              <Text>{name.charAt(0)}</Text>
-            </AvatarFallback>
-          </Avatar>
-        </View>
-        <Text className="mt-4 text-lg font-semibold">{name} Duyaivy</Text>
-        <Text className="text-gray-500">21 tuổi - 160 cm - 55kg</Text>
-      </View>
-
-      <View className="flex w-full flex-col">
-        <Text className="mt-6 text-lg font-semibold">Tài khoản</Text>
-        <View>
-          {USER_LIST_ITEM.map(({ Icon, text, isChevron, href, color }, index) => (
-            <ListItemIcon
-              key={index}
-              Icon={Icon}
-              text={text}
-              href={href}
-              color={color}
-              isChevron={isChevron}
-            />
-          ))}
-        </View>
-      </View>
-
-      <View className="flex w-full flex-col">
-        <Text className="mt-6 text-lg font-semibold">Khác</Text>
-
-        {OTHER_LIST_ITEM.map(({ Icon, text, isChevron, color, href }, index) => {
-          const isLogout = text === 'Đăng xuất';
-
-          return (
-            <ListItemIcon
-              key={index}
-              Icon={Icon}
-              text={text}
-              href={isLogout ? undefined : href}
-              color={color}
-              isChevron={isChevron}
-              onPress={isLogout ? handleLogout : undefined}
-            />
-          );
-        })}
-      </View>
-    </View>
+      <InfoSection isLoading={isLoading} user={data?.data.data} />
+      <UtilSection />
+    </SafeAreaView>
   );
 }
