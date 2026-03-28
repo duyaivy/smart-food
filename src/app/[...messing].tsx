@@ -12,8 +12,10 @@ export default function NotFoundScreen() {
           This screen doesn&apos;t exist.
         </Text>
 
-        <Link href={ROUTE.TAB.HOME} className="mt-4">
-          <Text className="text-blue-500 underline">Go to home screen!</Text>
+        <Link href={ROUTE.TAB.COOKING} className="mt-4">
+          <Text className="text-blue-500 underline">
+            Go to cooking screen! {ROUTE.TAB.COOKING}
+          </Text>
         </Link>
       </View>
     </>

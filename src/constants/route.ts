@@ -5,7 +5,7 @@ export const ROUTE = {
     FORGOT_PASSWORD: '/(stacks)/auth/forgot-password',
     RESET_PASSWORD: '/(stacks)/auth/reset-password',
     VERIFY_EMAIL: '/(stacks)/auth/verify-email',
-    ONBOARDING: '/(stacks)/auth/onboarding',
+    ONBOARDING: '/onboarding',
   },
 
   TAB: {

@@ -13,7 +13,7 @@ const UtilSection = () => {
         </Text>
         <View>
           {USER_LIST_ITEM.map(
-            ({ Icon, text, isChevron, href, color }, index) => (
+            ({ Icon, text, isChevron, href, color, onPress }, index) => (
               <ListItemIcon
                 key={index}
                 Icon={Icon}
@@ -21,6 +21,7 @@ const UtilSection = () => {
                 href={href}
                 color={color}
                 isChevron={isChevron}
+                onPress={onPress}
               />
             )
           )}
@@ -30,7 +31,7 @@ const UtilSection = () => {
         <Text className="mt-6 text-lg font-semibold text-black">Khác</Text>
 
         {OTHER_LIST_ITEM.map(
-          ({ Icon, text, isChevron, color, href }, index) => (
+          ({ Icon, text, isChevron, color, href, onPress }, index) => (
             <ListItemIcon
               key={index}
               Icon={Icon}
@@ -38,6 +39,7 @@ const UtilSection = () => {
               href={href}
               color={color}
               isChevron={isChevron}
+              onPress={onPress}
             />
           )
         )}

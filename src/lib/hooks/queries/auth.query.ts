@@ -1,14 +1,13 @@
-import { authApi } from '@/api/auth.api';
 import {
   useMutation,
   type UseMutationResult,
-  useQuery,
   useQueryClient,
-  type UseQueryResult,
 } from '@tanstack/react-query';
-import { useAuth } from '@/lib/auth';
 import type { Router } from 'expo-router';
 import { Alert } from 'react-native';
+
+import { authApi } from '@/api/auth.api';
+import { ROUTE } from '@/constants/route';
 import type {
   IAuthPayload,
   IAuthTokens,
@@ -17,8 +16,9 @@ import type {
   IResetPasswordInput,
   ISignInInput,
   ISignUpInput,
+  IUser,
 } from '@/interfaces/auth';
-import { ROUTE } from '@/constants/route';
+import { useAuth } from '@/lib/auth';
 
 export const authQueryKeys = {
   all: ['auth'] as const,
@@ -31,10 +31,7 @@ export function useSignInMutation(
   return useMutation({
     mutationFn: authApi.signIn,
     onSuccess: (result) => {
-      useAuth.getState().setUser({
-        name: result.user.name,
-        email: result.user.email,
-      });
+      useAuth.getState().setUserInfor(result.user);
 
       useAuth.getState().signIn({
         access: result.tokens.access.token,
@@ -42,7 +39,7 @@ export function useSignInMutation(
       });
 
       if (result.user.isEmailVerified) {
-        router.replace(ROUTE.TAB.HOME);
+        router.push(ROUTE.TAB.HOME);
         return;
       }
 
@@ -59,7 +56,7 @@ export function useSignInMutation(
 }
 
 export function useSignUpMutation(
-  router: Router
+  _router: Router
 ): UseMutationResult<IAuthPayload, unknown, ISignUpInput> {
   return useMutation({
     mutationFn: authApi.signUp,
@@ -69,12 +66,7 @@ export function useSignUpMutation(
         refresh: result.tokens.refresh.token,
       });
 
-      useAuth.getState().setUser({
-        name: result.user.name,
-        email: result.user.email,
-      });
-
-     
+      useAuth.getState().setUserInfor(result.user as IUser);
     },
     onError: (error) => {
       const message =
@@ -96,11 +88,11 @@ export function useLogoutMutation(
     onSuccess: async () => {
       useAuth.getState().signOut();
       await queryClient.clear();
-      router.replace('/signin');
+      router.replace(ROUTE.AUTH.SIGNIN);
     },
     onError: () => {
       useAuth.getState().signOut();
-      router.replace('/signin');
+      router.replace(ROUTE.AUTH.SIGNIN);
     },
   });
 }
@@ -125,7 +117,7 @@ export function useForgotPasswordMutation(
         'Đã gửi email đặt lại mật khẩu',
         'Vui lòng kiểm tra email của bạn để lấy token đặt lại mật khẩu.'
       );
-      router.push('/reset-password');
+      router.push(ROUTE.AUTH.RESET_PASSWORD);
     },
     onError: (error) => {
       const message =
@@ -149,7 +141,7 @@ export function useResetPasswordMutation(
         [
           {
             text: 'OK',
-            onPress: () => router.replace('/signin'),
+            onPress: () => router.replace(ROUTE.AUTH.SIGNIN),
           },
         ]
       );

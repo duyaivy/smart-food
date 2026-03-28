@@ -1,5 +1,6 @@
-import { SignInForm } from '@/app/(stacks)/auth/_components/sign-in-form';
 import { ScrollView, View } from 'react-native';
+
+import { SignInForm } from '@/app/(stacks)/auth/_components/sign-in-form';
 
 export default function SignInScreen() {
   return (

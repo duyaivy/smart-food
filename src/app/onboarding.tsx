@@ -29,7 +29,9 @@ export default function Onboarding() {
           Khám phá công thức nấu ăn ngon mỗi ngày
         </Text>
 
-        <Text className="my-1 pt-6 text-left text-lg">🍕 Công thức đa dạng</Text>
+        <Text className="my-1 pt-6 text-left text-lg">
+          🍕 Công thức đa dạng
+        </Text>
         <Text className="my-1 text-left text-lg">📖 Sách nấu ăn cá nhân</Text>
         <Text className="my-1 text-left text-lg">🔍 Tìm kiếm nhanh chóng</Text>
         <Text className="my-1 text-left text-lg">❤️ Lưu món yêu thích</Text>
@@ -37,13 +39,13 @@ export default function Onboarding() {
 
       <SafeAreaView className="mt-6 w-full px-4">
         <Button
-          className="w-full"
+          className="w-full bg-primary"
           onPress={() => {
             setIsFirstTime(false);
             router.replace(ROUTE.AUTH.SIGNIN);
           }}
         >
-          <Text>Bắt đầu nào!</Text>
+          <Text className="font-medium text-white">Bắt đầu nào!</Text>
         </Button>
       </SafeAreaView>
     </View>

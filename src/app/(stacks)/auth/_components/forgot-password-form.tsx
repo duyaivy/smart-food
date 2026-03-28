@@ -1,3 +1,9 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
+import { View } from 'react-native';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,11 +20,6 @@ import {
   forgotPasswordSchema,
   type ForgotPasswordSchemaType,
 } from '@/schemas/forgot-password.schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'expo-router';
-import * as React from 'react';
-import { useForm } from 'react-hook-form';
-import { View } from 'react-native';
 
 export function ForgotPasswordForm() {
   const router = useRouter();

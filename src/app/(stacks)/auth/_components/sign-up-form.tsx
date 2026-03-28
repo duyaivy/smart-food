@@ -1,3 +1,9 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
+import * as React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Pressable, type TextInput, View } from 'react-native';
+
 import { SocialConnections } from '@/app/(stacks)/auth/_components/social-connections';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,11 +19,6 @@ import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { ROUTE } from '@/constants/route';
 import { useSignUpMutation } from '@/lib/hooks/queries/auth.query';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'expo-router';
-import * as React from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { Pressable, type TextInput, View } from 'react-native';
 import { signupSchema, type SignupSchemaType } from '@/schemas/signup.schema';
 
 export function SignUpForm() {
@@ -193,7 +194,7 @@ export function SignUpForm() {
             <Button
               className="w-full bg-white"
               onPress={handleSubmit(onSubmit)}
-              disabled={signUpMutation.isPending}
+              loading={signUpMutation.isPending}
             >
               <Text className="font-medium text-black">
                 {signUpMutation.isPending
@@ -202,15 +203,16 @@ export function SignUpForm() {
               </Text>
             </Button>
           </View>
-
-          <Text className="text-center text-sm text-zinc-400">
-            Đã có tài khoản?{' '}
+          <View className="flex flex-row items-center justify-center">
+            <Text className=" text-center text-sm text-zinc-400">
+              Đã có tài khoản?{' '}
+            </Text>
             <Pressable onPress={() => router.push(ROUTE.AUTH.SIGNIN)}>
               <Text className="text-sm text-blue-400 underline underline-offset-4">
                 Đăng nhập
               </Text>
             </Pressable>
-          </Text>
+          </View>
 
           <View className="flex-row items-center">
             <Separator className="flex-1 bg-zinc-700" />

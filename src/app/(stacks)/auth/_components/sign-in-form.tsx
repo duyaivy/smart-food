@@ -1,3 +1,10 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
+import { Pressable, type TextInput, View } from 'react-native';
+import { type z } from 'zod';
+
 import { SocialConnections } from '@/app/(stacks)/auth/_components/social-connections';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,12 +21,6 @@ import { Text } from '@/components/ui/text';
 import { ROUTE } from '@/constants/route';
 import { useSignInMutation } from '@/lib/hooks/queries/auth.query';
 import { LoginSchema } from '@/schemas/login.schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'expo-router';
-import * as React from 'react';
-import { useForm } from 'react-hook-form';
-import { Pressable, type TextInput, View } from 'react-native';
-import { z } from 'zod';
 
 type SignInFormValues = z.infer<typeof LoginSchema>;
 
@@ -53,7 +54,7 @@ export function SignInForm() {
   }
 
   return (
-    <View className="gap-6">
+    <View className="gap-6 bg-white">
       <Card className="border-zinc-800 bg-zinc-900 shadow-none">
         <CardHeader>
           <CardTitle className="text-center text-xl text-white sm:text-left">
@@ -95,7 +96,7 @@ export function SignInForm() {
                 <Button
                   variant="link"
                   size="sm"
-                  className="web:h-fit ml-auto h-4 px-1 py-0 sm:h-4"
+                  className="ml-auto h-4 px-1 py-0 web:h-fit sm:h-4"
                   onPress={() => router.push(ROUTE.AUTH.FORGOT_PASSWORD)}
                 >
                   <Text className="font-normal leading-4 text-blue-400">
@@ -126,16 +127,16 @@ export function SignInForm() {
               </Text>
             </Button>
           </View>
-
-          <Text className="text-center text-sm text-zinc-400">
-            Chưa có tài khoản?{' '}
+          <View className="flex flex-row items-center justify-center">
+            <Text className=" text-center text-sm text-zinc-400">
+              Chưa có tài khoản?{' '}
+            </Text>
             <Pressable onPress={() => router.push(ROUTE.AUTH.SIGN_UP)}>
               <Text className="text-sm text-blue-400 underline underline-offset-4">
                 Đăng ký
               </Text>
             </Pressable>
-          </Text>
-
+          </View>
           <View className="flex-row items-center">
             <Separator className="flex-1 bg-zinc-700" />
             <Text className="px-4 text-sm text-zinc-500">hoặc</Text>

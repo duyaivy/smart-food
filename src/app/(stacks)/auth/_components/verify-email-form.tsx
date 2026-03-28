@@ -1,3 +1,7 @@
+import { useRouter } from 'expo-router';
+import * as React from 'react';
+import { type TextStyle, View } from 'react-native';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,16 +14,13 @@ import { Text } from '@/components/ui/text';
 import { ROUTE } from '@/constants/route';
 import { useAuth } from '@/lib/auth';
 import { useSendVerificationEmailMutation } from '@/lib/hooks/queries/auth.query';
-import { useRouter } from 'expo-router';
-import * as React from 'react';
-import { type TextStyle, View } from 'react-native';
 
 const RESEND_CODE_INTERVAL_SECONDS = 30;
 const TABULAR_NUMBERS_STYLE: TextStyle = { fontVariant: ['tabular-nums'] };
 
 export function VerifyEmailForm() {
   const router = useRouter();
-  const user = useAuth((state) => state.user);
+  const user = useAuth((state) => state.userInfor);
   const { countdown, restartCountdown } = useCountdown(
     RESEND_CODE_INTERVAL_SECONDS
   );

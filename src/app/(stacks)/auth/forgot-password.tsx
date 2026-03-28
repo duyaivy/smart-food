@@ -1,5 +1,6 @@
-import { ForgotPasswordForm } from '@/app/(stacks)/auth/_components/forgot-password-form';
 import { ScrollView, View } from 'react-native';
+
+import { ForgotPasswordForm } from '@/app/(stacks)/auth/_components/forgot-password-form';
 
 export default function ForgotPasswordScreen() {
   return (

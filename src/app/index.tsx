@@ -16,5 +16,5 @@ export default function Index() {
     return <Redirect href={ROUTE.AUTH.SIGNIN} />;
   }
 
-  return <Redirect href={"/(tabs)"} />;
+  return <Redirect href={ROUTE.TAB.HOME} />;
 }

@@ -3,14 +3,19 @@ import { showMessage } from 'react-native-flash-message';
 
 import { queryClient } from '@/api';
 import { userApi } from '@/api/user.api';
+import { useAuth } from '@/lib/auth';
 
-export const useGetMeQuery = () =>
-  useQuery({
+export const useGetMeQuery = () => {
+  const userInfor = useAuth((state) => state.userInfor);
+  return useQuery({
     queryKey: ['me'],
-    queryFn: userApi.getMe,
+    queryFn: () => {
+      return userInfor ? { data: { data: userInfor } } : userApi.getMe();
+    },
     staleTime: Infinity,
     retry: 3,
   });
+};
 export const useUpdateMeMutation = () =>
   useMutation({
     mutationKey: ['updateMe'],

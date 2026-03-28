@@ -47,7 +47,7 @@ function buildRange(min: number, max: number, step: number = 1): number[] {
 export default function EditProfileScreen(): React.JSX.Element {
   const userInfor = useAuth((state) => state.userInfor);
   const { mutateAsync: updateMe } = useUpdateMeMutation();
-  const ageValues = React.useMemo(() => buildRange(10, 100), []);
+  const birthdayValues = React.useMemo(() => buildRange(10, 100), []);
   const heightValues = React.useMemo(() => buildRange(80, 200), []);
   const weightValues = React.useMemo(() => buildRange(20, 150), []);
 
@@ -61,7 +61,8 @@ export default function EditProfileScreen(): React.JSX.Element {
     mode: 'onChange',
     defaultValues: {
       name: userInfor?.name ?? '',
-      age: userInfor?.age ?? 25,
+      birthday: userInfor?.birthday ?? new Date().getFullYear() - 25,
+      gender: userInfor?.sex ?? true,
       height: userInfor?.height ?? 170,
       weight: userInfor?.weight ?? 65,
     },
@@ -73,7 +74,8 @@ export default function EditProfileScreen(): React.JSX.Element {
     reset(
       {
         name: userInfor.name ?? '',
-        age: userInfor.age ?? 25,
+        birthday: userInfor.birthday ?? new Date().getFullYear() - 25,
+        gender: userInfor.sex ?? true,
         height: userInfor.height ?? 170,
         weight: userInfor.weight ?? 65,
       },
@@ -116,9 +118,9 @@ export default function EditProfileScreen(): React.JSX.Element {
 
             <NumberPickerField<EditProfileFormValues>
               control={control}
-              name="age"
+              name="birthday"
               label="Tuổi"
-              values={ageValues}
+              values={birthdayValues}
               unit="tuổi"
             />
 
