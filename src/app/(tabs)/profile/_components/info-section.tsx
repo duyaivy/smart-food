@@ -13,6 +13,10 @@ type InfoSectionProps = {
 
 const InfoSection = ({ user, isLoading = true }: InfoSectionProps) => {
   const avatarUri = user?.avatar?.trim();
+  const age = user?.birthday
+    ? new Date().getFullYear() - new Date(user.birthday).getFullYear()
+    : null;
+  console.log({ user });
 
   return (
     <View className="mt-24 flex items-center">
@@ -46,10 +50,10 @@ const InfoSection = ({ user, isLoading = true }: InfoSectionProps) => {
             {user?.name ? user.name : 'Người dùng SmartFood'}
           </Text>
           <Text className="text-gray-500">
-            {user?.age ? `${user.age} tuổi -` : ''}{' '}
+            {age !== null ? `${age} tuổi -` : ''}{' '}
             {user?.height ? `${user.height} cm -` : ''}{' '}
             {user?.weight ? `${user.weight} kg` : ''}
-            {!user?.age &&
+            {!user?.birthday &&
               !user?.height &&
               !user?.weight &&
               'Chưa có thông tin'}

@@ -10,7 +10,9 @@ export interface IUser {
   isEmailVerified: boolean;
   height?: number;
   weight?: number;
-  age?: number;
+  birthday?: Date;
+  sex?: boolean;
+  activivyLevel?: number;
   createdAt: Date;
   updatedAt: Date;
 }

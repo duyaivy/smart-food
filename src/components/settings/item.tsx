@@ -21,7 +21,7 @@ export const Item = ({ text, value, icon, onPress }: ItemProps) => {
     >
       <View className="flex-row items-center">
         {icon && <View className="pr-2">{icon}</View>}
-        <Text tx={text} />
+        <Text>{text}</Text>
       </View>
       <View className="flex-row items-center">
         <Text className="text-neutral-600 dark:text-white">{value}</Text>

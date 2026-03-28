@@ -12,6 +12,7 @@ type Props = {
   isChevron?: boolean;
   color?: string;
   href?: LinkProps['href'];
+  onPress?: () => void;
 };
 
 const ListItemIcon = ({
@@ -20,11 +21,13 @@ const ListItemIcon = ({
   isChevron = false,
   color = '#222222',
   href,
+  onPress,
 }: Props) => {
   const content = (
     <TouchableOpacity
       activeOpacity={href ? 0.7 : 1}
-      disabled={!href}
+      disabled={!href && !onPress}
+      onPress={onPress}
       className="mt-3.5 flex w-full flex-row justify-between gap-2"
     >
       <View className="flex flex-row gap-2">
@@ -37,13 +40,15 @@ const ListItemIcon = ({
     </TouchableOpacity>
   );
 
-  if (!href) return content;
+  if (href && !onPress) {
+    return (
+      <Link href={href} asChild>
+        {content}
+      </Link>
+    );
+  }
 
-  return (
-    <Link href={href} asChild>
-      {content}
-    </Link>
-  );
+  return content;
 };
 
 export default ListItemIcon;

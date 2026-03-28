@@ -7,6 +7,7 @@ export interface NavbarItem {
   isChevron: boolean;
   color?: string;
   href?: LinkProps['href'];
+  onPress?: () => void;
 }
 
 export interface SuccessResponse<Data> {
