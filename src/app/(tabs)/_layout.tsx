@@ -22,7 +22,7 @@ export default function TabLayout() {
     return <Redirect href={ROUTE.AUTH.ONBOARDING} />;
   }
   if (status === 'signOut') {
-    return <Redirect href={ROUTE.AUTH.LOGIN} />;
+    return <Redirect href={ROUTE.AUTH.SIGNIN} />;
   }
 
   return (

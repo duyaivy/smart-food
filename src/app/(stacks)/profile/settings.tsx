@@ -8,10 +8,23 @@ import { ThemeItem } from '@/components/settings/theme-item';
 import { FocusAwareStatusBar, ScrollView, View } from '@/components/ui';
 import { ROUTE } from '@/constants/route';
 import { useAuth } from '@/lib';
+import { useLogoutMutation } from '@/lib/hooks/queries/auth.query';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const signOut = useAuth.use.signOut();
+  const tokens = useAuth.use.token();
+  const logoutMutation = useLogoutMutation(router);
+
+  function onLogout() {
+    const refreshToken = tokens?.refresh;
+    if (!refreshToken) {
+      logoutMutation.reset();
+      router.replace(ROUTE.AUTH.SIGNIN);
+      return;
+    }
+
+    logoutMutation.mutate({ refreshToken });
+  }
   return (
     <>
       <FocusAwareStatusBar />
@@ -40,7 +53,7 @@ export default function SettingsScreen() {
 
           <View className="my-8">
             <ItemsContainer>
-              <Item text="settings.logout" onPress={signOut} />
+              <Item text="settings.logout" onPress={onLogout} />
             </ItemsContainer>
           </View>
         </View>

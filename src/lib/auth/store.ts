@@ -10,22 +10,14 @@ import { getToken, removeToken, type TokenType } from './utils';
 
 export type AuthStatus = 'idle' | 'signOut' | 'signIn';
 
-export type AuthUser = {
-  name: string;
-  email: string;
-};
-
 export type AuthState = {
   token: TokenType | null;
-  user: AuthUser | null;
   status: AuthStatus;
   userInfor: IUser | null;
 
   setUserInfor: (userInfor: IUser) => void;
   signIn: (token: TokenType) => void;
   signOut: () => void;
-  setUser: (user: AuthUser | null) => void;
-  updateUser: (patch: Partial<AuthUser>) => void;
   hydrate: () => void;
 };
 
@@ -46,27 +38,9 @@ const _useAuth = create<AuthState>()(
       },
 
       signOut: () => {
-        set({ status: 'signOut', token: null, user: null });
-
+        set({ status: 'signOut', token: null, userInfor: null });
         // legacy cleanup (older code persisted token under the `token` key)
         removeToken();
-      },
-
-      setUser: (user) => {
-        set({ user });
-      },
-
-      updateUser: (patch) => {
-        set((state) => {
-          const nextUser = state.user
-            ? { ...state.user, ...patch }
-            : {
-                name: patch.name ?? '',
-                email: patch.email ?? '',
-              };
-
-          return { user: nextUser };
-        });
       },
 
       hydrate: () => {
@@ -91,7 +65,7 @@ const _useAuth = create<AuthState>()(
       name: 'auth',
       version: 1,
       storage: createJSONStorage(() => mmkvStateStorage),
-      partialize: ({ token, user }) => ({ token, user }),
+      partialize: ({ token, userInfor }) => ({ token, userInfor }),
       onRehydrateStorage: () => (state) => {
         state?.hydrate();
       },

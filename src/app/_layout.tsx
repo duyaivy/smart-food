@@ -1,4 +1,3 @@
-// Import  global CSS file
 import '../../global.css';
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -18,28 +17,31 @@ import { useThemeConfig } from '@/lib/common/use-theme-config';
 export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
-  // (tabs) is the primary entry point after auth checks
-  initialRouteName: '(tabs)',
+  initialRouteName: 'index',
 };
 
 hydrateAuth();
 loadSelectedTheme();
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-// Set the animation options. This is optional.
 SplashScreen.setOptions({
   duration: 500,
   fade: true,
 });
 
 export default function RootLayout() {
+  React.useEffect(() => {
+    const prepare = async () => {
+      await SplashScreen.hideAsync();
+    };
+
+    prepare();
+  }, []);
+
   return (
     <Providers>
       <Stack>
-        {/* Primary tab group — bottom tab bar is visible here */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-
-        {/* Child screen group — no tab bar, each domain _layout.tsx controls headers */}
         <Stack.Screen
           name="(stacks)"
           options={{
@@ -47,10 +49,7 @@ export default function RootLayout() {
             animation: 'slide_from_right',
           }}
         />
-
-        {/* Auth / onboarding screens */}
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack>
     </Providers>
   );
@@ -58,10 +57,11 @@ export default function RootLayout() {
 
 function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeConfig();
+
   return (
     <GestureHandlerRootView
       style={styles.container}
-      className={theme.dark ? `dark` : undefined}
+      className={theme.dark ? 'dark' : undefined}
     >
       <ThemeProvider value={theme}>
         <APIProvider>

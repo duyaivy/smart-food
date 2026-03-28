@@ -10,11 +10,13 @@ import UtilSection from './_components/util-section';
 export default function ProfileScreen() {
   const { data, isLoading } = useGetMeQuery();
   const setUserInfor = useAuth((state) => state.setUserInfor);
+
   useEffect(() => {
     if (data?.data.data) {
       setUserInfor(data.data.data);
     }
   }, [data, setUserInfor]);
+
   return (
     <SafeAreaView className="flex min-h-screen w-full flex-col items-center bg-white px-6">
       <FocusAwareStatusBar />

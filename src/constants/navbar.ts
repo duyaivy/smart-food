@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import {
   Handshake,
   History,
@@ -7,8 +8,10 @@ import {
   Settings,
   User2,
 } from 'lucide-react-native';
+import { Alert } from 'react-native';
 
 import { ROUTE } from '@/constants/route';
+import { useAuth } from '@/lib';
 import { type NavbarItem } from '@/models/interfaces/common';
 
 export const USER_LIST_ITEM = [
@@ -35,6 +38,18 @@ export const USER_LIST_ITEM = [
     Icon: LockKeyhole,
     text: 'Quên mật khẩu',
     isChevron: false,
+    onPress: () => {
+      const email = useAuth.getState().userInfor?.email;
+
+      if (!email) {
+        Alert.alert(
+          'Lỗi',
+          'Không tìm thấy email của bạn. Vui lòng thử lại sau.'
+        );
+        return;
+      }
+      router.push(ROUTE.AUTH.FORGOT_PASSWORD);
+    },
   },
 ] satisfies NavbarItem[];
 
@@ -56,5 +71,22 @@ export const OTHER_LIST_ITEM = [
     text: 'Đăng xuất',
     isChevron: false,
     color: '#FF3B30',
+    onPress: () => {
+      console.log({ log: 123 });
+
+      Alert.alert('Đăng xuất', 'Bạn có chắc chắn muốn đăng xuất không?', [
+        {
+          text: 'Huỷ',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            useAuth.getState().signOut();
+            router.push(ROUTE.AUTH.SIGNIN);
+          },
+        },
+      ]);
+    },
   },
 ] satisfies NavbarItem[];
