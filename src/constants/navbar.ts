@@ -72,8 +72,6 @@ export const OTHER_LIST_ITEM = [
     isChevron: false,
     color: '#FF3B30',
     onPress: () => {
-      console.log({ log: 123 });
-
       Alert.alert('Đăng xuất', 'Bạn có chắc chắn muốn đăng xuất không?', [
         {
           text: 'Huỷ',

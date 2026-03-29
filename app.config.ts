@@ -25,7 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   description: `${Env.NAME} Mobile App`,
   owner: Env.EXPO_ACCOUNT_OWNER,
   scheme: Env.SCHEME,
-  slug: 'obytesapp',
+  slug: 'smartfood-ai',
   version: Env.VERSION.toString(),
   orientation: 'portrait',
   icon: './assets/icon.png',

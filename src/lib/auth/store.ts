@@ -6,6 +6,7 @@ import { createSelectors } from '@/lib/common/utils';
 import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
 import { type IUser } from '@/models/interfaces/user';
 
+import { useLogoutMutation } from '../hooks/queries/auth.query';
 import { getToken, removeToken, type TokenType } from './utils';
 
 export type AuthStatus = 'idle' | 'signOut' | 'signIn';
@@ -14,8 +15,9 @@ export type AuthState = {
   token: TokenType | null;
   status: AuthStatus;
   userInfor: IUser | null;
+  userInforUpdatedAt: number | null;
 
-  setUserInfor: (userInfor: IUser) => void;
+  setUserInfor: (userInfor: IUser | null, updatedAt?: number) => void;
   signIn: (token: TokenType) => void;
   signOut: () => void;
   hydrate: () => void;
@@ -30,15 +32,24 @@ const _useAuth = create<AuthState>()(
       token: null,
       user: null,
       userInfor: null,
+      userInforUpdatedAt: null,
       signIn: (token) => {
         set({ status: 'signIn', token });
       },
-      setUserInfor: (userInfor) => {
-        set({ userInfor });
+      setUserInfor: (userInfor, updatedAt) => {
+        set({
+          userInfor,
+          userInforUpdatedAt: userInfor ? (updatedAt ?? Date.now()) : null,
+        });
       },
 
       signOut: () => {
-        set({ status: 'signOut', token: null, userInfor: null });
+        set({
+          status: 'signOut',
+          token: null,
+          userInfor: null,
+          userInforUpdatedAt: null,
+        });
         // legacy cleanup (older code persisted token under the `token` key)
         removeToken();
       },
@@ -65,7 +76,11 @@ const _useAuth = create<AuthState>()(
       name: 'auth',
       version: 1,
       storage: createJSONStorage(() => mmkvStateStorage),
-      partialize: ({ token, userInfor }) => ({ token, userInfor }),
+      partialize: ({ token, userInfor, userInforUpdatedAt }) => ({
+        token,
+        userInfor,
+        userInforUpdatedAt,
+      }),
       onRehydrateStorage: () => (state) => {
         state?.hydrate();
       },

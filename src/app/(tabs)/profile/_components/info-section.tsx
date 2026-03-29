@@ -16,7 +16,6 @@ const InfoSection = ({ user, isLoading = true }: InfoSectionProps) => {
   const age = user?.birthday
     ? new Date().getFullYear() - new Date(user.birthday).getFullYear()
     : null;
-  console.log({ user });
 
   return (
     <View className="mt-24 flex items-center">

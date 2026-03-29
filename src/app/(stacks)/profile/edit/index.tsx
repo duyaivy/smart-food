@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 
-import { queryClient } from '@/api';
 import {
   Button,
   ControlledInput,
@@ -15,6 +14,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import { ROUTE } from '@/constants/route';
 import { useAuth } from '@/lib';
 import { useUploadMediaMutation } from '@/lib/hooks/queries/upload.query';
 import { useUpdateMeMutation } from '@/lib/hooks/queries/user.query';
@@ -24,8 +24,9 @@ import {
 } from '@/schemas/profile.schema';
 
 import AvatarPickerField from './_components/avatar-picker-field';
+import DatePickerField from './_components/date-picker-field';
+import GenderPickerField from './_components/gender-picker-field';
 import NumberPickerField from './_components/number-picker-field';
-
 const SAFE_AREA_EDGES = ['bottom'] as const;
 
 const styles = StyleSheet.create({
@@ -51,14 +52,18 @@ export default function EditProfileScreen(): React.JSX.Element {
   const { mutateAsync: updateMe } = useUpdateMeMutation();
   const { mutateAsync: uploadMedia, isPending: isUploadingMedia } =
     useUploadMediaMutation();
-  const birthdayValues = useMemo(() => buildRange(10, 100), []);
+  const defaultBirthday = useMemo(() => {
+    const birthday = userInfor?.birthday ? new Date(userInfor.birthday) : null;
+    if (birthday && !Number.isNaN(birthday.getTime())) return birthday;
+    return new Date(new Date().setFullYear(new Date().getFullYear() - 25));
+  }, [userInfor?.birthday]);
+
   const heightValues = useMemo(() => buildRange(80, 200), []);
   const weightValues = useMemo(() => buildRange(20, 150), []);
 
   const [avatar, setAvatar] = useState<string | undefined>(userInfor?.avatar);
   const {
     control,
-    reset,
     handleSubmit,
     formState: { isValid, isSubmitting },
   } = useForm<EditProfileFormValues>({
@@ -66,27 +71,12 @@ export default function EditProfileScreen(): React.JSX.Element {
     mode: 'onChange',
     defaultValues: {
       name: userInfor?.name ?? '',
-      birthday: userInfor?.birthday ?? new Date().getFullYear() - 25,
-      gender: userInfor?.sex ?? true,
+      birthday: defaultBirthday,
+      sex: userInfor?.sex ?? true,
       height: userInfor?.height ?? 170,
       weight: userInfor?.weight ?? 65,
     },
   });
-
-  useEffect(() => {
-    if (!userInfor) return;
-
-    reset(
-      {
-        name: userInfor.name ?? '',
-        birthday: userInfor.birthday ?? new Date().getFullYear() - 25,
-        gender: userInfor.sex ?? true,
-        height: userInfor.height ?? 170,
-        weight: userInfor.weight ?? 65,
-      },
-      { keepDirtyValues: true }
-    );
-  }, [reset, userInfor]);
 
   const onSubmit = handleSubmit(async (values) => {
     let avatarValue: string | undefined = undefined;
@@ -104,14 +94,12 @@ export default function EditProfileScreen(): React.JSX.Element {
     }
     const data = { ...values, avatar: avatarValue };
     await updateMe(data);
-    queryClient.invalidateQueries({ queryKey: ['me'] });
-    router.back();
+    router.replace(ROUTE.TAB.PROFILE);
   });
 
   return (
     <SafeAreaView className="flex-1" edges={SAFE_AREA_EDGES}>
       <FocusAwareStatusBar />
-
       <KeyboardAvoidingView
         style={styles.grow}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -139,13 +127,17 @@ export default function EditProfileScreen(): React.JSX.Element {
               <Text className=" text-black">Email</Text>
               <Input value={userInfor?.email ?? ''} disabled />
             </View>
-
-            <NumberPickerField<EditProfileFormValues>
+            <GenderPickerField<EditProfileFormValues>
+              control={control}
+              name="sex"
+              label="Giới tính"
+            />
+            <DatePickerField<EditProfileFormValues>
               control={control}
               name="birthday"
-              label="Tuổi"
-              values={birthdayValues}
-              unit="tuổi"
+              label="Ngày sinh"
+              minimumDate={new Date('1926-01-01')}
+              maximumDate={new Date('2126-01-01')}
             />
 
             <View className="flex-row gap-3">
