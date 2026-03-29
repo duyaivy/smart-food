@@ -6,7 +6,6 @@ import { createSelectors } from '@/lib/common/utils';
 import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
 import { type IUser } from '@/models/interfaces/user';
 
-import { useLogoutMutation } from '../hooks/queries/auth.query';
 import { getToken, removeToken, type TokenType } from './utils';
 
 export type AuthStatus = 'idle' | 'signOut' | 'signIn';

@@ -19,6 +19,9 @@ const appIconBadgeConfig: AppIconBadgeConfig = {
   ],
 };
 
+const googleServicesFile =
+  process.env.GOOGLE_SERVICES_JSON ?? './google-services.json';
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: Env.NAME,
@@ -51,6 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.PACKAGE,
+    googleServicesFile,
   },
   web: {
     favicon: './assets/favicon.png',
