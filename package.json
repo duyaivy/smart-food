@@ -1,5 +1,5 @@
 {
-  "name": "obytesapp",
+  "name": "smartfood-ai",
   "version": "8.0.0",
   "private": true,
   "main": "expo-router/entry",
@@ -38,15 +38,19 @@
     "test:ci": "pnpm run test --coverage",
     "test:watch": "pnpm run test --watch",
     "install-maestro": "curl -Ls 'https://get.maestro.mobile.dev' | bash",
-    "e2e-test": "maestro test .maestro/ -e APP_ID=com.obytes.development"
+    "e2e-test": "maestro test .maestro/ -e APP_ID=com.smartfood.development"
   },
   "dependencies": {
     "@expo/metro-runtime": "^5.0.4",
     "@gorhom/bottom-sheet": "^5.0.5",
     "@hookform/resolvers": "^3.9.0",
+    "@react-native-community/datetimepicker": "^9.1.0",
+    "@react-native-firebase/app": "^23.8.8",
+    "@react-native-firebase/messaging": "^23.8.8",
     "@react-native-picker/picker": "2.11.1",
     "@rn-primitives/avatar": "^1.2.0",
     "@rn-primitives/label": "^1.2.0",
+    "@rn-primitives/radio-group": "^1.4.0",
     "@rn-primitives/separator": "^1.2.0",
     "@rn-primitives/slot": "^1.2.0",
     "@shopify/flash-list": "1.7.6",
@@ -59,6 +63,7 @@
     "expo-constants": "~17.1.6",
     "expo-crypto": "^14.1.5",
     "expo-dev-client": "~5.2.1",
+    "expo-file-system": "~18.1.11",
     "expo-font": "~13.3.1",
     "expo-image": "~2.3.0",
     "expo-image-picker": "~16.1.4",

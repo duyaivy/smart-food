@@ -7,7 +7,11 @@ const UPLOAD_URL = '/uploads';
 
 export const uploadApi = {
   uploadMedia: (data: FormData) =>
-    http.post<SuccessResponse<string>>(`${UPLOAD_URL}/media`, data),
+    http.post<SuccessResponse<string>>(`${UPLOAD_URL}/media`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
   uploadAvatar: (data: Partial<IUser>) =>
-    http.patch<SuccessResponse<IUser>>(`${UPLOAD_URL}/avatar`, data),
+    http.patch<SuccessResponse<IUser>>(`${UPLOAD_URL}/avatar`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 };

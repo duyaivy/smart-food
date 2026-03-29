@@ -27,7 +27,7 @@ function NumberPickerField<TFieldValues extends FieldValues>({
   label,
   values,
   unit,
-  helperText = 'Chạm để chọn',
+  helperText = 'Nhấn để chọn',
 }: NumberPickerFieldProps<TFieldValues>): React.JSX.Element {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';

@@ -15,7 +15,8 @@ export interface SuccessResponse<Data> {
   data: Data;
 }
 
-export interface ErrorResponse<Data> {
+export interface ErrorResponse<Data = unknown> {
+  code?: number;
   message: string;
-  data?: Data;
+  data?: Data | null;
 }

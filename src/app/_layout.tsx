@@ -6,12 +6,11 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { red } from 'react-native-reanimated/lib/typescript/Colors';
 
 import { APIProvider } from '@/api';
 import { hydrateAuth, loadSelectedTheme } from '@/lib';
+import { FlashMessageProvider } from '@/lib/common/show-message';
 import { useThemeConfig } from '@/lib/common/use-theme-config';
 
 export { ErrorBoundary } from 'expo-router';
@@ -67,7 +66,7 @@ function Providers({ children }: { children: React.ReactNode }) {
         <APIProvider>
           <BottomSheetModalProvider>
             {children}
-            <FlashMessage position="top" />
+            <FlashMessageProvider />
           </BottomSheetModalProvider>
         </APIProvider>
       </ThemeProvider>

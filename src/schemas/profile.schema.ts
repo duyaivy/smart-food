@@ -6,7 +6,7 @@ export const editProfileSchema = z.object({
     .trim()
     .min(2, 'Tên phải có ít nhất 2 ký tự')
     .max(50, 'Tên quá dài'),
-  gender: z.boolean({ invalid_type_error: 'Giới tính là bắt buộc' }),
+  sex: z.boolean({ invalid_type_error: 'Giới tính là bắt buộc' }),
   birthday: z
     .date({ invalid_type_error: 'Ngày sinh là bắt buộc' })
     .min(
