@@ -8,13 +8,11 @@ export default function NotFoundScreen() {
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
       <View className="flex-1 items-center justify-center p-4">
-        <Text className="mb-4 text-2xl font-bold">
-          This screen doesn&apos;t exist.
-        </Text>
+        <Text className="mb-4 text-2xl font-bold">Không có trang này.</Text>
 
-        <Link href={ROUTE.TAB.COOKING} className="mt-4">
+        <Link href={ROUTE.TAB.HOME} className="mt-4">
           <Text className="text-blue-500 underline">
-            Go to cooking screen! {ROUTE.TAB.COOKING}
+            Quay về trang chủ! {ROUTE.TAB.HOME}
           </Text>
         </Link>
       </View>

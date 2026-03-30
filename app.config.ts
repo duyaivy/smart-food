@@ -19,9 +19,6 @@ const appIconBadgeConfig: AppIconBadgeConfig = {
   ],
 };
 
-const googleServicesFile =
-  process.env.GOOGLE_SERVICES_JSON ?? './google-services.json';
-
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: Env.NAME,
@@ -54,7 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.PACKAGE,
-    googleServicesFile,
+    googleServicesFile: './google-services.json',
   },
   web: {
     favicon: './assets/favicon.png',
@@ -90,6 +87,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'Cho phép $(PRODUCT_NAME) truy cập vào máy ảnh của bạn',
       },
     ],
+    ['expo-notifications'],
+    ['@react-native-community/datetimepicker'],
   ],
   extra: {
     ...ClientEnv,

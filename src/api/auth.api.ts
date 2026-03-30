@@ -8,7 +8,7 @@ import type {
   ISignInInput,
   ISignUpInput,
   ISuccessResponse,
-} from '@/interfaces/auth';
+} from '@/models/interfaces/auth';
 
 import http from './common/axios.config';
 

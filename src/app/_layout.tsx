@@ -13,6 +13,8 @@ import { hydrateAuth, loadSelectedTheme } from '@/lib';
 import { FlashMessageProvider } from '@/lib/common/show-message';
 import { useThemeConfig } from '@/lib/common/use-theme-config';
 
+import PushNotificationManager from './push-notification-provider';
+
 export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
@@ -63,12 +65,14 @@ function Providers({ children }: { children: React.ReactNode }) {
       className={theme.dark ? 'dark' : undefined}
     >
       <ThemeProvider value={theme}>
-        <APIProvider>
-          <BottomSheetModalProvider>
-            {children}
-            <FlashMessageProvider />
-          </BottomSheetModalProvider>
-        </APIProvider>
+        <PushNotificationManager>
+          <APIProvider>
+            <BottomSheetModalProvider>
+              {children}
+              <FlashMessageProvider />
+            </BottomSheetModalProvider>
+          </APIProvider>
+        </PushNotificationManager>
       </ThemeProvider>
     </GestureHandlerRootView>
   );
