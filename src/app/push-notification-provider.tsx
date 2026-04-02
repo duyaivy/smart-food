@@ -1,20 +1,31 @@
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
 import React, { type PropsWithChildren, useCallback, useEffect } from 'react';
 import { Platform } from 'react-native';
 
+import { dishApi } from '@/api/dish.api';
 import { userApi } from '@/api/user.api';
+import { ROUTE } from '@/constants/route';
+import { useDishStore } from '@/lib/stores/use-dish-store';
 import { useGlobalStore } from '@/lib/stores/use-global-store';
+import { toDishId } from '@/lib/utils/format';
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+  handleNotification: async (notification) => {
+    const title = notification.request.content.title?.trim();
+    const body = notification.request.content.body?.trim();
+    const shouldShow = Boolean(title || body);
+
+    return {
+      shouldShowAlert: shouldShow,
+      shouldPlaySound: shouldShow,
+      shouldSetBadge: false,
+      shouldShowBanner: shouldShow,
+      shouldShowList: shouldShow,
+    };
+  },
 });
 
 const getProjectId = (): string | null => {
@@ -28,6 +39,61 @@ const setupAndroidChannel = async () => {
     importance: Notifications.AndroidImportance.MAX,
     vibrationPattern: [0, 250, 250, 250],
     lightColor: '#FF231F7C',
+  });
+};
+
+type NotificationPayload = {
+  screen?: string;
+  dishId?: number | string;
+  action?: 'UPDATE' | 'DELETE' | 'CREATE' | string;
+};
+
+const syncDishByNotificationAction = async (payload: NotificationPayload) => {
+  if (payload.screen !== 'DishDetail') return;
+  if (
+    payload.action !== 'UPDATE' &&
+    payload.action !== 'DELETE' &&
+    payload.action !== 'CREATE'
+  ) {
+    return;
+  }
+
+  const dishId = toDishId(payload.dishId);
+  if (!dishId) return;
+
+  const { removeDishDetail, setDishDetail, setStatus } =
+    useDishStore.getState();
+
+  setStatus('stale');
+
+  if (payload.action === 'CREATE') {
+    return;
+  }
+
+  if (payload.action === 'DELETE') {
+    removeDishDetail(dishId);
+    return;
+  }
+
+  try {
+    const { data } = await dishApi.getDishDetail(String(dishId));
+    setDishDetail(dishId, data.data);
+  } catch (error) {
+    removeDishDetail(dishId);
+    console.error('Sync món ăn từ notification thất bại:', error);
+  }
+};
+
+const navigateByNotificationPayload = (payload: NotificationPayload) => {
+  if (payload.action && payload.action !== 'CREATE') return;
+  if (payload.screen !== 'DishDetail') return;
+
+  const dishId = toDishId(payload.dishId);
+  if (!dishId) return;
+
+  router.push({
+    pathname: ROUTE.STACK.DISCOVER.DISH_DETAIL,
+    params: { id: String(dishId) },
   });
 };
 
@@ -88,17 +154,20 @@ const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
 
   const handleNotificationReceived = useCallback(
     (notification: Notifications.Notification) => {
-      const data = notification.request.content.data;
+      const data = notification.request.content.data as NotificationPayload;
       console.log('Notification nhận được:', data);
+      void syncDishByNotificationAction(data);
     },
     []
   );
 
   const handleNotificationResponse = useCallback(
     (response: Notifications.NotificationResponse) => {
-      const data = response.notification.request.content.data;
+      const data = response.notification.request.content
+        .data as NotificationPayload;
       console.log('User tap notification:', data);
-      // TODO: navigate theo data.screen
+      void syncDishByNotificationAction(data);
+      navigateByNotificationPayload(data);
     },
     []
   );

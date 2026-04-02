@@ -87,7 +87,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'Cho phép $(PRODUCT_NAME) truy cập vào máy ảnh của bạn',
       },
     ],
-    ['expo-notifications'],
+    [
+      'expo-notifications',
+      {
+        icon: './assets/splash-icon.png',
+        color: '#ffffff',
+        defaultChannel: 'default',
+      },
+    ],
     ['@react-native-community/datetimepicker'],
   ],
   extra: {

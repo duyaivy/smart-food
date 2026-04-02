@@ -24,6 +24,15 @@ function isAxiosUnauthorizedError(error: AxiosError) {
   return error.response?.status === 401;
 }
 
+function shouldForceSignOutOnRefreshError(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) return false;
+
+  const status = error.response?.status;
+
+  // Only force logout when refresh token is explicitly unauthorized/forbidden.
+  return status === 401 || status === 403;
+}
+
 function setAuthorizationHeader(
   config: InternalAxiosRequestConfig,
   token: string
@@ -289,7 +298,9 @@ export class Http {
               return this.instance(config);
             })
             .catch((refreshError) => {
-              clearAuthAndRedirectToLogin();
+              if (shouldForceSignOutOnRefreshError(refreshError)) {
+                clearAuthAndRedirectToLogin();
+              }
               return Promise.reject(refreshError);
             });
         }

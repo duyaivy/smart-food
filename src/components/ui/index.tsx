@@ -1,14 +1,15 @@
 import { cssInterop } from 'nativewind';
 import Svg from 'react-native-svg';
 
+export { default as colors } from '../../constants/colors';
 export * from './button';
 export * from './checkbox';
-export { default as colors } from '../../constants/colors';
 export * from './focus-aware-status-bar';
 export * from './image';
 export * from './input';
 export * from './list';
 export * from './modal';
+export * from './nutrition-item';
 export * from './progress-bar';
 export * from './select';
 export * from './text';

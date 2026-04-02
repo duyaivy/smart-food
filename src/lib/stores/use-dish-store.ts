@@ -4,15 +4,17 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { storage } from '@/lib/common/storage';
 import { createSelectors } from '@/lib/common/utils';
 import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
+import { toValidDate } from '@/lib/utils/format';
 import { type IDish, type MiniDish } from '@/models/interfaces/dish';
 
 type DishStoreStatus = 'synced' | 'stale' | 'syncing';
 type DishDetailCacheItem = { data: IDish; cachedAt: number };
+export const STALE_THRESHOLD_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
 export type DishState = {
   hasHydrated: boolean;
   dishList: MiniDish[];
-  lastSyncAt: number | null;
+  lastSyncAt: Date | null;
   status: DishStoreStatus;
   dishDetailsById: Record<number, DishDetailCacheItem>;
 
@@ -26,6 +28,7 @@ export type DishState = {
   markHydrated: () => void;
   reset: () => void;
 };
+
 const mmkvStateStorage = createMmkvZustandStorage(storage);
 const _useDish = create<DishState>()(
   persist(
@@ -36,7 +39,7 @@ const _useDish = create<DishState>()(
       status: 'stale',
       dishDetailsById: {},
       setDishList: (dishList) => {
-        set({ dishList, lastSyncAt: Date.now(), status: 'synced' });
+        set({ dishList, lastSyncAt: new Date(), status: 'synced' });
       },
       updateDishListItem: (miniDishes) => {
         set((state) => {
@@ -51,6 +54,8 @@ const _useDish = create<DishState>()(
 
           return {
             dishList: Array.from(dishMap.values()),
+            lastSyncAt: new Date(),
+            status: 'synced' as DishStoreStatus,
           };
         });
       },
@@ -96,6 +101,9 @@ const _useDish = create<DishState>()(
       version: 1,
       storage: createJSONStorage(() => mmkvStateStorage),
       onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.lastSyncAt = toValidDate(state.lastSyncAt);
+        }
         state?.markHydrated();
       },
     }

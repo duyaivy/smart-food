@@ -13,3 +13,8 @@ export enum DishSortBy {
   COOK_TIME = 'COOK_TIME',
   CREATED_AT = 'CREATED_AT',
 }
+export enum DificultyValue {
+  EASY = 'Dễ',
+  MEDIUM = 'Trung bình',
+  HARD = 'Khó',
+}

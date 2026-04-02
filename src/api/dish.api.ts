@@ -13,10 +13,10 @@ export const dishApi = {
     http<SuccessResponse<PaginationResponse<MiniDish>>>(
       `${DISH_URL}?${queryString}`
     ),
-  getDishesSync: (lastSyncAt: string) =>
-    http<SuccessResponse<MiniDish[]>>(
-      `${DISH_URL}/sync?lastSyncAt=${lastSyncAt}`
-    ),
+  getDishesSync: (lastSyncAt?: Date) => {
+    const query = lastSyncAt ? `?lastSyncAt=${lastSyncAt.toISOString()}` : '';
+    return http<SuccessResponse<MiniDish[]>>(`${DISH_URL}/sync${query}`);
+  },
   getDishDetail: (id: string) =>
     http<SuccessResponse<IDish>>(`${DISH_URL}/${id}`),
 };

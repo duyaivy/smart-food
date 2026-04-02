@@ -8,6 +8,7 @@ export interface MiniDish {
   description: string | null;
   difficulty: Difficulty;
   images: string[];
+  calories?: number | null;
 }
 
 export interface DishListResult {
@@ -30,6 +31,12 @@ export interface Instruction {
   content: string;
 }
 
+export interface IIngredient {
+  id: number;
+  name: string;
+  quantity: string;
+  isAvailable: boolean;
+}
 export interface IDish {
   id: number;
   name: string;
@@ -39,6 +46,9 @@ export interface IDish {
   prepTimeMin?: number;
   cookTimeMin?: number;
   difficulty: Difficulty;
+  isDeleted: boolean;
+  calories: number;
   createdAt: Date;
   updatedAt: Date;
+  ingredients: IIngredient[];
 }
