@@ -73,7 +73,7 @@ const colors = {
     DEFAULT: '#3B82F6',
   },
 
-  background: '#FFFFFF',
+  background: '#f9f9f9',
   foreground: '#333333',
   border: '#E1E1E1',
 

@@ -17,7 +17,7 @@ import type {
   ISignInInput,
   ISignUpInput,
   IUser,
-} from '@/interfaces/auth';
+} from '@/models/interfaces/auth';
 import { useAuth } from '@/lib/auth';
 
 export const authQueryKeys = {

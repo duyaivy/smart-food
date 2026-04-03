@@ -1,13 +1,8 @@
-import {
-  type AuthState,
-  type AuthStatus,
-  type AuthUser,
-  useAuth,
-} from './store';
+import { type AuthState, type AuthStatus, useAuth } from './store';
 import type { TokenType } from './utils';
 
 export { useAuth };
-export type { AuthState, AuthStatus, AuthUser, TokenType };
+export type { AuthState, AuthStatus, TokenType };
 
 export const signOut = () => useAuth.getState().signOut();
 export const signIn = (token: TokenType) => useAuth.getState().signIn(token);

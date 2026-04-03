@@ -51,6 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.PACKAGE,
+    googleServicesFile: './google-services.json',
   },
   web: {
     favicon: './assets/favicon.png',
@@ -86,6 +87,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'Cho phép $(PRODUCT_NAME) truy cập vào máy ảnh của bạn',
       },
     ],
+    [
+      'expo-notifications',
+      {
+        icon: './assets/splash-icon.png',
+        color: '#ffffff',
+        defaultChannel: 'default',
+      },
+    ],
+    ['@react-native-community/datetimepicker'],
   ],
   extra: {
     ...ClientEnv,
