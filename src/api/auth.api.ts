@@ -1,17 +1,19 @@
+import http from './common/axios.config';
 import type {
   IAuthPayload,
   IAuthTokens,
   IForgotPasswordInput,
   ILogoutInput,
+  IMyProfile,
   IRefreshTokenInput,
   IResetPasswordInput,
   ISignInInput,
   ISignUpInput,
   ISuccessResponse,
-} from '@/models/interfaces/auth';
+  IUpdateMyProfileInput,
+} from '@/interfaces/auth';
 
-import http from './common/axios.config';
-
+const MY_PROFILE_URL = '/users/me';
 const LOGIN_URL = '/auth/login';
 const REGISTER_URL = '/auth/register';
 const LOGOUT_URL = '/auth/logout';

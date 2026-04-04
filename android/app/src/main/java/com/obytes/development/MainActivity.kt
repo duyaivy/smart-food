@@ -1,4 +1,4 @@
-package com.duyaivy.smartfood
+package com.obytes.development
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

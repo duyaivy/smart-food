@@ -36,7 +36,7 @@ require('dotenv').config({
 // TODO: Replace these values with your own
 
 const BUNDLE_ID = 'com.smartfood'; // ios bundle id
-const PACKAGE = 'com.duyaivy.smartfood'; // android package name
+const PACKAGE = 'com.smartfood'; // android package name
 const NAME = 'SmartFood AI'; // app name
 const EXPO_ACCOUNT_OWNER = 'duyaivy'; // expo account owner
 const EAS_PROJECT_ID = 'fb89be3d-54d7-405e-801c-0cb1b5f83a46'; // eas project id
@@ -50,11 +50,7 @@ const SCHEME = 'smartfood'; // app scheme
  */
 
 const withEnvSuffix = (name) => {
-  if (APP_ENV === 'production' || APP_ENV === 'development') {
-    return name;
-  }
-
-  return `${name}.${APP_ENV}`;
+  return APP_ENV === 'production' ? name : `${name}.${APP_ENV}`;
 };
 
 /**

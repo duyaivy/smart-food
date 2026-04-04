@@ -20,7 +20,3 @@ export interface ErrorResponse<Data = unknown> {
   message: string;
   data?: Data | null;
 }
-export interface PaginationResponse<T> {
-  control: { total: number; page: number; limit: number };
-  results: T[];
-}

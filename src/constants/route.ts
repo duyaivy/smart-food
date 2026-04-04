@@ -19,13 +19,6 @@ export const ROUTE = {
     SEARCH: {
       ROOT: '/(stacks)/search',
     },
-    DISCOVER: {
-      ROOT: '/(stacks)/discover',
-      DISH_LIST: '/(stacks)/discover/dishes',
-      DISH_DETAIL: '/(stacks)/discover/dishes/[id]',
-      INGREDIENT: '/(stacks)/discover/ingredients',
-      INGREDIENT_DETAIL: '/(stacks)/discover/ingredients/[id]',
-    },
     PROFILE: {
       ABOUT_US: '/(stacks)/profile/about-us',
       EDIT: '/(stacks)/profile/edit',

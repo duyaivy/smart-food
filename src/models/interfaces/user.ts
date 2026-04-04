@@ -16,7 +16,3 @@ export interface IUser {
   createdAt: Date;
   updatedAt: Date;
 }
-export interface IUserPushToken {
-  token: string;
-  deviceName: string;
-}

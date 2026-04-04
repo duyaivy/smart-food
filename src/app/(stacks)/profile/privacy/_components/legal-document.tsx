@@ -29,7 +29,7 @@ export function LegalDocument(): React.JSX.Element {
   const getItemType = React.useCallback((item: LegalRow) => item.type, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={SAFE_AREA_EDGES}>
+    <SafeAreaView className="flex-1" edges={SAFE_AREA_EDGES}>
       <FocusAwareStatusBar />
       <List
         data={rows}

@@ -1,4 +1,4 @@
-package com.duyaivy.smartfood
+package com.obytes.development
 import com.facebook.react.common.assets.ReactFontManager
 
 import android.app.Application
