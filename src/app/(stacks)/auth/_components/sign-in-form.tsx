@@ -55,12 +55,12 @@ export function SignInForm() {
 
   return (
     <View className="gap-6 bg-white">
-      <Card className="border-zinc-800 bg-zinc-900 shadow-none">
+      <Card className="border-zinc-200 bg-white shadow-none">
         <CardHeader>
-          <CardTitle className="text-center text-xl text-white sm:text-left">
+          <CardTitle className="text-center text-xl text-zinc-900 sm:text-left">
             Đăng nhập
           </CardTitle>
-          <CardDescription className="text-center text-zinc-400 sm:text-left">
+          <CardDescription className="text-center text-zinc-500 sm:text-left">
             Chào mừng bạn quay lại. Vui lòng đăng nhập để tiếp tục
           </CardDescription>
         </CardHeader>
@@ -68,7 +68,7 @@ export function SignInForm() {
         <CardContent className="gap-6">
           <View className="gap-6">
             <View className="gap-1.5">
-              <Label htmlFor="email" className="!text-zinc-200">
+              <Label htmlFor="email" className="!text-zinc-700">
                 Email
               </Label>
 
@@ -76,7 +76,7 @@ export function SignInForm() {
                 control={control}
                 name="email"
                 id="email"
-                className="border-zinc-700 bg-zinc-800  text-white"
+                className="border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400"
                 placeholder="m@example.com"
                 keyboardType="email-address"
                 autoComplete="email"
@@ -90,7 +90,7 @@ export function SignInForm() {
 
             <View className="gap-1.5">
               <View className="flex-row items-center">
-                <Label htmlFor="password" className="!text-zinc-200">
+                <Label htmlFor="password" className="!text-zinc-700">
                   Mật khẩu
                 </Label>
                 <Button
@@ -99,7 +99,7 @@ export function SignInForm() {
                   className="ml-auto h-4 px-1 py-0 web:h-fit sm:h-4"
                   onPress={() => router.push(ROUTE.AUTH.FORGOT_PASSWORD)}
                 >
-                  <Text className="font-normal leading-4 text-blue-400">
+                  <Text className="font-normal leading-4 text-orange-500">
                     Quên mật khẩu?
                   </Text>
                 </Button>
@@ -109,7 +109,7 @@ export function SignInForm() {
                 control={control}
                 name="password"
                 id="password"
-                className="border-zinc-700 bg-zinc-800 text-white"
+                className="border-zinc-300 bg-white text-zinc-900"
                 secureTextEntry
                 returnKeyType="send"
                 onSubmitEditing={handleSubmit(onSubmit)}
@@ -118,29 +118,31 @@ export function SignInForm() {
             </View>
 
             <Button
-              className="w-full bg-white"
+              className="w-full bg-orange-500"
               onPress={handleSubmit(onSubmit)}
               loading={signInMutation.isPending}
             >
-              <Text className="font-medium text-black">
+              <Text className="font-medium text-white">
                 {signInMutation.isPending ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </Text>
             </Button>
           </View>
+
           <View className="flex flex-row items-center justify-center">
-            <Text className=" text-center text-sm text-zinc-400">
+            <Text className="text-center text-sm text-zinc-500">
               Chưa có tài khoản?{' '}
             </Text>
             <Pressable onPress={() => router.push(ROUTE.AUTH.SIGN_UP)}>
-              <Text className="text-sm text-blue-400 underline underline-offset-4">
+              <Text className="text-sm text-orange-500 underline underline-offset-4">
                 Đăng ký
               </Text>
             </Pressable>
           </View>
+
           <View className="flex-row items-center">
-            <Separator className="flex-1 bg-zinc-700" />
-            <Text className="px-4 text-sm text-zinc-500">hoặc</Text>
-            <Separator className="flex-1 bg-zinc-700" />
+            <Separator className="flex-1 bg-zinc-200" />
+            <Text className="px-4 text-sm text-zinc-400">hoặc</Text>
+            <Separator className="flex-1 bg-zinc-200" />
           </View>
 
           <SocialConnections />

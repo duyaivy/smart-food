@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { useColorScheme } from 'nativewind';
 import { Platform, View } from 'react-native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 
@@ -20,19 +19,16 @@ const SOCIAL_CONNECTION_STRATEGIES = [
 ] as const;
 
 export function SocialConnections() {
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
   function renderIcon(type: (typeof SOCIAL_CONNECTION_STRATEGIES)[number]['type']) {
     switch (type) {
       case 'oauth_apple':
-        return <AntDesign name="apple1" size={18} color={isDark ? 'white' : 'black'} />;
+        return <AntDesign name="apple1" size={18} color="black" />;
       case 'oauth_google':
         return <AntDesign name="google" size={18} color="#DB4437" />;
       case 'oauth_github':
-        return <AntDesign name="github" size={18} color={isDark ? 'white' : 'black'} />;
+        return <AntDesign name="github" size={18} color="black" />;
       default:
-        return <FontAwesome name="circle" size={18} color={isDark ? 'white' : 'black'} />;
+        return <FontAwesome name="circle" size={18} color="black" />;
     }
   }
 
@@ -44,14 +40,14 @@ export function SocialConnections() {
             key={strategy.type}
             variant="outline"
             size="sm"
-            className="h-11 flex-row items-center justify-center gap-2 border-zinc-700 bg-zinc-800 sm:flex-1"
+            className="h-11 flex-row items-center justify-center gap-2 border-zinc-300 bg-white sm:flex-1"
             onPress={() => {
               // TODO: Xử lý đăng nhập mạng xã hội
             }}
           >
             {renderIcon(strategy.type)}
             {Platform.OS !== 'web' ? (
-              <Text className="text-sm text-white">{strategy.label}</Text>
+              <Text className="text-sm text-zinc-900">{strategy.label}</Text>
             ) : null}
           </Button>
         );

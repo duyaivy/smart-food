@@ -44,12 +44,12 @@ export function ForgotPasswordForm() {
 
   return (
     <View className="gap-6">
-      <Card className="border-zinc-800 bg-zinc-900 shadow-none">
+      <Card className="border-zinc-200 bg-white shadow-none">
         <CardHeader>
-          <CardTitle className="text-center text-xl text-white sm:text-left">
+          <CardTitle className="text-center text-xl text-zinc-900 sm:text-left">
             Quên mật khẩu?
           </CardTitle>
-          <CardDescription className="text-center text-zinc-400 sm:text-left">
+          <CardDescription className="text-center text-zinc-500 sm:text-left">
             Nhập email để nhận hướng dẫn đặt lại mật khẩu
           </CardDescription>
         </CardHeader>
@@ -57,7 +57,7 @@ export function ForgotPasswordForm() {
         <CardContent className="gap-6">
           <View className="gap-6">
             <View className="gap-1.5">
-              <Label htmlFor="email" className="text-zinc-200">
+              <Label htmlFor="email" className="text-zinc-700">
                 Email
               </Label>
 
@@ -65,7 +65,7 @@ export function ForgotPasswordForm() {
                 control={control}
                 name="email"
                 id="email"
-                className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                className="border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400"
                 placeholder="m@example.com"
                 keyboardType="email-address"
                 autoComplete="email"
@@ -77,11 +77,11 @@ export function ForgotPasswordForm() {
             </View>
 
             <Button
-              className="w-full bg-white"
+              className="w-full bg-orange-500"
               onPress={handleSubmit(onSubmit)}
               disabled={forgotPasswordMutation.isPending}
             >
-              <Text className="font-medium text-black">
+              <Text className="font-medium text-white">
                 {forgotPasswordMutation.isPending
                   ? 'Đang gửi email...'
                   : 'Gửi yêu cầu đặt lại mật khẩu'}
