@@ -1,10 +1,11 @@
 import React from 'react';
 import { Alert } from 'react-native';
-import { Scale, Wifi, WifiOff, Battery, Radio } from 'lucide-react-native';
+import { Battery, Radio, Scale, ScanLine, Wifi, WifiOff } from 'lucide-react-native';
 
 import {
   Button,
   FocusAwareStatusBar,
+  Image,
   Input,
   SafeAreaView,
   ScrollView,
@@ -18,8 +19,12 @@ import {
   useUnpairDeviceMutation,
 } from '@/lib/hooks/queries/iot.query';
 import { useIotStore } from '@/lib/stores/use-iot-store';
+import { router } from 'expo-router';
+import { ROUTE } from '@/constants/route';
 
 const SAFE_AREA_EDGES = ['bottom'] as const;
+const MOCK_SCALE_IMAGE =
+  'https://res.cloudinary.com/dr3wv6tee/image/upload/v1775380761/334732c9-8c64-453d-8483-9529bb009f63_dler5u.jpg';
 
 function formatLastSeenAt(value?: string | null) {
   if (!value) return 'Chưa có dữ liệu';
@@ -53,6 +58,7 @@ export default function SmartScaleScreen(): React.JSX.Element {
 
   const [deviceUidInput, setDeviceUidInput] = React.useState('');
   const [apiKeyInput, setApiKeyInput] = React.useState('');
+  const [pairMethod, setPairMethod] = React.useState<'qr' | 'manual'>('qr');
 
   useGetMyDevicesQuery();
 
@@ -117,6 +123,10 @@ export default function SmartScaleScreen(): React.JSX.Element {
     );
   };
 
+  const handleOpenQrScanner = () => {
+    router.push(ROUTE.STACK.PROFILE.SMART_SCALE_SCAN_QR);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={SAFE_AREA_EDGES}>
       <FocusAwareStatusBar />
@@ -131,6 +141,7 @@ export default function SmartScaleScreen(): React.JSX.Element {
         {!device ? (
           <View className="rounded-3xl border border-neutral-200 bg-neutral-50 px-6 py-10">
             <View className="items-center">
+
               <View className="mb-4 size-20 items-center justify-center rounded-full bg-primary/10">
                 <Scale size={32} color="#f97316" />
               </View>
@@ -140,64 +151,78 @@ export default function SmartScaleScreen(): React.JSX.Element {
               </Text>
 
               <Text className="mt-3 text-center text-base leading-6 text-neutral-500">
-                Nhập thông tin thiết bị để liên kết với ứng dụng. Ở bước sau có
-                thể thay bằng quét QR.
+                Bạn có thể quét mã QR để kết nối nhanh hoặc nhập thủ công thông
+                tin thiết bị để ghép nối với ứng dụng.
               </Text>
             </View>
 
             <View className="mt-6 gap-3">
-              <View>
-                <Text className="mb-1 text-black">Device UID</Text>
-                <Input
-                  value={deviceUidInput}
-                  onChangeText={setDeviceUidInput}
-                  placeholder="Ví dụ: esp32_kitchen_01"
-                  autoCapitalize="none"
-                />
-              </View>
-
-              <View>
-                <Text className="mb-1 text-black">API Key</Text>
-                <Input
-                  value={apiKeyInput}
-                  onChangeText={setApiKeyInput}
-                  placeholder="Nhập mã xác thực thiết bị"
-                  autoCapitalize="none"
-                />
-              </View>
-            </View>
-
-            <View className="mt-6">
               <Button
-                label="Kết nối thiết bị"
+                label="Quét mã QR"
                 className="bg-primary"
-                loading={isPairing}
-                disabled={isPairing}
-                onPress={handlePair}
+                onPress={handleOpenQrScanner}
+              />
+
+              <Button
+                label="Nhập thủ công"
+                variant="outline"
+                className="border-orange-200"
+                textClassName="text-primary text-lg"
+                onPress={() =>
+                  setPairMethod((prev) => (prev === 'manual' ? 'qr' : 'manual'))
+                }
               />
             </View>
+
+            {pairMethod === 'manual' && (
+              <View className="mt-6 gap-3">
+                <View>
+                  <Text className="mb-1 text-black">Device UID</Text>
+                  <Input
+                    value={deviceUidInput}
+                    onChangeText={setDeviceUidInput}
+                    placeholder="Ví dụ: esp32_kitchen_01"
+                    autoCapitalize="none"
+                  />
+                </View>
+
+                <View>
+                  <Text className="mb-1 text-black">API Key</Text>
+                  <Input
+                    value={apiKeyInput}
+                    onChangeText={setApiKeyInput}
+                    placeholder="Nhập mã xác thực thiết bị"
+                    autoCapitalize="none"
+                  />
+                </View>
+
+                <Button
+                  label="Liên kết thiết bị"
+                  className="bg-primary"
+                  loading={isPairing}
+                  disabled={isPairing}
+                  onPress={handlePair}
+                />
+              </View>
+            )}
+
+            {pairMethod === 'qr' && (
+              <Text className="mt-4 text-center text-sm text-neutral-400">
+                Hãy dùng camera để quét mã QR chứa deviceUid và apiKey của thiết
+                bị.
+              </Text>
+            )}
           </View>
         ) : (
           <View className="gap-4">
             <View className="rounded-3xl border border-neutral-200 bg-neutral-50 px-6 py-8">
               <View className="items-center">
-                <View className="mb-4 size-20 items-center justify-center rounded-full bg-primary/10">
-                  <Scale size={32} color="#f97316" />
-                </View>
-
-                <Text className="text-center text-2xl font-semibold text-black">
-                  Cân thông minh
-                </Text>
-
-                <Text className="mt-2 text-center text-base text-neutral-500">
-                  {device.deviceUid}
-                </Text>
-
-                <View className="mt-4">
-                  <DeviceStatusBadge
-                    isOnline={currentStatus?.isOnline ?? false}
-                  />
-                </View>
+                <Image
+                  source={{ uri: MOCK_SCALE_IMAGE }}
+                  className="mb-5 h-44 w-full rounded-3xl"
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                />
               </View>
             </View>
 

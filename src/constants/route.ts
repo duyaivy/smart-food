@@ -33,6 +33,7 @@ export const ROUTE = {
       PRIVACY: '/(stacks)/profile/privacy',
       SETTINGS: '/(stacks)/profile/settings',
       SMART_SCALE: '/(stacks)/profile/smart-scale',
+      SMART_SCALE_SCAN_QR: '/(stacks)/profile/smart-scale-scan-qr',
     },
   },
 } as const;

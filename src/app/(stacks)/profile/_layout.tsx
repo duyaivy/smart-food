@@ -34,6 +34,10 @@ export default function ProfileStackLayout() {
         name="smart-scale"
         options={stackHeaderOptions({ title: 'Cân thông minh' })}
       />
+      <Stack.Screen
+        name="smart-scale-scan-qr"
+        options={stackHeaderOptions({ title: 'Quét mã QR' })}
+      />
     </Stack>
   );
 }
