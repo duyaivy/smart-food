@@ -1,18 +1,122 @@
 import React from 'react';
-import { Scale } from 'lucide-react-native';
+import { Alert } from 'react-native';
+import { Scale, Wifi, WifiOff, Battery, Radio } from 'lucide-react-native';
 
 import {
   Button,
   FocusAwareStatusBar,
+  Input,
   SafeAreaView,
   ScrollView,
   Text,
   View,
 } from '@/components/ui';
+import {
+  useGetDeviceStatusQuery,
+  useGetMyDevicesQuery,
+  usePairDeviceMutation,
+  useUnpairDeviceMutation,
+} from '@/lib/hooks/queries/iot.query';
+import { useIotStore } from '@/lib/stores/use-iot-store';
 
 const SAFE_AREA_EDGES = ['bottom'] as const;
 
+function formatLastSeenAt(value?: string | null) {
+  if (!value) return 'Chưa có dữ liệu';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Chưa có dữ liệu';
+
+  return date.toLocaleString('vi-VN');
+}
+
+function DeviceStatusBadge({ isOnline }: { isOnline: boolean }) {
+  return (
+    <View
+      className={`rounded-full px-3 py-1 ${
+        isOnline ? 'bg-green-100' : 'bg-neutral-200'
+      }`}
+    >
+      <Text
+        className={`text-sm font-medium ${
+          isOnline ? 'text-green-700' : 'text-neutral-600'
+        }`}
+      >
+        {isOnline ? 'Online' : 'Offline'}
+      </Text>
+    </View>
+  );
+}
+
 export default function SmartScaleScreen(): React.JSX.Element {
+  const device = useIotStore((state) => state.device);
+
+  const [deviceUidInput, setDeviceUidInput] = React.useState('');
+  const [apiKeyInput, setApiKeyInput] = React.useState('');
+
+  useGetMyDevicesQuery();
+
+  const {
+    data: statusData,
+    isFetching: isFetchingStatus,
+    refetch: refetchStatus,
+  } = useGetDeviceStatusQuery(device?.deviceUid);
+
+  const { mutateAsync: pairDevice, isPending: isPairing } =
+    usePairDeviceMutation();
+
+  const { mutateAsync: unpairDevice, isPending: isUnpairing } =
+    useUnpairDeviceMutation();
+
+  const currentStatus = statusData?.data;
+
+  const handlePair = async () => {
+    const deviceUid = deviceUidInput.trim();
+    const apiKey = apiKeyInput.trim();
+
+    if (!deviceUid || !apiKey) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập deviceUid và apiKey.');
+      return;
+    }
+
+    await pairDevice({
+      deviceUid,
+      apiKey,
+    });
+
+    setDeviceUidInput('');
+    setApiKeyInput('');
+
+    await refetchStatus();
+  };
+
+  const handleRefreshStatus = async () => {
+    if (!device?.deviceUid) return;
+    await refetchStatus();
+  };
+
+  const handleUnpair = () => {
+    if (!device?.deviceUid) return;
+
+    Alert.alert(
+      'Ngắt liên kết thiết bị',
+      'Bạn có chắc chắn muốn ngắt liên kết cân thông minh không?',
+      [
+        {
+          text: 'Huỷ',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          style: 'destructive',
+          onPress: async () => {
+            await unpairDevice(device.deviceUid);
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={SAFE_AREA_EDGES}>
       <FocusAwareStatusBar />
@@ -24,34 +128,165 @@ export default function SmartScaleScreen(): React.JSX.Element {
         }}
         keyboardShouldPersistTaps="always"
       >
-        <View className="rounded-3xl border border-neutral-200 bg-neutral-50 px-6 py-10">
-          <View className="items-center">
-            <View className="mb-4 size-20 items-center justify-center rounded-full bg-primary/10">
-              <Scale size={32} color="#f97316" />
+        {!device ? (
+          <View className="rounded-3xl border border-neutral-200 bg-neutral-50 px-6 py-10">
+            <View className="items-center">
+              <View className="mb-4 size-20 items-center justify-center rounded-full bg-primary/10">
+                <Scale size={32} color="#f97316" />
+              </View>
+
+              <Text className="text-center text-2xl font-semibold text-black">
+                Chưa kết nối cân thông minh
+              </Text>
+
+              <Text className="mt-3 text-center text-base leading-6 text-neutral-500">
+                Nhập thông tin thiết bị để liên kết với ứng dụng. Ở bước sau có
+                thể thay bằng quét QR.
+              </Text>
             </View>
 
-            <Text className="text-center text-2xl font-semibold text-black">
-              Chưa kết nối cân thông minh
-            </Text>
+            <View className="mt-6 gap-3">
+              <View>
+                <Text className="mb-1 text-black">Device UID</Text>
+                <Input
+                  value={deviceUidInput}
+                  onChangeText={setDeviceUidInput}
+                  placeholder="Ví dụ: esp32_kitchen_01"
+                  autoCapitalize="none"
+                />
+              </View>
 
-            <Text className="mt-3 text-center text-base leading-6 text-neutral-500">
-              Kết nối thiết bị để xem trạng thái cân và nhận dữ liệu nguyên liệu
-              trực tiếp trên ứng dụng.
-            </Text>
+              <View>
+                <Text className="mb-1 text-black">API Key</Text>
+                <Input
+                  value={apiKeyInput}
+                  onChangeText={setApiKeyInput}
+                  placeholder="Nhập mã xác thực thiết bị"
+                  autoCapitalize="none"
+                />
+              </View>
+            </View>
+
+            <View className="mt-6">
+              <Button
+                label="Kết nối thiết bị"
+                className="bg-primary"
+                loading={isPairing}
+                disabled={isPairing}
+                onPress={handlePair}
+              />
+            </View>
           </View>
+        ) : (
+          <View className="gap-4">
+            <View className="rounded-3xl border border-neutral-200 bg-neutral-50 px-6 py-8">
+              <View className="items-center">
+                <View className="mb-4 size-20 items-center justify-center rounded-full bg-primary/10">
+                  <Scale size={32} color="#f97316" />
+                </View>
 
-          <View className="mt-6">
-            <Button
-              label="Kết nối thiết bị"
-              className="bg-primary"
-              onPress={() => {}}
-            />
+                <Text className="text-center text-2xl font-semibold text-black">
+                  Cân thông minh
+                </Text>
+
+                <Text className="mt-2 text-center text-base text-neutral-500">
+                  {device.deviceUid}
+                </Text>
+
+                <View className="mt-4">
+                  <DeviceStatusBadge
+                    isOnline={currentStatus?.isOnline ?? false}
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View className="rounded-3xl border border-neutral-200 bg-white px-5 py-5">
+              <Text className="text-lg font-semibold text-black">
+                Thông tin thiết bị
+              </Text>
+
+              <View className="mt-4 gap-4">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    {currentStatus?.isOnline ? (
+                      <Wifi size={18} color="#f97316" />
+                    ) : (
+                      <WifiOff size={18} color="#9ca3af" />
+                    )}
+                    <Text className="text-neutral-700">Trạng thái</Text>
+                  </View>
+                  <Text className="font-medium text-black">
+                    {currentStatus?.isOnline ? 'Online' : 'Offline'}
+                  </Text>
+                </View>
+
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <Battery size={18} color="#f97316" />
+                    <Text className="text-neutral-700">Pin</Text>
+                  </View>
+                  <Text className="font-medium text-black">
+                    {currentStatus?.batteryLevel ?? '--'}%
+                  </Text>
+                </View>
+
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <Wifi size={18} color="#f97316" />
+                    <Text className="text-neutral-700">Wi-Fi</Text>
+                  </View>
+                  <Text className="max-w-[55%] text-right font-medium text-black">
+                    {currentStatus?.wifiSsid ?? 'Chưa có dữ liệu'}
+                  </Text>
+                </View>
+
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <Radio size={18} color="#f97316" />
+                    <Text className="text-neutral-700">Tín hiệu</Text>
+                  </View>
+                  <Text className="font-medium text-black">
+                    {currentStatus?.signalStrength ?? '--'} dBm
+                  </Text>
+                </View>
+
+                <View className="flex-row items-start justify-between">
+                  <Text className="text-neutral-700">Cập nhật lần cuối</Text>
+                  <Text className="max-w-[55%] text-right font-medium text-black">
+                    {formatLastSeenAt(currentStatus?.lastSeenAt)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View className="gap-3">
+              <Button
+                label="Làm mới trạng thái"
+                className="bg-primary"
+                loading={isFetchingStatus}
+                disabled={isFetchingStatus}
+                onPress={handleRefreshStatus}
+              />
+
+              <Button
+                label="Ngắt liên kết"
+                variant="outline"
+                className="border-red-300"
+                textClassName="text-red-600 text-lg"
+                loading={isUnpairing}
+                disabled={isUnpairing}
+                onPress={handleUnpair}
+              />
+            </View>
+
+            {!currentStatus && (
+              <Text className="text-center text-sm text-neutral-400">
+                Thiết bị đã ghép nối nhưng chưa có dữ liệu heartbeat gần đây.
+              </Text>
+            )}
           </View>
-
-          <Text className="mt-3 text-center text-sm text-neutral-400">
-            Bước tiếp theo sẽ triển khai pair thủ công và quét QR.
-          </Text>
-        </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
