@@ -26,10 +26,13 @@ export default function ProfileStackLayout() {
         name="privacy/index"
         options={stackHeaderOptions({ title: 'Điều khoản và chính sách' })}
       />
-
       <Stack.Screen
         name="history-cooking"
         options={stackHeaderOptions({ title: 'Lịch sử nấu ăn' })}
+      />
+      <Stack.Screen
+        name="smart-scale"
+        options={stackHeaderOptions({ title: 'Cân thông minh' })}
       />
     </Stack>
   );

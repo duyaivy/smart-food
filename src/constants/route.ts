@@ -32,6 +32,7 @@ export const ROUTE = {
       HISTORY_COOKING: '/(stacks)/profile/history-cooking',
       PRIVACY: '/(stacks)/profile/privacy',
       SETTINGS: '/(stacks)/profile/settings',
+      SMART_SCALE: '/(stacks)/profile/smart-scale',
     },
   },
 } as const;

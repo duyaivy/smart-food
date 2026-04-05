@@ -5,6 +5,7 @@ import {
   Info,
   LockKeyhole,
   LogOut,
+  Scale,
   Settings,
   User2,
 } from 'lucide-react-native';
@@ -20,6 +21,13 @@ export const USER_LIST_ITEM = [
     text: 'Chỉnh sửa thông tin',
     isChevron: true,
     href: ROUTE.STACK.PROFILE.EDIT,
+    color: '#111',
+  },
+  {
+    Icon: Scale,
+    text: 'Cân thông minh',
+    isChevron: true,
+    href: ROUTE.STACK.PROFILE.SMART_SCALE,
     color: '#111',
   },
   {
