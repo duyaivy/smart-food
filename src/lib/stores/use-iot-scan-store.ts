@@ -1,30 +1,21 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import type { IotScanRecord } from '@/models/interfaces/iot';
 import { storage } from '@/lib/common/storage';
 import { createSelectors } from '@/lib/common/utils';
 import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
-
-export type IotScanRecordStatus = 'DONE' | 'FAILED';
-
-export type IotScanRecord = {
-  id: string;
-  deviceUid: string;
-  ingredientName: string | null;
-  calories: number | null;
-  weight: number;
-  status: IotScanRecordStatus;
-  message: string;
-  imageUrl: string;
-  recordedAt: number;
-  source: 'local' | 'sse' | 'sync';
-};
 
 export type IotScanStoreState = {
   hasHydrated: boolean;
   records: IotScanRecord[];
 
-  addRecord: (record: Omit<IotScanRecord, 'id' | 'recordedAt'> & { id?: string; recordedAt?: number }) => void;
+  addRecord: (
+    record: Omit<IotScanRecord, 'id' | 'recordedAt'> & {
+      id?: string;
+      recordedAt?: number;
+    }
+  ) => void;
   setRecords: (records: IotScanRecord[]) => void;
   removeRecordsByDeviceUid: (deviceUid: string) => void;
   clearRecords: () => void;
@@ -62,7 +53,9 @@ const _useIotScanStore = create<IotScanStoreState>()(
 
       removeRecordsByDeviceUid: (deviceUid) => {
         set((state) => ({
-          records: state.records.filter((record) => record.deviceUid !== deviceUid),
+          records: state.records.filter(
+            (record) => record.deviceUid !== deviceUid
+          ),
         }));
       },
 

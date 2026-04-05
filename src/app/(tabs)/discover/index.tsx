@@ -11,6 +11,7 @@ import {
   View,
 } from '@/components/ui';
 import { ROUTE } from '@/constants/route';
+import { useIotSse } from '@/lib/hooks/use-iot-sse';
 import { useGetDeviceStatusQuery } from '@/lib/hooks/queries/iot.query';
 import { useIotScanStore } from '@/lib/stores/use-iot-scan-store';
 import { useIotStore } from '@/lib/stores/use-iot-store';
@@ -123,16 +124,22 @@ function DeviceLiveCard({
 function ScanRecordCard({
   ingredientName,
   calories,
+  protein,
+  carb,
+  fat,
+  confidence,
   weight,
   status,
-  message,
   recordedAt,
 }: {
   ingredientName: string | null;
   calories: number | null;
+  protein: number | null;
+  carb: number | null;
+  fat: number | null;
+  confidence: number | null;
   weight: number;
   status: 'DONE' | 'FAILED';
-  message: string;
   recordedAt: number;
 }) {
   const isDone = status === 'DONE';
@@ -144,7 +151,9 @@ function ScanRecordCard({
           <Text className="text-base font-semibold text-black">
             {ingredientName ?? 'Chưa nhận diện được'}
           </Text>
-          <Text className="mt-1 text-sm text-neutral-500">{message}</Text>
+          <Text className="mt-1 text-sm text-neutral-500">
+            Độ chính xác: {confidence ?? 50}%
+          </Text>
         </View>
 
         <View
@@ -176,6 +185,27 @@ function ScanRecordCard({
         </View>
 
         <View className="flex-row justify-between">
+          <Text className="text-neutral-600">Protein</Text>
+          <Text className="font-medium text-black">
+            {protein ?? 'Chưa có dữ liệu'} g
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between">
+          <Text className="text-neutral-600">Carb</Text>
+          <Text className="font-medium text-black">
+            {carb ?? 'Chưa có dữ liệu'} g
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between">
+          <Text className="text-neutral-600">Fat</Text>
+          <Text className="font-medium text-black">
+            {fat ?? 'Chưa có dữ liệu'} g
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between">
           <Text className="text-neutral-600">Thời gian ghi nhận</Text>
           <Text className="max-w-[55%] text-right font-medium text-black">
             {formatRecordedAt(recordedAt)}
@@ -189,6 +219,8 @@ function ScanRecordCard({
 export default function DiscoverScreen() {
   const device = useIotStore((state) => state.device);
   const records = useIotScanStore((state) => state.records);
+
+  useIotSse(device?.deviceUid);
 
   const { data: statusData } = useGetDeviceStatusQuery(device?.deviceUid);
 
@@ -265,9 +297,12 @@ export default function DiscoverScreen() {
                       key={record.id}
                       ingredientName={record.ingredientName}
                       calories={record.calories}
+                      protein={record.protein}
+                      carb={record.carb}
+                      fat={record.fat}
+                      confidence={record.confidence}
                       weight={record.weight}
                       status={record.status}
-                      message={record.message}
                       recordedAt={record.recordedAt}
                     />
                   ))}

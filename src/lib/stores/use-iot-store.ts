@@ -1,36 +1,26 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import type {
+  IotPairedDevice,
+  StoredIotDeviceStatus,
+} from '@/models/interfaces/iot';
 import { storage } from '@/lib/common/storage';
 import { createSelectors } from '@/lib/common/utils';
 import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
 
-export type IotDeviceStatus = {
-  deviceUid: string;
-  isOnline: boolean;
-  batteryLevel: number | null;
-  wifiSsid: string | null;
-  signalStrength: number | null;
-  lastSeenAt: string | null;
-  fetchedAt: number;
-};
-
-export type IotPairedDevice = {
-  id: number;
-  deviceUid: string;
-  ownerId: number | null;
-  createdAt?: string | null;
-  pairedAt: number;
-};
-
 export type IotStoreState = {
   hasHydrated: boolean;
   device: IotPairedDevice | null;
-  status: IotDeviceStatus | null;
+  status: StoredIotDeviceStatus | null;
   lastSyncedAt: number | null;
 
-  setDevice: (device: Omit<IotPairedDevice, 'pairedAt'> & { pairedAt?: number }) => void;
-  setStatus: (status: Omit<IotDeviceStatus, 'fetchedAt'> & { fetchedAt?: number }) => void;
+  setDevice: (
+    device: Omit<IotPairedDevice, 'pairedAt'> & { pairedAt?: number }
+  ) => void;
+  setStatus: (
+    status: Omit<StoredIotDeviceStatus, 'fetchedAt'> & { fetchedAt?: number }
+  ) => void;
   setLastSyncedAt: (timestamp?: number) => void;
   clearDevice: () => void;
   markHydrated: () => void;
