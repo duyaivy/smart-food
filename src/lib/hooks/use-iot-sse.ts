@@ -4,24 +4,10 @@ import EventSource from 'react-native-sse';
 import { showMessage } from '@/lib/common/show-message';
 import { Env } from '@/lib/env';
 import { useIotScanStore } from '@/lib/stores/use-iot-scan-store';
-
-type IotSseConnectedPayload = {
-  deviceUid: string;
-};
-
-type IotSseScanResultPayload = {
-  deviceUid: string;
-  ingredientName: string | null;
-  calories: number | null;
-  protein?: number | null;
-  carb?: number | null;
-  fat?: number | null;
-  confidence?: number | null;
-  weight: number;
-  status: 'DONE' | 'FAILED';
-  message: string;
-  imageUrl: string;
-};
+import {
+  type IotSseConnectedPayload,
+  type IotSseScanResultPayload,
+} from '@/models/types/iot-sse';
 
 const MOCK_NUTRITION = {
   protein: 12,
@@ -30,19 +16,14 @@ const MOCK_NUTRITION = {
   confidence: 50,
 };
 
-function normalizeBaseUrl(value?: string) {
-  if (!value) return '';
-  return value.endsWith('/v1') ? value.slice(0, -3) : value;
-}
-
 function buildStreamUrl(deviceUid: string) {
-  const baseUrl = normalizeBaseUrl(Env.API_URL);
+  const baseUrl = Env.API_URL;
 
   if (!baseUrl) {
     throw new Error('Thiếu Env.API_URL để mở SSE stream');
   }
 
-  return `${baseUrl}/v1/iot/devices/${encodeURIComponent(deviceUid)}/stream`;
+  return `${baseUrl}/iot/devices/${encodeURIComponent(deviceUid)}/stream`;
 }
 
 export function useIotSse(deviceUid?: string | null) {

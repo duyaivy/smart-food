@@ -31,7 +31,7 @@ export default function ProfileStackLayout() {
         options={stackHeaderOptions({ title: 'Lịch sử nấu ăn' })}
       />
       <Stack.Screen
-        name="smart-scale"
+        name="smart-scale/index"
         options={stackHeaderOptions({ title: 'Cân thông minh' })}
       />
       <Stack.Screen

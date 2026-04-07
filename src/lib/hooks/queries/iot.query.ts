@@ -54,9 +54,9 @@ export const useGetMyDevicesQuery = () => {
   });
 
   useEffect(() => {
-    const latestDevice = getLatestDeviceFromList(query.data?.data);
-
     if (!query.data) return;
+
+    const latestDevice = getLatestDeviceFromList(query.data.data);
 
     if (!latestDevice) {
       clearDevice();
@@ -140,13 +140,24 @@ export const usePairDeviceMutation = () =>
         data: [device],
       });
 
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.iotDevices,
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey as unknown[];
 
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.iotDeviceStatus(device.deviceUid),
-      });
+            if (!Array.isArray(queryKey) || queryKey.length === 0) {
+              return false;
+            }
+
+            const [rootKey, secondKey] = queryKey;
+
+            return (
+              rootKey === queryKeys.iotDevices[0] ||
+              (rootKey === 'iot-device-status' && secondKey === device.deviceUid)
+            );
+          },
+        }),
+      ]);
 
       showMessage({
         message: 'Liên kết thiết bị thành công',
@@ -155,7 +166,10 @@ export const usePairDeviceMutation = () =>
     },
     onError: (error: AxiosError<{ message: string }>) => {
       const message =
-        error instanceof Error ? error.message : 'Liên kết thiết bị thất bại';
+        error.response?.data?.message ??
+        (error instanceof Error
+          ? error.message
+          : 'Liên kết thiết bị thất bại');
 
       showMessage({
         message,
@@ -171,13 +185,24 @@ export const useUnpairDeviceMutation = () =>
       useIotStore.getState().clearDevice();
       useIotScanStore.getState().removeRecordsByDeviceUid(deviceUid);
 
-      queryClient.removeQueries({
-        queryKey: queryKeys.iotDevices,
-      });
+      await Promise.all([
+        queryClient.removeQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey as unknown[];
 
-      queryClient.removeQueries({
-        queryKey: queryKeys.iotDeviceStatus(deviceUid),
-      });
+            if (!Array.isArray(queryKey) || queryKey.length === 0) {
+              return false;
+            }
+
+            const [rootKey, secondKey] = queryKey;
+
+            return (
+              rootKey === queryKeys.iotDevices[0] ||
+              (rootKey === 'iot-device-status' && secondKey === deviceUid)
+            );
+          },
+        }),
+      ]);
 
       showMessage({
         message: 'Ngắt liên kết thiết bị thành công',
@@ -186,7 +211,10 @@ export const useUnpairDeviceMutation = () =>
     },
     onError: (error: AxiosError<{ message: string }>) => {
       const message =
-        error instanceof Error ? error.message : 'Ngắt liên kết thiết bị thất bại';
+        error.response?.data?.message ??
+        (error instanceof Error
+          ? error.message
+          : 'Ngắt liên kết thiết bị thất bại');
 
       showMessage({
         message,
