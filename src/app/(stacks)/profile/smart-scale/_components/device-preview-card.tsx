@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Image, View } from '@/components/ui';
 
-const SMART_SCALE_IMAGE = require('../../../../../../assets/images/smart-scale.png');
+const SMART_SCALE_IMAGE = require('@assets/images/smart-scale.png');
 
 export function DevicePreviewCard() {
   return (

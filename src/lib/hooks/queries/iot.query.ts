@@ -15,11 +15,6 @@ import { useIotScanStore } from '@/lib/stores/use-iot-scan-store';
 import { useIotStore } from '@/lib/stores/use-iot-store';
 import { type SuccessResponse } from '@/models/interfaces/common';
 
-const getLatestDeviceFromList = (devices?: IotDevice[]) => {
-  if (!devices?.length) return null;
-  return devices[0] ?? null;
-};
-
 export const useGetMyDevicesQuery = () => {
   const device = useIotStore((state) => state.device);
   const lastSyncedAt = useIotStore((state) => state.lastSyncedAt);
@@ -40,12 +35,20 @@ export const useGetMyDevicesQuery = () => {
       }
     : undefined;
 
-  const query = useQuery<SuccessResponse<IotDevice[]>>({
+  const query = useQuery<
+    SuccessResponse<IotDevice[]>,
+    AxiosError,
+    SuccessResponse<IotDevice | null>
+  >({
     queryKey: queryKeys.iotDevices,
     queryFn: async () => {
       const response = await iotApi.getMyDevices();
       return response.data;
     },
+    select: (response) => ({
+      ...response,
+      data: response.data[0] ?? null,
+    }),
     initialData,
     initialDataUpdatedAt: lastSyncedAt ?? undefined,
     staleTime: 60 * 1000,
@@ -56,7 +59,7 @@ export const useGetMyDevicesQuery = () => {
   useEffect(() => {
     if (!query.data) return;
 
-    const latestDevice = getLatestDeviceFromList(query.data.data);
+    const latestDevice = query.data.data;
 
     if (!latestDevice) {
       clearDevice();
@@ -94,7 +97,11 @@ export const useGetDeviceStatusQuery = (deviceUid?: string | null) => {
         }
       : undefined;
 
-  const query = useQuery<SuccessResponse<IotDeviceStatus>>({
+  const query = useQuery<
+    SuccessResponse<IotDeviceStatus>,
+    AxiosError,
+    SuccessResponse<IotDeviceStatus>
+  >({
     queryKey: deviceUid
       ? queryKeys.iotDeviceStatus(deviceUid)
       : ['iot-device-status', 'unknown'],
@@ -106,6 +113,17 @@ export const useGetDeviceStatusQuery = (deviceUid?: string | null) => {
       const response = await iotApi.getDeviceStatus(deviceUid);
       return response.data;
     },
+    select: (response) => ({
+      ...response,
+      data: {
+        deviceUid: response.data.deviceUid,
+        isOnline: response.data.isOnline,
+        batteryLevel: response.data.batteryLevel,
+        wifiSsid: response.data.wifiSsid,
+        signalStrength: response.data.signalStrength,
+        lastSeenAt: response.data.lastSeenAt,
+      },
+    }),
     enabled: !!deviceUid,
     initialData,
     initialDataUpdatedAt: lastSyncedAt ?? undefined,
@@ -135,10 +153,13 @@ export const usePairDeviceMutation = () =>
         createdAt: device.createdAt ?? null,
       });
 
-      queryClient.setQueryData(queryKeys.iotDevices, {
-        message: response.data.message,
-        data: [device],
-      });
+      queryClient.setQueryData<SuccessResponse<IotDevice[]>>(
+        queryKeys.iotDevices,
+        {
+          message: response.data.message,
+          data: [device],
+        },
+      );
 
       await Promise.all([
         queryClient.invalidateQueries({
@@ -149,11 +170,23 @@ export const usePairDeviceMutation = () =>
               return false;
             }
 
+            const [rootKey] = queryKey;
+            return rootKey === queryKeys.iotDevices[0];
+          },
+        }),
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey as unknown[];
+
+            if (!Array.isArray(queryKey) || queryKey.length < 2) {
+              return false;
+            }
+
             const [rootKey, secondKey] = queryKey;
 
             return (
-              rootKey === queryKeys.iotDevices[0] ||
-              (rootKey === 'iot-device-status' && secondKey === device.deviceUid)
+              rootKey === 'iot-device-status' &&
+              secondKey === device.deviceUid
             );
           },
         }),
@@ -194,12 +227,21 @@ export const useUnpairDeviceMutation = () =>
               return false;
             }
 
+            const [rootKey] = queryKey;
+            return rootKey === queryKeys.iotDevices[0];
+          },
+        }),
+        queryClient.removeQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey as unknown[];
+
+            if (!Array.isArray(queryKey) || queryKey.length < 2) {
+              return false;
+            }
+
             const [rootKey, secondKey] = queryKey;
 
-            return (
-              rootKey === queryKeys.iotDevices[0] ||
-              (rootKey === 'iot-device-status' && secondKey === deviceUid)
-            );
+            return rootKey === 'iot-device-status' && secondKey === deviceUid;
           },
         }),
       ]);
