@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { type AxiosError } from 'axios';
-import { useEffect } from 'react';
 
 import { queryClient } from '@/api';
 import {
@@ -18,8 +17,6 @@ import { type SuccessResponse } from '@/models/interfaces/common';
 export const useGetMyDevicesQuery = () => {
   const device = useIotStore((state) => state.device);
   const lastSyncedAt = useIotStore((state) => state.lastSyncedAt);
-  const setDevice = useIotStore((state) => state.setDevice);
-  const clearDevice = useIotStore((state) => state.clearDevice);
 
   const initialData: SuccessResponse<IotDevice[]> | undefined = device
     ? {
@@ -35,7 +32,7 @@ export const useGetMyDevicesQuery = () => {
       }
     : undefined;
 
-  const query = useQuery<
+  return useQuery<
     SuccessResponse<IotDevice[]>,
     AxiosError,
     SuccessResponse<IotDevice | null>
@@ -43,7 +40,23 @@ export const useGetMyDevicesQuery = () => {
     queryKey: queryKeys.iotDevices,
     queryFn: async () => {
       const response = await iotApi.getMyDevices();
-      return response.data;
+      const data = response.data;
+      const latestDevice = data.data[0] ?? null;
+
+      const { setDevice, clearDevice } = useIotStore.getState();
+
+      if (!latestDevice) {
+        clearDevice();
+      } else {
+        setDevice({
+          id: latestDevice.id,
+          deviceUid: latestDevice.deviceUid,
+          ownerId: latestDevice.ownerId,
+          createdAt: latestDevice.createdAt ?? null,
+        });
+      }
+
+      return data;
     },
     select: (response) => ({
       ...response,
@@ -55,32 +68,11 @@ export const useGetMyDevicesQuery = () => {
     refetchOnWindowFocus: false,
     retry: 3,
   });
-
-  useEffect(() => {
-    if (!query.data) return;
-
-    const latestDevice = query.data.data;
-
-    if (!latestDevice) {
-      clearDevice();
-      return;
-    }
-
-    setDevice({
-      id: latestDevice.id,
-      deviceUid: latestDevice.deviceUid,
-      ownerId: latestDevice.ownerId,
-      createdAt: latestDevice.createdAt ?? null,
-    });
-  }, [query.data, clearDevice, setDevice]);
-
-  return query;
 };
 
 export const useGetDeviceStatusQuery = (deviceUid?: string | null) => {
   const status = useIotStore((state) => state.status);
   const lastSyncedAt = useIotStore((state) => state.lastSyncedAt);
-  const setStatus = useIotStore((state) => state.setStatus);
 
   const initialData: SuccessResponse<IotDeviceStatus> | undefined =
     deviceUid && status?.deviceUid === deviceUid
@@ -97,7 +89,7 @@ export const useGetDeviceStatusQuery = (deviceUid?: string | null) => {
         }
       : undefined;
 
-  const query = useQuery<
+  return useQuery<
     SuccessResponse<IotDeviceStatus>,
     AxiosError,
     SuccessResponse<IotDeviceStatus>
@@ -111,7 +103,18 @@ export const useGetDeviceStatusQuery = (deviceUid?: string | null) => {
       }
 
       const response = await iotApi.getDeviceStatus(deviceUid);
-      return response.data;
+      const data = response.data;
+
+      useIotStore.getState().setStatus({
+        deviceUid: data.data.deviceUid,
+        isOnline: data.data.isOnline,
+        batteryLevel: data.data.batteryLevel,
+        wifiSsid: data.data.wifiSsid,
+        signalStrength: data.data.signalStrength,
+        lastSeenAt: data.data.lastSeenAt,
+      });
+
+      return data;
     },
     select: (response) => ({
       ...response,
@@ -131,13 +134,6 @@ export const useGetDeviceStatusQuery = (deviceUid?: string | null) => {
     refetchOnWindowFocus: false,
     retry: 3,
   });
-
-  useEffect(() => {
-    if (!query.data?.data) return;
-    setStatus(query.data.data);
-  }, [query.data, setStatus]);
-
-  return query;
 };
 
 export const usePairDeviceMutation = () =>
