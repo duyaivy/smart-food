@@ -45,14 +45,14 @@ export function VerifyEmailForm() {
 
   return (
     <View className="gap-6">
-      <Card className="border-zinc-800 bg-zinc-900 pb-4 shadow-none">
+      <Card className="border-zinc-200 bg-white pb-4 shadow-none">
         <CardHeader>
-          <CardTitle className="text-center text-xl text-white sm:text-left">
+          <CardTitle className="text-center text-xl text-zinc-900 sm:text-left">
             Xác thực email
           </CardTitle>
-          <CardDescription className="text-center text-zinc-400 sm:text-left">
+          <CardDescription className="text-center text-zinc-500 sm:text-left">
             Chúng tôi đã gửi liên kết xác thực đến{' '}
-            <Text className="font-medium text-white">
+            <Text className="font-medium text-zinc-900">
               {user?.email ?? 'địa chỉ email của bạn'}
             </Text>
             . Vui lòng mở email và nhấn vào liên kết xác thực.
@@ -64,11 +64,11 @@ export function VerifyEmailForm() {
             <View className="gap-3">
               <Button
                 variant="outline"
-                className="w-full border-zinc-700 bg-zinc-800"
+                className="w-full border-zinc-300 bg-white"
                 disabled={isResendDisabled}
                 onPress={onResendEmail}
               >
-                <Text className="text-white">
+                <Text className="text-zinc-900">
                   {sendVerificationEmailMutation.isPending
                     ? 'Đang gửi...'
                     : `Gửi lại email xác thực${countdown > 0 ? ` (${countdown})` : ''}`}
@@ -91,12 +91,12 @@ export function VerifyEmailForm() {
             </View>
 
             <View className="gap-3">
-              <Button className="w-full bg-white" onPress={onContinue}>
-                <Text className="font-medium text-black">Tiếp tục</Text>
+              <Button className="w-full bg-orange-500" onPress={onContinue}>
+                <Text className="font-medium text-white">Tiếp tục</Text>
               </Button>
 
               <Button variant="link" className="mx-auto" onPress={onCancel}>
-                <Text className="text-blue-400">Quay lại đăng nhập</Text>
+                <Text className="text-orange-500">Quay lại đăng nhập</Text>
               </Button>
             </View>
           </View>
