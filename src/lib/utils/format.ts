@@ -10,8 +10,17 @@ export function toValidDate(value: unknown): Date | null {
   return null;
 }
 
-export const toDishId = (value: number | string | undefined): number | null => {
+export const toIntegerId = (
+  value: number | string | undefined
+): number | null => {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0) return null;
   return parsed;
 };
+
+export const normalizeText = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
