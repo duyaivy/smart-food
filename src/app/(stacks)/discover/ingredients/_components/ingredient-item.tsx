@@ -1,51 +1,16 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import {
-  Apple,
-  Bean,
-  Beef,
-  Egg,
-  Fish,
-  Flame,
-  Heart,
-  Leaf,
-  Shell,
-  Wheat,
-} from 'lucide-react-native';
+import { Flame, Heart } from 'lucide-react-native';
 import React, { memo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Image, Text } from '@/components/ui';
 import { MacroBadge } from '@/components/ui/macro-badge';
 import { Toggle, ToggleIcon } from '@/components/ui/toggle';
-import { ICON_SIZE_MEDIUM } from '@/constants/common';
+import { getCategoryConfig, ICON_SIZE_MEDIUM } from '@/constants/common';
 import { ROUTE } from '@/constants/route';
 import { calcKcal } from '@/lib/utils/caculator';
 import { type IIngredient } from '@/models/interfaces/ingredient';
-
-const CATEGORY_CONFIG: Record<
-  number,
-  {
-    label: string;
-    Icon: React.FC<{ size: number; className?: string }>;
-    color: string;
-  }
-> = {
-  1: { label: 'Rau củ', Icon: Leaf, color: '#22c55e' },
-  2: { label: 'Thịt tươi', Icon: Beef, color: '#ef4444' },
-  3: { label: 'Hải sản', Icon: Fish, color: '#3b82f6' },
-  4: { label: 'Trứng & sữa', Icon: Egg, color: '#eab308' },
-  5: { label: 'Đậu & ngũ cốc', Icon: Bean, color: '#f97316' },
-  6: { label: 'Gia vị', Icon: Flame, color: '#8b5cf6' },
-  7: { label: 'Tinh bột', Icon: Wheat, color: '#fec76f' },
-  8: { label: 'Trái cây', Icon: Apple, color: '#ef4444' },
-};
-
-const DEFAULT_CATEGORY = { label: 'Khác', Icon: Shell, color: '#6b7280' };
-
-export const getCategoryConfig = (categoryId?: number) =>
-  categoryId != null
-    ? (CATEGORY_CONFIG[categoryId] ?? DEFAULT_CATEGORY)
-    : DEFAULT_CATEGORY;
 
 type Props = {
   ingredient: IIngredient;
@@ -53,7 +18,7 @@ type Props = {
 
 const IngredientItem = ({ ingredient }: Props) => {
   const [isFavorite, setIsFavorite] = useState(false);
-  const { color, Icon } = getCategoryConfig(ingredient.categoryId);
+  const { color, iconName } = getCategoryConfig(ingredient.categoryId);
 
   const handlePress = () => {
     router.push({
@@ -110,7 +75,12 @@ const IngredientItem = ({ ingredient }: Props) => {
             {ingredient.name}
           </Text>
           <View className=" flex-row items-center gap-0.5 rounded-full px-1.5 py-0.5">
-            <Icon size={ICON_SIZE_MEDIUM} fill={color} />
+            <MaterialIcons
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              name={iconName as any}
+              size={ICON_SIZE_MEDIUM}
+              color={color}
+            />
           </View>
         </View>
 

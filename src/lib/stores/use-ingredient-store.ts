@@ -5,7 +5,10 @@ import { storage } from '@/lib/common/storage';
 import { createSelectors } from '@/lib/common/utils';
 import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
 import { toValidDate } from '@/lib/utils/format';
-import { type IIngredient } from '@/models/interfaces/ingredient';
+import {
+  type ICategory,
+  type IIngredient,
+} from '@/models/interfaces/ingredient';
 
 type IngredientStoreStatus = 'synced' | 'stale' | 'syncing';
 export const STALE_THRESHOLD_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
@@ -16,7 +19,9 @@ export type IngredientState = {
   lastSyncAt: Date | null;
   status: IngredientStoreStatus;
   ingredientDetailsById: Record<number, IIngredient>;
+  categories: ICategory[];
 
+  setCategories: (list: ICategory[]) => void;
   setIngredientList: (list: IIngredient[]) => void;
   updateIngredientList: (IIngredient: IIngredient[]) => void;
   setStatus: (status: IngredientStoreStatus) => void;
@@ -34,6 +39,7 @@ const _useIngredient = create<IngredientState>()(
       lastSyncAt: null,
       status: 'stale',
       ingredientDetailsById: {},
+      categories: [],
       setIngredientList: (ingredientList) => {
         const ingredientDetailsById = Object.fromEntries(
           ingredientList.map((i) => [i.id, i])
@@ -69,6 +75,9 @@ const _useIngredient = create<IngredientState>()(
           };
         });
       },
+      setCategories: (categories) => {
+        set({ categories });
+      },
       setStatus: (status) => {
         set({ status });
       },
@@ -96,6 +105,7 @@ const _useIngredient = create<IngredientState>()(
         ingredientList: state.ingredientList,
         lastSyncAt: state.lastSyncAt,
         status: state.status,
+        categories: state.categories,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {

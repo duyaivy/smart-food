@@ -33,3 +33,31 @@ export const fallbackIngredients = [
   { id: 3, name: 'Tỏi', quantity: '3 tép', isAvailable: false },
   { id: 4, name: 'Bơ lạt', quantity: '20g', isAvailable: false },
 ];
+
+type CategoryConfig = {
+  label: string;
+  iconName: string;
+  color: string;
+};
+
+const CATEGORY_CONFIG: Record<number, CategoryConfig> = {
+  1: { label: 'Rau củ', iconName: 'eco', color: '#22c55e' },
+  2: { label: 'Thịt tươi', iconName: 'set-meal', color: '#ef4444' },
+  3: { label: 'Hải sản', iconName: 'set-meal', color: '#3b82f6' },
+  4: { label: 'Trứng & sữa', iconName: 'egg', color: '#eab308' },
+  5: { label: 'Đậu & ngũ cốc', iconName: 'grain', color: '#f97316' },
+  6: { label: 'Gia vị', iconName: 'nature', color: '#8b5cf6' },
+  7: { label: 'Tinh bột', iconName: 'spa', color: '#fec76f' },
+  8: { label: 'Trái cây', iconName: 'apple', color: '#ef4444' },
+};
+
+const DEFAULT_CATEGORY = {
+  label: 'Khác',
+  iconName: 'nature',
+  color: '#6b7280',
+};
+
+export const getCategoryConfig = (categoryId?: number) =>
+  categoryId != null
+    ? (CATEGORY_CONFIG[categoryId] ?? DEFAULT_CATEGORY)
+    : DEFAULT_CATEGORY;

@@ -13,9 +13,7 @@ const CATEGORY_URL = '/categories';
 
 export const categoryApi = {
   getCategories: (queryString: string) =>
-    http<SuccessResponse<PaginationResponse<ICategory>>>(
-      `${CATEGORY_URL}?${queryString}`
-    ),
+    http<SuccessResponse<ICategory[]>>(`${CATEGORY_URL}?${queryString}`),
   getCategoryDetail: (id: string) =>
     http<SuccessResponse<ICategoryDetail>>(`${CATEGORY_URL}/${id}`),
 };

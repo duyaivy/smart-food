@@ -1,15 +1,22 @@
 import { Search, SlidersHorizontal } from 'lucide-react-native';
 import * as React from 'react';
 import { TextInput } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 import { FocusAwareStatusBar, Pressable, View } from '@/components/ui';
 import { Icon } from '@/components/ui/icon';
+import { type ICategory } from '@/models/interfaces/ingredient';
+
+import CategoryItem from './_category-item';
 
 type Props = {
   searchQuery: string;
   onChangeSearchQuery: (value: string) => void;
   onPressFilter: () => void;
   isFilterActive?: boolean;
+  categories: ICategory[];
+  setCategoryFilter: (category: number | null) => void;
+  selectCategoryId?: number | null;
 };
 
 export function IngredientSearchHeader({
@@ -17,6 +24,9 @@ export function IngredientSearchHeader({
   onChangeSearchQuery,
   onPressFilter,
   isFilterActive = false,
+  categories,
+  setCategoryFilter,
+  selectCategoryId,
 }: Props) {
   return (
     <>
@@ -55,6 +65,22 @@ export function IngredientSearchHeader({
             />
           </Pressable>
         </View>
+        {isFilterActive && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="mt-3 flex-row items-center gap-2 pr-4"
+          >
+            {categories.map((category) => (
+              <CategoryItem
+                isSelected={category.id === selectCategoryId}
+                key={category.id}
+                category={category}
+                onPress={() => setCategoryFilter(category.id)}
+              />
+            ))}
+          </ScrollView>
+        )}
       </View>
     </>
   );

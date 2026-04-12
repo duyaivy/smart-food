@@ -2,15 +2,17 @@ import { useCallback, useState } from 'react';
 
 import IngredientItem from '@/app/(stacks)/discover/ingredients/_components/ingredient-item';
 import { List, View } from '@/components/ui';
+import { useCategoryQuery } from '@/lib/hooks/queries/category.query';
 import { useIngredient } from '@/lib/hooks/use-ingredient';
 import { type IIngredient } from '@/models/interfaces/ingredient';
 
 import { IngredientSearchHeader } from './_components/ingredient-search-header';
 
 export default function IngredientList() {
-  const { ingredients, filters, setSearch } = useIngredient();
+  const { ingredients, filters, setSearch, setCategoryFilter } =
+    useIngredient();
   const [isFilterVisible, setIsFilterVisible] = useState(false);
-
+  const { data: categoryData } = useCategoryQuery();
   const onPressFilter = useCallback(() => {
     setIsFilterVisible((prev) => !prev);
   }, []);
@@ -25,7 +27,8 @@ export default function IngredientList() {
   const handleRefresh = useCallback(() => {
     setSearch('');
     setIsFilterVisible(false);
-  }, [setSearch]);
+    setCategoryFilter(null);
+  }, [setSearch, setCategoryFilter]);
 
   return (
     <View className="flex-1 bg-background">
@@ -34,6 +37,9 @@ export default function IngredientList() {
         onChangeSearchQuery={setSearch}
         onPressFilter={onPressFilter}
         isFilterActive={isFilterVisible}
+        categories={categoryData?.data.data || []}
+        setCategoryFilter={setCategoryFilter}
+        selectCategoryId={filters.categoryId}
       />
 
       <List
