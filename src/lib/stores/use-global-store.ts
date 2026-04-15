@@ -7,7 +7,9 @@ import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
 
 export type GlobalState = {
   pushToken: string | null;
+  hasRegisteredPushToken: boolean;
   setPushToken: (token: string | null) => void;
+  setHasRegisteredPushToken: (hasRegistered: boolean) => void;
 
   reset: () => void;
 };
@@ -16,6 +18,9 @@ const _useGlobal = create<GlobalState>()(
   persist(
     (set) => ({
       pushToken: null,
+      hasRegisteredPushToken: false,
+      setHasRegisteredPushToken: (hasRegistered) =>
+        set({ hasRegisteredPushToken: hasRegistered }),
       setPushToken: (token) => set({ pushToken: token }),
       reset: () => set({ pushToken: null }),
     }),

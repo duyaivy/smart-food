@@ -8,6 +8,7 @@ import { Alert } from 'react-native';
 
 import { authApi } from '@/api/auth.api';
 import { ROUTE } from '@/constants/route';
+import { useAuth } from '@/lib/auth';
 import type {
   IAuthPayload,
   IAuthTokens,
@@ -16,9 +17,7 @@ import type {
   IResetPasswordInput,
   ISignInInput,
   ISignUpInput,
-  IUser,
 } from '@/models/interfaces/auth';
-import { useAuth } from '@/lib/auth';
 
 export const authQueryKeys = {
   all: ['auth'] as const,
@@ -66,7 +65,7 @@ export function useSignUpMutation(
         refresh: result.tokens.refresh.token,
       });
 
-      useAuth.getState().setUserInfor(result.user as IUser);
+      useAuth.getState().setUserInfor(result.user);
     },
     onError: (error) => {
       const message =

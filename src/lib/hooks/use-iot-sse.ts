@@ -27,9 +27,9 @@ function buildStreamUrl(deviceUid: string) {
 }
 
 export function useIotSse(deviceUid?: string | null) {
-  const eventSourceRef = useRef<EventSource<'connected' | 'scan-result'> | null>(
-    null
-  );
+  const eventSourceRef = useRef<EventSource<
+    'connected' | 'scan-result'
+  > | null>(null);
 
   useEffect(() => {
     if (!deviceUid) {

@@ -41,6 +41,20 @@ export default defineConfig([
       unicorn: eslintPluginUnicorn,
       'unused-imports': unusedImports,
     },
+    settings: {
+      'import/parsers': {
+        '@typescript-eslint/parser': ['.ts', '.tsx'],
+      },
+      'import/resolver': {
+        typescript: {
+          project: './tsconfig.json',
+          alwaysTryTypes: true,
+        },
+        node: {
+          extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        },
+      },
+    },
     rules: {
       'max-params': ['error', 3],
       'tailwindcss/classnames-order': [
@@ -64,16 +78,16 @@ export default defineConfig([
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
 
-'unused-imports/no-unused-vars': [
-  'error',
-  {
-    args: 'after-used',
-    argsIgnorePattern: '^_',
-    vars: 'all',
-    varsIgnorePattern: '^_',
-    caughtErrorsIgnorePattern: '^_',
-  },
-],
+      'unused-imports/no-unused-vars': [
+        'error',
+        {
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       'import/prefer-default-export': 'off',
       'import/no-cycle': ['error', { maxDepth: '∞' }],
       'prettier/prettier': ['error', { ignores: ['expo-env.d.ts'] }],

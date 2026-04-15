@@ -1,3 +1,5 @@
+import { type IUser } from './user';
+
 export interface ISuccessResponse<T> {
   code: number;
   message: string;
@@ -12,20 +14,6 @@ export interface IAuthTokenItem {
 export interface IAuthTokens {
   access: IAuthTokenItem;
   refresh: IAuthTokenItem;
-}
-
-export interface IUser {
-  id: number;
-  email: string;
-  name: string;
-  avatar?: string | null;
-  role?: string;
-  isEmailVerified?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  height?: number | null;
-  weight?: number | null;
-  age?: number | null;
 }
 
 export interface IAuthPayload {

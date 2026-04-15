@@ -1,3 +1,5 @@
+import http from '@api/common/axios.config';
+
 import type {
   IAuthPayload,
   IAuthTokens,
@@ -9,8 +11,6 @@ import type {
   ISignUpInput,
   ISuccessResponse,
 } from '@/models/interfaces/auth';
-
-import http from './common/axios.config';
 
 const LOGIN_URL = '/auth/login';
 const REGISTER_URL = '/auth/register';

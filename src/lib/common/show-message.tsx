@@ -22,7 +22,7 @@ type ShowAppMessageParams = {
   duration?: number;
 };
 
-const MESSAGE_CONFIG = {
+const MESSAGE_CONFIG = Object.freeze({
   success: {
     backgroundColor: colors.success[50],
     titleColor: colors.success[800],
@@ -58,7 +58,7 @@ const MESSAGE_CONFIG = {
     iconColor: colors.neutral[700],
     iconName: 'notifications' as const,
   },
-} as const;
+} as const);
 
 export const showMessage = ({
   message,

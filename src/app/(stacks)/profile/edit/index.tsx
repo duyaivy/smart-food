@@ -61,7 +61,9 @@ export default function EditProfileScreen(): React.JSX.Element {
   const heightValues = useMemo(() => buildRange(80, 200), []);
   const weightValues = useMemo(() => buildRange(20, 150), []);
 
-  const [avatar, setAvatar] = useState<string | undefined>(userInfor?.avatar);
+  const [avatar, setAvatar] = useState<string | undefined>(
+    userInfor?.avatar || undefined
+  );
   const {
     control,
     handleSubmit,

@@ -1,22 +1,27 @@
+import http from '@api/common/axios.config';
+
+import { generatePath } from '@/lib/common/utils';
 import {
+  type PaginationParams,
   type PaginationResponse,
   type SuccessResponse,
 } from '@/models/interfaces/common';
 import { type IDish, type MiniDish } from '@/models/interfaces/dish';
 
-import http from './common/axios.config';
-
+const GET_DISH_DETAIL_URL = '/dishes/:id';
 const DISH_URL = '/dishes';
+const SYNC_DISH_URL = '/dishes/sync';
 
 export const dishApi = {
-  getDishes: (queryString: string) =>
+  getDishes: ({ page, limit }: PaginationParams) =>
     http<SuccessResponse<PaginationResponse<MiniDish>>>(
-      `${DISH_URL}?${queryString}`
+      generatePath(DISH_URL, {}, { page, limit })
     ),
   getDishesSync: (lastSyncAt?: Date) => {
-    const query = lastSyncAt ? `?lastSyncAt=${lastSyncAt.toISOString()}` : '';
-    return http<SuccessResponse<MiniDish[]>>(`${DISH_URL}/sync${query}`);
+    return http<SuccessResponse<MiniDish[]>>(
+      generatePath(SYNC_DISH_URL, {}, { lastSyncAt: lastSyncAt?.toISOString() })
+    );
   },
   getDishDetail: (id: string) =>
-    http<SuccessResponse<IDish>>(`${DISH_URL}/${id}`),
+    http<SuccessResponse<IDish>>(generatePath(GET_DISH_DETAIL_URL, { id })),
 };

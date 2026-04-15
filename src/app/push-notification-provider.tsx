@@ -10,7 +10,14 @@ import { userApi } from '@/api/user.api';
 import { ROUTE } from '@/constants/route';
 import { useDishStore } from '@/lib/stores/use-dish-store';
 import { useGlobalStore } from '@/lib/stores/use-global-store';
-import { toDishId } from '@/lib/utils/format';
+import { useIngredientStore } from '@/lib/stores/use-ingredient-store';
+import { toIntegerId } from '@/lib/utils/format';
+import {
+  NOTIFICATION_ACTION,
+  NOTIFICATION_SCREEN,
+  type NotificationAction,
+  type NotificationPayload,
+} from '@/models/types/notification';
 
 Notifications.setNotificationHandler({
   handleNotification: async (notification) => {
@@ -42,23 +49,43 @@ const setupAndroidChannel = async () => {
   });
 };
 
-type NotificationPayload = {
-  screen?: string;
-  dishId?: number | string;
-  action?: 'UPDATE' | 'DELETE' | 'CREATE' | string;
+const isSupportedNotificationAction = (
+  action: NotificationPayload['action']
+): action is NotificationAction => {
+  return (
+    action === NOTIFICATION_ACTION.CREATE ||
+    action === NOTIFICATION_ACTION.UPDATE ||
+    action === NOTIFICATION_ACTION.DELETE
+  );
 };
 
-const syncDishByNotificationAction = async (payload: NotificationPayload) => {
-  if (payload.screen !== 'DishDetail') return;
-  if (
-    payload.action !== 'UPDATE' &&
-    payload.action !== 'DELETE' &&
-    payload.action !== 'CREATE'
-  ) {
+const syncIngredientByNotificationAction = async (
+  payload: NotificationPayload
+) => {
+  if (payload.screen !== NOTIFICATION_SCREEN.INGREDIENT_DETAIL) return;
+  if (!isSupportedNotificationAction(payload.action)) return;
+
+  const ingredientId = toIntegerId(payload.ingredientId);
+  if (!ingredientId) return;
+
+  const { setStatus } = useIngredientStore.getState();
+  setStatus('stale');
+
+  if (payload.action === NOTIFICATION_ACTION.DELETE) {
     return;
   }
 
-  const dishId = toDishId(payload.dishId);
+  try {
+  } catch (error) {
+    console.error('Sync nguyên liệu từ notification thất bại:', error);
+  }
+};
+
+const syncDishByNotificationAction = async (payload: NotificationPayload) => {
+  if (payload.screen !== NOTIFICATION_SCREEN.DISH_DETAIL) return;
+  if (!isSupportedNotificationAction(payload.action)) return;
+
+  const dishId = toIntegerId(payload.dishId);
   if (!dishId) return;
 
   const { removeDishDetail, setDishDetail, setStatus } =
@@ -66,11 +93,11 @@ const syncDishByNotificationAction = async (payload: NotificationPayload) => {
 
   setStatus('stale');
 
-  if (payload.action === 'CREATE') {
+  if (payload.action === NOTIFICATION_ACTION.CREATE) {
     return;
   }
 
-  if (payload.action === 'DELETE') {
+  if (payload.action === NOTIFICATION_ACTION.DELETE) {
     removeDishDetail(dishId);
     return;
   }
@@ -85,16 +112,27 @@ const syncDishByNotificationAction = async (payload: NotificationPayload) => {
 };
 
 const navigateByNotificationPayload = (payload: NotificationPayload) => {
-  if (payload.action && payload.action !== 'CREATE') return;
-  if (payload.screen !== 'DishDetail') return;
+  if (payload.action && payload.action !== NOTIFICATION_ACTION.CREATE) return;
+  if (payload.screen === NOTIFICATION_SCREEN.DISH_DETAIL) {
+    const dishId = toIntegerId(payload.dishId);
+    if (!dishId) return;
 
-  const dishId = toDishId(payload.dishId);
-  if (!dishId) return;
+    router.push({
+      pathname: ROUTE.STACK.DISCOVER.DISH_DETAIL,
+      params: { id: String(dishId) },
+    });
+    return;
+  }
 
-  router.push({
-    pathname: ROUTE.STACK.DISCOVER.DISH_DETAIL,
-    params: { id: String(dishId) },
-  });
+  if (payload.screen === NOTIFICATION_SCREEN.INGREDIENT_DETAIL) {
+    const ingredientId = toIntegerId(payload.ingredientId);
+    if (!ingredientId) return;
+
+    router.push({
+      pathname: ROUTE.STACK.DISCOVER.INGREDIENT_DETAIL,
+      params: { id: String(ingredientId) },
+    });
+  }
 };
 
 const registerForPushNotificationsAsync = async (): Promise<string | null> => {
@@ -137,19 +175,35 @@ const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
   const handleToken = useCallback(async () => {
     const token = await registerForPushNotificationsAsync();
     if (!token) return;
-    const { setPushToken, pushToken } = useGlobalStore.getState();
+    const {
+      setPushToken,
+      pushToken,
+      setHasRegisteredPushToken,
+      hasRegisteredPushToken,
+    } = useGlobalStore.getState();
+
     console.log('Push Token:', token);
 
-    if (pushToken === token) {
-      console.log('Token đã được lưu trữ, không gửi lại server');
+    if (pushToken === token && hasRegisteredPushToken) {
+      console.log(
+        'Token đã được lưu trữ và đã được đăng ký, không gửi lại server'
+      );
       return;
     }
 
-    setPushToken(token);
-    await userApi.pushToken({
-      token,
-      deviceName: Device.deviceName || 'Unknown Device',
-    });
+    userApi
+      .pushToken({
+        token,
+        deviceName: Device.deviceName || 'Unknown Device',
+      })
+      .then(() => {
+        console.log('Đã gửi push token lên server');
+        setPushToken(token);
+        setHasRegisteredPushToken(true);
+      })
+      .catch((error) => {
+        console.error('Lỗi khi gửi push token lên server:', error);
+      });
   }, []);
 
   const handleNotificationReceived = useCallback(
@@ -157,6 +211,7 @@ const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
       const data = notification.request.content.data as NotificationPayload;
       console.log('Notification nhận được:', data);
       void syncDishByNotificationAction(data);
+      void syncIngredientByNotificationAction(data);
     },
     []
   );
@@ -167,6 +222,7 @@ const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
         .data as NotificationPayload;
       console.log('User tap notification:', data);
       void syncDishByNotificationAction(data);
+      void syncIngredientByNotificationAction(data);
       navigateByNotificationPayload(data);
     },
     []
