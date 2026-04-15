@@ -9,7 +9,7 @@ export const TAB_ACTIVE_COLOR = '#FF5722';
 export const DIFFICULTY_MAP: Record<
   Difficulty,
   { label: string; textClassName: string; iconClassName: string }
-> = {
+> = Object.freeze({
   [Difficulty.EASY]: {
     label: 'Dễ',
     textClassName: 'text-secondary-700',
@@ -25,7 +25,7 @@ export const DIFFICULTY_MAP: Record<
     textClassName: 'text-primary-700',
     iconClassName: 'text-primary-700',
   },
-};
+});
 
 export const fallbackIngredients = [
   { id: 1, name: 'Ức gà', quantity: '300g', isAvailable: true },
@@ -40,7 +40,7 @@ type CategoryConfig = {
   color: string;
 };
 
-const CATEGORY_CONFIG: Record<number, CategoryConfig> = {
+const CATEGORY_CONFIG: Record<number, CategoryConfig> = Object.freeze({
   1: { label: 'Rau củ', iconName: 'eco', color: '#22c55e' },
   2: { label: 'Thịt tươi', iconName: 'set-meal', color: '#ef4444' },
   3: { label: 'Hải sản', iconName: 'set-meal', color: '#3b82f6' },
@@ -49,13 +49,13 @@ const CATEGORY_CONFIG: Record<number, CategoryConfig> = {
   6: { label: 'Gia vị', iconName: 'nature', color: '#8b5cf6' },
   7: { label: 'Tinh bột', iconName: 'spa', color: '#fec76f' },
   8: { label: 'Trái cây', iconName: 'apple', color: '#ef4444' },
-};
+});
 
-const DEFAULT_CATEGORY = {
+const DEFAULT_CATEGORY = Object.freeze({
   label: 'Khác',
   iconName: 'nature',
   color: '#6b7280',
-};
+});
 
 export const getCategoryConfig = (categoryId?: number) =>
   categoryId != null

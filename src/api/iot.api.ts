@@ -1,34 +1,38 @@
+import http from '@api/common/axios.config';
+
+import { generatePath } from '@/lib/common/utils';
+import { type SuccessResponse } from '@/models/interfaces/common';
 import type {
   IotDevice,
   IotDeviceStatus,
   IotScanResultPayload,
   PairDevicePayload,
 } from '@/models/interfaces/iot';
-import { type SuccessResponse } from '@/models/interfaces/common';
 
-import http from './common/axios.config';
-
-const IOT_URL = '/iot';
+const PAIR_DEVICE_URL = `/iot/devices/pair`;
+const DEVICES_URL = `/iot/devices`;
+const DEVICE_STATUS_URL = `/iot/devices/:deviceUid/status`;
+const UNPAIR_DEVICE_URL = `/iot/devices/:deviceUid/pair`;
+const DEVICE_STREAM_URL = `/iot/devices/:deviceUid/stream`;
 
 export const iotApi = {
   pairDevice: (data: PairDevicePayload) =>
-    http.post<SuccessResponse<IotDevice>>(`${IOT_URL}/devices/pair`, data),
+    http.post<SuccessResponse<IotDevice>>(PAIR_DEVICE_URL, data),
 
-  getMyDevices: () =>
-    http.get<SuccessResponse<IotDevice[]>>(`${IOT_URL}/devices`),
+  getMyDevices: () => http.get<SuccessResponse<IotDevice[]>>(DEVICES_URL),
 
   getDeviceStatus: (deviceUid: string) =>
     http.get<SuccessResponse<IotDeviceStatus>>(
-      `${IOT_URL}/devices/${deviceUid}/status`
+      generatePath(DEVICE_STATUS_URL, { deviceUid })
     ),
 
   unpairDevice: (deviceUid: string) =>
     http.delete<SuccessResponse<IotDevice>>(
-      `${IOT_URL}/devices/${deviceUid}/pair`
+      generatePath(UNPAIR_DEVICE_URL, { deviceUid })
     ),
 
   getDeviceStreamUrl: (deviceUid: string) =>
-    `${IOT_URL}/devices/${deviceUid}/stream`,
+    generatePath(DEVICE_STREAM_URL, { deviceUid }),
 };
 
 export type {

@@ -23,7 +23,7 @@ const inputTv = tv({
     container: 'mb-2',
     label: 'mb-1 text-lg text-zinc-700',
     input:
-      'mt-0 rounded-xl border border-zinc-300 bg-white px-4 py-3 font-inter text-base font-medium leading-5 text-zinc-900 placeholder:text-zinc-400',
+      'mt-0 rounded-xl border border-zinc-300 bg-white px-4 py-3 font-inter text-base font-medium leading-5 text-zinc-900',
   },
 
   variants: {
@@ -72,8 +72,7 @@ export type InputControllerType<T extends FieldValues> = {
 };
 
 interface ControlledInputProps<T extends FieldValues>
-  extends NInputProps,
-    InputControllerType<T> {}
+  extends NInputProps, InputControllerType<T> {}
 
 export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
   const { label, error, testID, className, ...inputProps } = props;

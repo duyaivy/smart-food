@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Text, View } from '@/components/ui';
+import { cn } from '@/lib/common/utils';
 import { calcKcal } from '@/lib/utils/caculator';
 import { type IIngredient } from '@/models/interfaces/ingredient';
 
@@ -77,7 +78,7 @@ export function IngredientNutritionBoard({ ingredient }: Props) {
               <Text className="text-xs font-medium uppercase tracking-wider text-neutral-500">
                 {macro.label}
               </Text>
-              <Text className={`text-xl font-bold ${macro.color}`}>
+              <Text className={cn('text-xl font-bold', macro.color)}>
                 {macro.value}
                 <Text className="text-sm font-normal text-neutral-400">
                   {' '}
@@ -87,7 +88,10 @@ export function IngredientNutritionBoard({ ingredient }: Props) {
             </View>
             <View className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
               <View
-                className={`h-full rounded-full ${macro.barColor}`}
+                className={cn(
+                  'h-full rounded-full bg-neutral-400',
+                  macro.barColor
+                )}
                 style={{ width: macro.barWidth }}
               />
             </View>

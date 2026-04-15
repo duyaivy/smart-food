@@ -17,13 +17,15 @@ export const useGetDishSyncQuery = () => {
     queryKey: queryKeys.syncDish,
     queryFn: async () => {
       const date = new Date();
-      const response = await dishApi.getDishesSync(date.toISOString());
+      const response = await dishApi.getDishesSync(date);
       return response.data;
     },
     initialData: listDishMini
       ? { message: 'local-cache', data: listDishMini }
       : undefined,
-    initialDataUpdatedAt: lastSyncAt ?? undefined,
+    initialDataUpdatedAt: lastSyncAt
+      ? new Date(lastSyncAt).getTime()
+      : undefined,
     staleTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

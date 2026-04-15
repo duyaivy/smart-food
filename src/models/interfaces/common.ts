@@ -24,3 +24,7 @@ export interface PaginationResponse<T> {
   control: { total: number; page: number; limit: number };
   results: T[];
 }
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}

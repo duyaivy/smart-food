@@ -1,5 +1,8 @@
+import http from '@api/common/axios.config';
+
+import { generatePath } from '@/lib/common/utils';
 import {
-  type PaginationResponse,
+  type PaginationParams,
   type SuccessResponse,
 } from '@/models/interfaces/common';
 import {
@@ -7,13 +10,15 @@ import {
   type ICategoryDetail,
 } from '@/models/interfaces/ingredient';
 
-import http from './common/axios.config';
-
-const CATEGORY_URL = '/categories';
-
+const CATEGORY_DETAIL_URL = '/categories/:id';
+const GET_CATEGORIES_URL = '/categories';
 export const categoryApi = {
-  getCategories: (queryString: string) =>
-    http<SuccessResponse<ICategory[]>>(`${CATEGORY_URL}?${queryString}`),
+  getCategories: ({ page, limit }: PaginationParams) =>
+    http<SuccessResponse<ICategory[]>>(
+      generatePath(GET_CATEGORIES_URL, {}, { page, limit })
+    ),
   getCategoryDetail: (id: string) =>
-    http<SuccessResponse<ICategoryDetail>>(`${CATEGORY_URL}/${id}`),
+    http<SuccessResponse<ICategoryDetail>>(
+      generatePath(CATEGORY_DETAIL_URL, { id })
+    ),
 };

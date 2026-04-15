@@ -12,6 +12,12 @@ import { useDishStore } from '@/lib/stores/use-dish-store';
 import { useGlobalStore } from '@/lib/stores/use-global-store';
 import { useIngredientStore } from '@/lib/stores/use-ingredient-store';
 import { toIntegerId } from '@/lib/utils/format';
+import {
+  NOTIFICATION_ACTION,
+  NOTIFICATION_SCREEN,
+  type NotificationAction,
+  type NotificationPayload,
+} from '@/models/types/notification';
 
 Notifications.setNotificationHandler({
   handleNotification: async (notification) => {
@@ -43,23 +49,20 @@ const setupAndroidChannel = async () => {
   });
 };
 
-type NotificationPayload = {
-  screen?: string;
-  dishId?: number | string;
-  ingredientId?: number | string;
-  action?: 'UPDATE' | 'DELETE' | 'CREATE' | string;
-};
-
 const isSupportedNotificationAction = (
   action: NotificationPayload['action']
-): action is 'UPDATE' | 'DELETE' | 'CREATE' => {
-  return action === 'UPDATE' || action === 'DELETE' || action === 'CREATE';
+): action is NotificationAction => {
+  return (
+    action === NOTIFICATION_ACTION.CREATE ||
+    action === NOTIFICATION_ACTION.UPDATE ||
+    action === NOTIFICATION_ACTION.DELETE
+  );
 };
 
 const syncIngredientByNotificationAction = async (
   payload: NotificationPayload
 ) => {
-  if (payload.screen !== 'IngredientDetail') return;
+  if (payload.screen !== NOTIFICATION_SCREEN.INGREDIENT_DETAIL) return;
   if (!isSupportedNotificationAction(payload.action)) return;
 
   const ingredientId = toIntegerId(payload.ingredientId);
@@ -68,7 +71,7 @@ const syncIngredientByNotificationAction = async (
   const { setStatus } = useIngredientStore.getState();
   setStatus('stale');
 
-  if (payload.action === 'DELETE') {
+  if (payload.action === NOTIFICATION_ACTION.DELETE) {
     return;
   }
 
@@ -79,7 +82,7 @@ const syncIngredientByNotificationAction = async (
 };
 
 const syncDishByNotificationAction = async (payload: NotificationPayload) => {
-  if (payload.screen !== 'DishDetail') return;
+  if (payload.screen !== NOTIFICATION_SCREEN.DISH_DETAIL) return;
   if (!isSupportedNotificationAction(payload.action)) return;
 
   const dishId = toIntegerId(payload.dishId);
@@ -90,11 +93,11 @@ const syncDishByNotificationAction = async (payload: NotificationPayload) => {
 
   setStatus('stale');
 
-  if (payload.action === 'CREATE') {
+  if (payload.action === NOTIFICATION_ACTION.CREATE) {
     return;
   }
 
-  if (payload.action === 'DELETE') {
+  if (payload.action === NOTIFICATION_ACTION.DELETE) {
     removeDishDetail(dishId);
     return;
   }
@@ -109,8 +112,8 @@ const syncDishByNotificationAction = async (payload: NotificationPayload) => {
 };
 
 const navigateByNotificationPayload = (payload: NotificationPayload) => {
-  if (payload.action && payload.action !== 'CREATE') return;
-  if (payload.screen === 'DishDetail') {
+  if (payload.action && payload.action !== NOTIFICATION_ACTION.CREATE) return;
+  if (payload.screen === NOTIFICATION_SCREEN.DISH_DETAIL) {
     const dishId = toIntegerId(payload.dishId);
     if (!dishId) return;
 
@@ -121,7 +124,7 @@ const navigateByNotificationPayload = (payload: NotificationPayload) => {
     return;
   }
 
-  if (payload.screen === 'IngredientDetail') {
+  if (payload.screen === NOTIFICATION_SCREEN.INGREDIENT_DETAIL) {
     const ingredientId = toIntegerId(payload.ingredientId);
     if (!ingredientId) return;
 

@@ -1,24 +1,34 @@
+import http from '@api/common/axios.config';
+
+import { generatePath } from '@/lib/common/utils';
 import {
+  type PaginationParams,
   type PaginationResponse,
   type SuccessResponse,
 } from '@/models/interfaces/common';
 import { type IIngredient } from '@/models/interfaces/ingredient';
 
-import http from './common/axios.config';
-
 const INGREDIENT_URL = '/ingredients';
+const INGREDIENT_SYNC_URL = '/ingredients/sync';
+const INGREDIENT_DETAIL_URL = '/ingredients/:id';
 
 export const ingredientApi = {
-  getIngredients: (queryString: string) =>
+  getIngredients: ({ page, limit }: PaginationParams) =>
     http<SuccessResponse<PaginationResponse<IIngredient>>>(
-      `${INGREDIENT_URL}?${queryString}`
+      generatePath(INGREDIENT_URL, {}, { page, limit })
     ),
-  getIngredientsSync: (lastSyncAt?: Date) => {
-    const query = lastSyncAt ? `?lastSyncAt=${lastSyncAt.toISOString()}` : '';
-    return http<SuccessResponse<IIngredient[]>>(
-      `${INGREDIENT_URL}/sync${query}`
-    );
-  },
+  getIngredientsSync: (lastSyncAt?: Date) =>
+    http<SuccessResponse<IIngredient[]>>(
+      generatePath(
+        INGREDIENT_SYNC_URL,
+        {},
+        {
+          lastSyncAt: lastSyncAt?.toISOString(),
+        }
+      )
+    ),
   getIngredientDetail: (id: string) =>
-    http<SuccessResponse<IIngredient>>(`${INGREDIENT_URL}/${id}`),
+    http<SuccessResponse<IIngredient>>(
+      generatePath(INGREDIENT_DETAIL_URL, { id })
+    ),
 };

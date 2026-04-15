@@ -6,7 +6,10 @@
     "paths": {
       "@/*": ["./src/*"],
       "@env": ["src/lib/env.js"],
-      "@assets/*": ["./assets/*"]
+      "@assets/*": ["./assets/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@api/*": ["./src/api/*"]
     },
     "esModuleInterop": true,
     "checkJs": true

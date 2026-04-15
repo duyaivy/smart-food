@@ -4,7 +4,7 @@ export interface IUser {
   id: number;
   name: string;
   email: string;
-  avatar?: string;
+  avatar?: string | null;
   password?: string;
   role: Role;
   isEmailVerified: boolean;

@@ -1,7 +1,6 @@
 import { Search, SlidersHorizontal } from 'lucide-react-native';
 import * as React from 'react';
-import { TextInput } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { FlatList, TextInput } from 'react-native';
 
 import { FocusAwareStatusBar, Pressable, View } from '@/components/ui';
 import { Icon } from '@/components/ui/icon';
@@ -66,20 +65,21 @@ export function IngredientSearchHeader({
           </Pressable>
         </View>
         {isFilterActive && (
-          <ScrollView
+          <FlatList
+            data={categories}
             horizontal
+            keyExtractor={(item) => String(item.id)}
             showsHorizontalScrollIndicator={false}
-            contentContainerClassName="mt-3 flex-row items-center gap-2 pr-4"
-          >
-            {categories.map((category) => (
+            contentContainerClassName="mt-3 items-center gap-2 pr-4"
+            renderItem={({ item }) => (
               <CategoryItem
-                isSelected={category.id === selectCategoryId}
-                key={category.id}
-                category={category}
-                onPress={() => setCategoryFilter(category.id)}
+                isSelected={item.id === selectCategoryId}
+                key={item.id}
+                category={item}
+                onPress={() => setCategoryFilter(item.id)}
               />
-            ))}
-          </ScrollView>
+            )}
+          />
         )}
       </View>
     </>

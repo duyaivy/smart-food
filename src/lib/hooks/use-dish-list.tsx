@@ -15,11 +15,11 @@ export type DishListFilters = {
   sortOrder: SortOrder;
 };
 
-const DEFAULT_FILTERS: DishListFilters = {
+const DEFAULT_FILTERS = Object.freeze({
   search: '',
   sortField: 'name',
   sortOrder: 'asc',
-};
+}) satisfies Readonly<DishListFilters>;
 
 const normalizeText = (value: string): string =>
   value

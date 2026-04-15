@@ -27,3 +27,37 @@ export const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
 
   return store;
 };
+
+type Params = Record<string, string | number | boolean | null | undefined>;
+
+export function generatePath(
+  path: string,
+  pathParams: Params = {},
+  queryParams: Params = {}
+): string {
+  let result = path;
+
+  result = result.replace(/:([a-zA-Z0-9_]+)/g, (_, key) => {
+    const value = pathParams[key];
+
+    if (value === undefined || value === null) {
+      throw new Error(`Missing parameter: ${key}`);
+    }
+
+    return encodeURIComponent(String(value));
+  });
+
+  result = result.replace(/\/+/g, '/');
+
+  const searchParams = new URLSearchParams();
+
+  Object.entries(queryParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      searchParams.append(key, String(value));
+    }
+  });
+
+  const queryString = searchParams.toString();
+
+  return queryString ? `${result}?${queryString}` : result;
+}

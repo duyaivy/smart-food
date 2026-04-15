@@ -20,12 +20,12 @@ export type IngredientListFilters = {
   sortOrder: SortOrder;
 };
 
-const DEFAULT_FILTERS: IngredientListFilters = {
+const DEFAULT_FILTERS: IngredientListFilters = Object.freeze({
   search: '',
   categoryId: null,
   sortField: 'name',
   sortOrder: 'asc',
-};
+});
 
 const normalizeText = (value: string): string =>
   value
