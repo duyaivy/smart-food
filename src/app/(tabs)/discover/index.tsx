@@ -1,5 +1,5 @@
-import React from 'react';
 import { router } from 'expo-router';
+import React from 'react';
 
 import {
   FocusAwareStatusBar,
@@ -10,18 +10,23 @@ import {
   View,
 } from '@/components/ui';
 import { ROUTE } from '@/constants/route';
-import { useIotSse } from '@/lib/hooks/use-iot-sse';
 import { useGetDeviceStatusQuery } from '@/lib/hooks/queries/iot.query';
+import { useDiscoverPrivacy } from '@/lib/hooks/use-discover-privacy';
+import { useIotSse } from '@/lib/hooks/use-iot-sse';
 import { useIotScanStore } from '@/lib/stores/use-iot-scan-store';
 import { useIotStore } from '@/lib/stores/use-iot-store';
 
-import { WarningConnectCard } from './_components/warning-connect-card';
 import { DeviceLiveCard } from './_components/device-live-card';
+import { PrivacyModal } from './_components/privacy-modal';
 import { ScanRecordCard } from './_components/scan-record-card';
+import { WarningConnectCard } from './_components/warning-connect-card';
 
 export default function DiscoverScreen() {
   const device = useIotStore((state) => state.device);
   const records = useIotScanStore((state) => state.records);
+
+  const [hasSeenDiscoverPrivacy, setHasSeenDiscoverPrivacy] =
+    useDiscoverPrivacy();
 
   useIotSse(device?.deviceUid);
 
@@ -34,9 +39,27 @@ export default function DiscoverScreen() {
     return records.filter((record) => record.deviceUid === device.deviceUid);
   }, [device?.deviceUid, records]);
 
+  const [openPrivacyModal, setOpenPrivacyModal] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!hasSeenDiscoverPrivacy) {
+      setOpenPrivacyModal(true);
+    }
+  }, [hasSeenDiscoverPrivacy]);
+
+  const handleConfirmPrivacy = () => {
+    setHasSeenDiscoverPrivacy(true);
+    setOpenPrivacyModal(false);
+  };
+
   return (
     <SafeAreaView className="flex-1 px-4">
       <FocusAwareStatusBar />
+
+      <PrivacyModal
+        visible={openPrivacyModal}
+        onConfirm={handleConfirmPrivacy}
+      />
 
       <ScrollView
         contentContainerStyle={{
