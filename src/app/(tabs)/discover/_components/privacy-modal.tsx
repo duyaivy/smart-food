@@ -1,7 +1,9 @@
+import { TriangleAlert } from 'lucide-react-native';
 import React from 'react';
 import { Modal } from 'react-native';
 
 import { Pressable, Text, View } from '@/components/ui';
+import { Icon } from '@/components/ui/icon';
 
 type PrivacyModalProps = {
   visible: boolean;
@@ -13,11 +15,14 @@ export function PrivacyModal({ visible, onConfirm }: PrivacyModalProps) {
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 items-center justify-center bg-black/50 px-6">
         <View className="w-full rounded-2xl bg-white p-5">
-          <Text className="text-lg font-bold text-black">
-            Lưu ý về quyền riêng tư
-          </Text>
+          <View className="mb-3 flex-row items-center gap-2">
+            <Icon as={TriangleAlert} size={20} className="text-orange-500" />
+            <Text className="text-lg font-bold text-black">
+              Lưu ý về quyền riêng tư
+            </Text>
+          </View>
 
-          <Text className="mt-3 leading-6 text-neutral-700">
+          <Text className="leading-6 text-neutral-700">
             Để cá nhân hóa nội dung Khám phá, SmartFood có thể sử dụng thông tin
             như độ tuổi, chiều cao, cân nặng và lịch sử ăn uống của bạn. Thông
             tin này được xử lý theo Chính sách bảo mật của ứng dụng.

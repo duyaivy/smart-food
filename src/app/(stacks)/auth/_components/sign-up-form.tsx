@@ -4,6 +4,7 @@ import { Check } from 'lucide-react-native';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, type TextInput, View } from 'react-native';
+import { z } from 'zod';
 
 import { SocialConnections } from '@/app/(stacks)/auth/_components/social-connections';
 import { Button } from '@/components/ui/button';
@@ -21,16 +22,28 @@ import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { ROUTE } from '@/constants/route';
 import { useSignUpMutation } from '@/lib/hooks/queries/auth.query';
-import { signupSchema, type SignupSchemaType } from '@/schemas/signup.schema';
+import { signupSchema } from '@/schemas/signup.schema';
 
-const PRIVACY_ROUTE = '/(stacks)/profile/privacy';
+const ICON_SIZE_SMALL = 14;
+
+const signupWithLegalSchema = z.object({
+  name: signupSchema.innerType().shape.name,
+  email: signupSchema.innerType().shape.email,
+  password: signupSchema.innerType().shape.password,
+  confirmPassword: signupSchema.innerType().shape.confirmPassword,
+  acceptedLegal: z.literal(true, {
+    errorMap: () => ({
+      message: 'Vui lòng đồng ý với Điều khoản sử dụng và Chính sách bảo mật.',
+    }),
+  }),
+});
+
+type SignupWithLegalSchemaType = z.infer<typeof signupWithLegalSchema>;
 
 export function SignUpForm() {
   const router = useRouter();
   const passwordInputRef = React.useRef<TextInput>(null);
   const confirmPasswordInputRef = React.useRef<TextInput>(null);
-  const [acceptedLegal, setAcceptedLegal] = React.useState(false);
-  const [legalError, setLegalError] = React.useState<string | null>(null);
 
   const signUpMutation = useSignUpMutation(router);
 
@@ -38,13 +51,14 @@ export function SignUpForm() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignupSchemaType>({
-    resolver: zodResolver(signupSchema),
+  } = useForm<SignupWithLegalSchemaType>({
+    resolver: zodResolver(signupWithLegalSchema),
     defaultValues: {
       name: '',
       email: '',
       password: '',
       confirmPassword: '',
+      acceptedLegal: undefined,
     },
   });
 
@@ -61,29 +75,10 @@ export function SignUpForm() {
   }
 
   function handleOpenLegal() {
-    router.push(PRIVACY_ROUTE as never);
+    router.push(ROUTE.STACK.PROFILE.PRIVACY as never);
   }
 
-  function onToggleAcceptedLegal() {
-    setAcceptedLegal((prev) => {
-      const next = !prev;
-      if (next) {
-        setLegalError(null);
-      }
-      return next;
-    });
-  }
-
-  function onSubmit(values: SignupSchemaType) {
-    if (!acceptedLegal) {
-      setLegalError(
-        'Vui lòng đồng ý với Điều khoản sử dụng và Chính sách bảo mật.'
-      );
-      return;
-    }
-
-    setLegalError(null);
-
+  function onSubmit(values: SignupWithLegalSchemaType) {
     signUpMutation.mutate({
       name: values.name,
       email: values.email,
@@ -221,37 +216,49 @@ export function SignUpForm() {
             </View>
 
             <View className="gap-2">
-              <Pressable
-                onPress={onToggleAcceptedLegal}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: acceptedLegal }}
-                className="flex-row items-start gap-3 rounded-xl border border-zinc-200 p-3"
-              >
-                <View
-                  className={`mt-0.5 size-5 items-center justify-center rounded border ${
-                    acceptedLegal
-                      ? 'border-orange-500 bg-orange-500'
-                      : 'border-zinc-300 bg-white'
-                  }`}
-                >
-                  {acceptedLegal ? (
-                    <Icon as={Check} size={14} className="text-white" />
-                  ) : null}
-                </View>
-
-                <Text className="flex-1 text-sm leading-5 text-zinc-700">
-                  Tôi đồng ý với{' '}
-                  <Text
-                    onPress={handleOpenLegal}
-                    className="text-orange-500 underline"
+              <Controller
+                control={control}
+                name="acceptedLegal"
+                render={({ field: { onChange, value } }) => (
+                  <Pressable
+                    onPress={() => onChange(value ? undefined : true)}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: !!value }}
+                    className="flex-row items-start gap-3 rounded-xl p-3"
                   >
-                    Điều khoản sử dụng và Chính sách bảo mật
-                  </Text>
-                </Text>
-              </Pressable>
+                    <View
+                      className={`mt-0.5 size-5 items-center justify-center rounded border ${
+                        value
+                          ? 'border-orange-500 bg-orange-500'
+                          : 'border-zinc-300 bg-white'
+                      }`}
+                    >
+                      {value ? (
+                        <Icon
+                          as={Check}
+                          size={ICON_SIZE_SMALL}
+                          className="text-white"
+                        />
+                      ) : null}
+                    </View>
 
-              {legalError ? (
-                <Text className="text-destructive text-sm">{legalError}</Text>
+                    <Text className="flex-1 text-sm leading-5 text-zinc-700">
+                      Tôi đồng ý với{' '}
+                      <Text
+                        onPress={handleOpenLegal}
+                        className="text-orange-500 underline"
+                      >
+                        Điều khoản sử dụng và Chính sách bảo mật
+                      </Text>
+                    </Text>
+                  </Pressable>
+                )}
+              />
+
+              {errors.acceptedLegal?.message ? (
+                <Text className="text-destructive text-sm">
+                  {errors.acceptedLegal.message}
+                </Text>
               ) : null}
             </View>
 
