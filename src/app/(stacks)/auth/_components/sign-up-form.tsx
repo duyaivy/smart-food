@@ -1,8 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
+import { Check } from 'lucide-react-native';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, type TextInput, View } from 'react-native';
+import { z } from 'zod';
 
 import { SocialConnections } from '@/app/(stacks)/auth/_components/social-connections';
 import { Button } from '@/components/ui/button';
@@ -13,13 +15,30 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { ROUTE } from '@/constants/route';
 import { useSignUpMutation } from '@/lib/hooks/queries/auth.query';
-import { signupSchema, type SignupSchemaType } from '@/schemas/signup.schema';
+import { signupSchema } from '@/schemas/signup.schema';
+
+const ICON_SIZE_SMALL = 14;
+
+const signupWithLegalSchema = z.object({
+  name: signupSchema.innerType().shape.name,
+  email: signupSchema.innerType().shape.email,
+  password: signupSchema.innerType().shape.password,
+  confirmPassword: signupSchema.innerType().shape.confirmPassword,
+  acceptedLegal: z.literal(true, {
+    errorMap: () => ({
+      message: 'Vui lòng đồng ý với Điều khoản sử dụng và Chính sách bảo mật.',
+    }),
+  }),
+});
+
+type SignupWithLegalSchemaType = z.infer<typeof signupWithLegalSchema>;
 
 export function SignUpForm() {
   const router = useRouter();
@@ -32,13 +51,14 @@ export function SignUpForm() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignupSchemaType>({
-    resolver: zodResolver(signupSchema),
+  } = useForm<SignupWithLegalSchemaType>({
+    resolver: zodResolver(signupWithLegalSchema),
     defaultValues: {
       name: '',
       email: '',
       password: '',
       confirmPassword: '',
+      acceptedLegal: undefined,
     },
   });
 
@@ -54,7 +74,11 @@ export function SignUpForm() {
     confirmPasswordInputRef.current?.focus();
   }
 
-  function onSubmit(values: SignupSchemaType) {
+  function handleOpenLegal() {
+    router.push(ROUTE.STACK.PROFILE.PRIVACY as never);
+  }
+
+  function onSubmit(values: SignupWithLegalSchemaType) {
     signUpMutation.mutate({
       name: values.name,
       email: values.email,
@@ -187,6 +211,53 @@ export function SignUpForm() {
               {errors.confirmPassword?.message ? (
                 <Text className="text-destructive text-sm">
                   {errors.confirmPassword.message}
+                </Text>
+              ) : null}
+            </View>
+
+            <View className="gap-2">
+              <Controller
+                control={control}
+                name="acceptedLegal"
+                render={({ field: { onChange, value } }) => (
+                  <Pressable
+                    onPress={() => onChange(value ? undefined : true)}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: !!value }}
+                    className="flex-row items-start gap-3 rounded-xl p-3"
+                  >
+                    <View
+                      className={`mt-0.5 size-5 items-center justify-center rounded border ${
+                        value
+                          ? 'border-orange-500 bg-orange-500'
+                          : 'border-zinc-300 bg-white'
+                      }`}
+                    >
+                      {value ? (
+                        <Icon
+                          as={Check}
+                          size={ICON_SIZE_SMALL}
+                          className="text-white"
+                        />
+                      ) : null}
+                    </View>
+
+                    <Text className="flex-1 text-sm leading-5 text-zinc-700">
+                      Tôi đồng ý với{' '}
+                      <Text
+                        onPress={handleOpenLegal}
+                        className="text-orange-500 underline"
+                      >
+                        Điều khoản sử dụng và Chính sách bảo mật
+                      </Text>
+                    </Text>
+                  </Pressable>
+                )}
+              />
+
+              {errors.acceptedLegal?.message ? (
+                <Text className="text-destructive text-sm">
+                  {errors.acceptedLegal.message}
                 </Text>
               ) : null}
             </View>
