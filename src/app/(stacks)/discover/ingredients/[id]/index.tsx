@@ -2,6 +2,10 @@ import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useMemo } from 'react';
 
 import { ActivityIndicator, ScrollView, View } from '@/components/ui';
+import { TouchableOpacity, Platform } from 'react-native';
+import { ChevronLeft } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { ROUTE } from '@/constants/route';
 import { useIngredient } from '@/lib/hooks/use-ingredient';
 
 import { IngredientDescription } from './_components/ingredient-description';
@@ -26,6 +30,20 @@ export default function IngredientDetailScreen() {
       headerTitleAlign: 'center',
       headerShadowVisible: false,
       headerTitleStyle: { fontSize: 18, fontWeight: '600' },
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => {
+            if (router.canGoBack()) router.back();
+            else router.push(ROUTE.TAB.FRIDGE);
+          }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={{ paddingHorizontal: Platform.OS === 'ios' ? 0 : 4 }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
+          <ChevronLeft size={24} color="#1A1A1A" />
+        </TouchableOpacity>
+      ),
     });
   }, [ingredient?.name, navigation]);
 

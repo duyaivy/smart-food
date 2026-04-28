@@ -2,6 +2,8 @@ import React from 'react';
 
 import { Text, View } from '@/components/ui';
 import { formatRecordedAt } from '@/lib/utils/date-time';
+import { Button } from '@/components/ui';
+import { formatUnitLabel } from '@/lib/utils/unit';
 
 type Props = {
   ingredientName: string | null;
@@ -13,6 +15,9 @@ type Props = {
   weight: number;
   status: 'DONE' | 'FAILED';
   recordedAt: number;
+  // optional unit to show (mapped)
+  unit?: string | null;
+  onAddToFridge?: () => void;
 };
 
 export function ScanRecordCard({
@@ -25,8 +30,11 @@ export function ScanRecordCard({
   weight,
   status,
   recordedAt,
+  unit,
+  onAddToFridge,
 }: Props) {
   const isDone = status === 'DONE';
+  const unitLabel = formatUnitLabel(unit ?? 'g');
 
   return (
     <View className="rounded-2xl border border-neutral-200 bg-white p-4">
@@ -58,7 +66,7 @@ export function ScanRecordCard({
       <View className="mt-4 gap-2">
         <View className="flex-row justify-between">
           <Text className="text-neutral-600">Khối lượng</Text>
-          <Text className="font-medium text-black">{weight} g</Text>
+          <Text className="font-medium text-black">{weight} {unitLabel}</Text>
         </View>
 
         <View className="flex-row justify-between">
@@ -96,6 +104,12 @@ export function ScanRecordCard({
           </Text>
         </View>
       </View>
+
+      {isDone && onAddToFridge ? (
+        <View className="mt-4">
+          <Button label="Thêm vào tủ lạnh" onPress={onAddToFridge} />
+        </View>
+      ) : null}
     </View>
   );
 }
