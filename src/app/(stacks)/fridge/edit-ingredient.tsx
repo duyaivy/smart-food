@@ -1,29 +1,43 @@
+import { Ionicons } from '@expo/vector-icons';
+import { zodResolver } from '@hookform/resolvers/zod';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { ScrollView, Platform, Pressable } from 'react-native';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Platform, Pressable, ScrollView } from 'react-native';
 
 import {
   ActivityIndicator,
   Button,
+  ControlledInput,
   FocusAwareStatusBar,
-  Input,
+  Image,
   Text,
   View,
 } from '@/components/ui';
-import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { priorityOptions } from '@/constants/fridge';
 import { ROUTE } from '@/constants/route';
 import { showMessage } from '@/lib/common/show-message';
 import { useFridge } from '@/lib/hooks/use-fridge';
 import {
+  formatDateDisplay,
+  formatDateInput,
+  toDueDateIso,
+} from '@/lib/utils/date-time';
+import { formatUnitLabel } from '@/lib/utils/unit';
+import {
   FridgeItemPriority,
   FridgeItemPriorityValue,
 } from '@/models/types/fridge';
-import { priorityOptions } from '@/constants/fridge';
-import { formatDateInput, toDueDateIso } from '@/lib/utils/fridge';
+import {
+  editFridgeItemFormSchema,
+  type EditFridgeItemFormValues,
+} from '@/schemas/fridge.schema';
 
 export default function EditIngredientScreen() {
   const { id } = useLocalSearchParams<{ id: string | string[] }>();
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const initializedItemRef = React.useRef<number | null>(null);
 
   const normalizedId = useMemo(() => {
     const raw = Array.isArray(id) ? (id[0] ?? '') : (id ?? '');
@@ -33,61 +47,43 @@ export default function EditIngredientScreen() {
 
   const { error, fridgeItem, isMutating, updateItem } = useFridge(normalizedId);
 
-  const [quantity, setQuantity] = useState(() =>
-    fridgeItem?.quantity != null ? String(fridgeItem.quantity) : ''
-  );
-  const [dueDate, setDueDate] = useState(() =>
-    formatDateInput(fridgeItem?.dueDate)
-  );
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [priority, setPriority] = useState<FridgeItemPriority>(
-    fridgeItem?.priority ?? FridgeItemPriority.MEDIUM
-  );
-  const [formError, setFormError] = useState<string | null>(null);
-  const initializedRef = React.useRef(false);
-  const priorityRef = React.useRef<FridgeItemPriority | null>(
-    fridgeItem?.priority ?? null
-  );
+  const {
+    control,
+    formState: { isSubmitting },
+    handleSubmit,
+    reset,
+  } = useForm<EditFridgeItemFormValues>({
+    resolver: zodResolver(editFridgeItemFormSchema),
+    defaultValues: {
+      quantity: '',
+      dueDate: '',
+      priority: FridgeItemPriority.MEDIUM,
+    },
+  });
+
+  const dueDate = useWatch({ control, name: 'dueDate' }) ?? '';
 
   React.useEffect(() => {
-    if (!fridgeItem) return;
-    // initialize local form state from fridgeItem only once to avoid
-    // overwriting user selections if the store updates while editing
-    if (initializedRef.current) return;
+    if (!fridgeItem || initializedItemRef.current === fridgeItem.id) return;
 
-    setQuantity(String(fridgeItem.quantity));
-    setDueDate(formatDateInput(fridgeItem.dueDate));
-    setPriority(fridgeItem.priority);
-    priorityRef.current = fridgeItem.priority;
-    initializedRef.current = true;
-  }, [fridgeItem]);
+    reset({
+      quantity: String(fridgeItem.quantity),
+      dueDate: formatDateInput(fridgeItem.dueDate),
+      priority: fridgeItem.priority,
+    });
+    initializedItemRef.current = fridgeItem.id;
+  }, [fridgeItem, reset]);
 
-  const handleSubmit = async () => {
-    const parsedQuantity = Number(quantity);
-    const parsedDueDate = toDueDateIso(dueDate);
+  const handleUpdate = async (values: EditFridgeItemFormValues) => {
+    const parsedDueDate = toDueDateIso(values.dueDate);
 
-    if (!Number.isFinite(parsedQuantity) || parsedQuantity < 0) {
-      setFormError('Số lượng không hợp lệ.');
-
-      return;
-    }
-
-    if (!parsedDueDate) {
-      setFormError('Ngày hết hạn không hợp lệ. Định dạng đúng: YYYY-MM-DD.');
-
-      return;
-    }
-
-    setFormError(null);
+    if (!parsedDueDate) return;
 
     const updatedItem = await updateItem({
-      quantity: parsedQuantity,
+      quantity: Number(values.quantity),
       dueDate: parsedDueDate,
-      priority,
+      priority: values.priority,
     });
-    // Debug payload
-    // eslint-disable-next-line no-console
-    console.debug('UpdateFridgeItem payload', { quantity: parsedQuantity, dueDate: parsedDueDate, priority });
 
     if (updatedItem) {
       showMessage({
@@ -128,6 +124,9 @@ export default function EditIngredientScreen() {
     );
   }
 
+  const ingredient = fridgeItem.ingredient;
+  const imageUrl = ingredient?.images?.[0];
+
   return (
     <View className="flex-1 bg-white">
       <Stack.Screen
@@ -146,77 +145,129 @@ export default function EditIngredientScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 24, paddingBottom: 48 }}
       >
-        <Text className="text-sm text-zinc-500">
-          {fridgeItem.ingredient?.name ??
-            `Nguyên liệu #${fridgeItem.ingredientId}`}
-        </Text>
+        <View className="flex-row items-center gap-4">
+          {imageUrl ? (
+            <Image
+              source={{ uri: imageUrl }}
+              className="size-20 rounded-xl bg-zinc-200"
+              contentFit="cover"
+            />
+          ) : (
+            <View className="size-20 items-center justify-center rounded-xl bg-zinc-200">
+              <Ionicons name="image-outline" size={28} color="#71717A" />
+            </View>
+          )}
+
+          <View className="flex-1">
+            <Text className="text-xl font-bold text-zinc-950">
+              {ingredient?.name ?? `Nguyên liệu #${fridgeItem.ingredientId}`}
+            </Text>
+
+            <Text className="mt-1 text-sm text-zinc-500">
+              Đơn vị: {formatUnitLabel(ingredient?.unit ?? '') || 'Chưa có'}
+            </Text>
+          </View>
+        </View>
 
         <View className="mt-8">
-          <Input
+          <ControlledInput<EditFridgeItemFormValues>
+            control={control}
+            name="quantity"
             label="Số lượng"
-            value={quantity}
-            onChangeText={setQuantity}
             keyboardType="numeric"
           />
 
-          <View className="mt-3">
-            <Text className="text-sm text-zinc-600 mb-2">Ngày hết hạn</Text>
-
-            <Pressable
-              className="h-[48px] rounded-xl border border-zinc-300 px-4 justify-center bg-white"
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text className={`${dueDate ? 'text-zinc-900' : 'text-zinc-400'}`}>
-                {dueDate || 'Chọn ngày (YYYY-MM-DD)'}
-              </Text>
-            </Pressable>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={dueDate ? new Date(`${dueDate}T00:00:00.000Z`) : new Date()}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
-                onChange={(event, selected) => {
-                  setShowDatePicker(Platform.OS === 'ios');
-                  if (selected) {
-                    const iso = selected.toISOString().slice(0, 10);
-                    setDueDate(iso);
-                  }
-                }}
-              />
-            )}
-          </View>
-
-          <Text className="my-2 text-lg text-zinc-700">Mức độ ưu tiên</Text>
-
-          <View className="flex-row flex-wrap gap-3">
-            {priorityOptions.map((option) => {
-              const selected = priority === option;
-
-              return (
-                <Pressable
-                  key={option}
-                  onPress={() => {
-                    setPriority(option);
-                    priorityRef.current = option;
-                    // Debug: log priority selection to Metro console to confirm state
-                    // eslint-disable-next-line no-console
-                    console.debug('EditIngredient: priority selected', option);
-                  }}
-                  className={`${selected ? 'bg-[#67BE70]' : 'border border-zinc-300 bg-white'} h-14 w-[48%] rounded-xl items-center justify-center`}
+          <Controller
+            control={control}
+            name="dueDate"
+            render={({ field, fieldState }) => (
+              <View className="mt-3">
+                <Text
+                  className={`mb-1 text-lg ${
+                    fieldState.error ? 'text-danger-600' : 'text-zinc-700'
+                  }`}
                 >
-                  <Text className={`text-center text-base ${selected ? 'text-white' : 'text-zinc-900'}`}>
-                    {FridgeItemPriorityValue[option]}
+                  Ngày hết hạn
+                </Text>
+
+                <Pressable
+                  className={`h-12 justify-center rounded-xl border bg-white px-4 ${
+                    fieldState.error ? 'border-danger-600' : 'border-zinc-300'
+                  }`}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text
+                    className={field.value ? 'text-zinc-900' : 'text-zinc-400'}
+                  >
+                    {field.value
+                      ? formatDateDisplay(field.value)
+                      : 'Chọn ngày (DD-MM-YYYY)'}
                   </Text>
                 </Pressable>
-              );
-            })}
-          </View>
 
-          {formError || error ? (
-            <Text className="mt-3 text-sm text-red-500">
-              {formError ?? error}
-            </Text>
+                {fieldState.error ? (
+                  <Text className="mt-1 text-sm text-danger-400">
+                    {fieldState.error.message}
+                  </Text>
+                ) : null}
+
+                {showDatePicker ? (
+                  <DateTimePicker
+                    value={
+                      dueDate ? new Date(`${dueDate}T00:00:00`) : new Date()
+                    }
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+                    onChange={(_, selected) => {
+                      setShowDatePicker(Platform.OS === 'ios');
+                      if (selected) {
+                        field.onChange(formatDateInput(selected));
+                      }
+                    }}
+                  />
+                ) : null}
+              </View>
+            )}
+          />
+
+          <Text className="mb-2 mt-3 text-lg text-zinc-700">
+            Mức độ ưu tiên
+          </Text>
+
+          <Controller
+            control={control}
+            name="priority"
+            render={({ field }) => (
+              <View className="gap-3">
+                {priorityOptions.map((option) => {
+                  const selected = field.value === option;
+
+                  return (
+                    <Pressable
+                      key={option}
+                      onPress={() => field.onChange(option)}
+                      className={`h-14 w-full items-center justify-center rounded-xl ${
+                        selected
+                          ? 'bg-secondary'
+                          : 'border border-zinc-300 bg-white'
+                      }`}
+                    >
+                      <Text
+                        className={`text-center text-base ${
+                          selected ? 'text-white' : 'text-zinc-900'
+                        }`}
+                      >
+                        {FridgeItemPriorityValue[option]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+          />
+
+          {error ? (
+            <Text className="mt-3 text-sm text-red-500">{error}</Text>
           ) : null}
         </View>
 
@@ -226,15 +277,15 @@ export default function EditIngredientScreen() {
             variant="outline"
             className="flex-1 border-red-500"
             textClassName="text-red-500"
-            disabled={isMutating}
+            disabled={isMutating || isSubmitting}
             onPress={() => router.replace(ROUTE.TAB.FRIDGE)}
           />
 
           <Button
             label="Cập nhật"
-            className="flex-1 bg-[#67BE70]"
-            loading={isMutating}
-            onPress={handleSubmit}
+            className="flex-1 bg-secondary"
+            loading={isMutating || isSubmitting}
+            onPress={handleSubmit(handleUpdate)}
           />
         </View>
       </ScrollView>

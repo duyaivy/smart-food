@@ -8,14 +8,14 @@ import {
   FRIDGE_STALE_THRESHOLD_MS,
   useFridgeStore,
 } from '@/lib/stores/use-fridge-store';
-import { toValidDate } from '@/lib/utils/format';
+import { normalizeText, toValidDate } from '@/lib/utils/format';
 import type {
   ICreateFridgeItemBody,
   IFridgeItem,
   IUpdateFridgeItemBody,
 } from '@/models/interfaces/fridge';
 import type { IIngredient } from '@/models/interfaces/ingredient';
-import { FridgeItemPriority } from '@/models/types/fridge';
+import { type FridgeItemPriority } from '@/models/types/fridge';
 
 export type FridgeListFilters = {
   search: string;
@@ -24,6 +24,40 @@ export type FridgeListFilters = {
 
 export type EnrichedFridgeItem = IFridgeItem & {
   ingredient?: IIngredient;
+};
+
+type UseFridgeDetailReturn = {
+  fridgeItem: EnrichedFridgeItem | null;
+  updateItem: (body: IUpdateFridgeItemBody) => Promise<IFridgeItem | null>;
+  deleteItem: () => Promise<boolean>;
+  isMutating: boolean;
+  error: string | null;
+};
+
+type UseFridgeListReturn = {
+  fridgeItems: EnrichedFridgeItem[];
+  totalCount: number;
+  filteredCount: number;
+  lastSyncAt: Date | null;
+  isLoading: boolean;
+  isFetchingNextPage: boolean;
+  isMutating: boolean;
+  isStale: boolean;
+  hasNextPage: boolean;
+  error: string | null;
+  filters: FridgeListFilters;
+
+  setSearch: (search: string) => void;
+  setPriorityFilter: (priority: FridgeItemPriority | null) => void;
+  resetFilters: () => void;
+  refetch: () => void;
+  fetchNextPage: () => void;
+  createItem: (body: ICreateFridgeItemBody) => Promise<IFridgeItem | null>;
+  updateItem: (
+    id: number | string,
+    body: IUpdateFridgeItemBody
+  ) => Promise<IFridgeItem | null>;
+  deleteItem: (id: number | string) => Promise<boolean>;
 };
 
 type ApiErrorShape = {
@@ -41,12 +75,7 @@ const DEFAULT_FILTERS: FridgeListFilters = Object.freeze({
   priority: null,
 });
 
-const normalizeText = (value: string): string =>
-  value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+const FRIDGE_PAGE_SIZE = 20;
 
 const applyFilters = (
   list: EnrichedFridgeItem[],
@@ -99,38 +128,13 @@ const isFridgeNotFoundError = (err: unknown) => {
   );
 };
 
-export function useFridge(fridgeItemId: number): {
-  fridgeItem: EnrichedFridgeItem | null;
-  updateItem: (body: IUpdateFridgeItemBody) => Promise<IFridgeItem | null>;
-  deleteItem: () => Promise<boolean>;
-  isMutating: boolean;
-  error: string | null;
-};
+export function useFridge(fridgeItemId: number): UseFridgeDetailReturn;
 
-export function useFridge(fridgeItemId?: undefined): {
-  fridgeItems: EnrichedFridgeItem[];
-  totalCount: number;
-  filteredCount: number;
-  lastSyncAt: Date | null;
-  isLoading: boolean;
-  isMutating: boolean;
-  isStale: boolean;
-  error: string | null;
-  filters: FridgeListFilters;
+export function useFridge(): UseFridgeListReturn;
 
-  setSearch: (search: string) => void;
-  setPriorityFilter: (priority: FridgeItemPriority | null) => void;
-  resetFilters: () => void;
-  refetch: () => void;
-  createItem: (body: ICreateFridgeItemBody) => Promise<IFridgeItem | null>;
-  updateItem: (
-    id: number | string,
-    body: IUpdateFridgeItemBody
-  ) => Promise<IFridgeItem | null>;
-  deleteItem: (id: number | string) => Promise<boolean>;
-};
-
-export function useFridge(fridgeItemId?: number) {
+export function useFridge(
+  fridgeItemId?: number
+): UseFridgeDetailReturn | UseFridgeListReturn {
   const appState = useAppState();
   const ingredientState = useIngredient();
 
@@ -147,6 +151,7 @@ export function useFridge(fridgeItemId?: number) {
 
   const {
     addFridgeItem,
+    appendFridgeItemList,
     fridgeItemList,
     getFridgeItemDetail,
     hasHydrated,
@@ -159,6 +164,7 @@ export function useFridge(fridgeItemId?: number) {
   } = useFridgeStore(
     useShallow((state) => ({
       addFridgeItem: state.addFridgeItem,
+      appendFridgeItemList: state.appendFridgeItemList,
       fridgeItemList: state.fridgeItemList,
       getFridgeItemDetail: state.getFridgeItemDetail,
       hasHydrated: state.hasHydrated,
@@ -174,7 +180,13 @@ export function useFridge(fridgeItemId?: number) {
   const [filters, setFilters] = useState<FridgeListFilters>(DEFAULT_FILTERS);
   const [error, setError] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    total: 0,
+    hasNextPage: false,
+  });
 
   const normalizedLastSyncAt = useMemo(
     () => toValidDate(lastSyncAt),
@@ -189,22 +201,49 @@ export function useFridge(fridgeItemId?: number) {
     [ingredientMap]
   );
 
+  const applyPagination = useCallback(
+    (control: { page: number; limit: number; total: number }) => {
+      const page = control.page || 1;
+      const limit = control.limit || FRIDGE_PAGE_SIZE;
+      const total = control.total || 0;
+
+      setPagination({
+        page,
+        total,
+        hasNextPage: page * limit < total,
+      });
+    },
+    []
+  );
+
+  const fetchFirstFridgePage = useCallback(async () => {
+    const { data } = await fridgeApi.getFridgeItems({
+      page: 1,
+      limit: FRIDGE_PAGE_SIZE,
+    });
+
+    setFridgeItemList(data.data.results);
+    applyPagination(data.data.control);
+  }, [applyPagination, setFridgeItemList]);
+
   const fetchFridgeItems = useCallback(async () => {
     try {
       setError(null);
       setIsFetching(true);
       setStatus('syncing');
 
-      const { data } = await fridgeApi.getFridgeItems({
-        page: 1,
-        limit: 100,
-      });
-
-      setFridgeItemList(data.data.results);
+      await fetchFirstFridgePage();
     } catch (err) {
       if (isFridgeNotFoundError(err)) {
-        setFridgeItemList([]);
-        setError(null);
+        try {
+          await fridgeApi.createFridge();
+          await fetchFirstFridgePage();
+        } catch (createErr) {
+          setFridgeItemList([]);
+          setPagination({ page: 1, total: 0, hasNextPage: false });
+          setStatus('synced');
+          setError(getApiErrorMessage(createErr) || null);
+        }
 
         return;
       }
@@ -214,23 +253,64 @@ export function useFridge(fridgeItemId?: number) {
     } finally {
       setIsFetching(false);
     }
-  }, [setFridgeItemList, setStatus]);
+  }, [fetchFirstFridgePage, setFridgeItemList, setStatus]);
+
+  const fetchNextPage = useCallback(async () => {
+    if (isFetching || isFetchingNextPage || !pagination.hasNextPage) return;
+
+    try {
+      setError(null);
+      setIsFetchingNextPage(true);
+
+      const nextPage = pagination.page + 1;
+      const { data } = await fridgeApi.getFridgeItems({
+        page: nextPage,
+        limit: FRIDGE_PAGE_SIZE,
+      });
+
+      appendFridgeItemList(data.data.results);
+      applyPagination(data.data.control);
+    } catch (err) {
+      setError(getApiErrorMessage(err) || 'Có lỗi xảy ra');
+    } finally {
+      setIsFetchingNextPage(false);
+    }
+  }, [
+    appendFridgeItemList,
+    applyPagination,
+    isFetching,
+    isFetchingNextPage,
+    pagination.hasNextPage,
+    pagination.page,
+  ]);
 
   const createItem = useCallback(
     async (body: ICreateFridgeItemBody) => {
       try {
         setError(null);
         setIsMutating(true);
-        console.debug('[useFridge] createItem payload:', body);
+
+        const existingItem = fridgeItemList.find(
+          (item) => !item.deleteAt && item.ingredientId === body.ingredientId
+        );
+
+        if (existingItem) {
+          const { data } = await fridgeApi.updateFridgeItem(existingItem.id, {
+            ...body,
+            quantity: existingItem.quantity + body.quantity,
+          });
+
+          updateFridgeItem(data.data);
+
+          return data.data;
+        }
 
         const { data } = await fridgeApi.createFridgeItem(body);
-        console.debug('[useFridge] createItem response:', data);
 
         addFridgeItem(data.data);
 
         return data.data;
       } catch (err) {
-        console.debug('[useFridge] createItem error:', err);
         setError(getApiErrorMessage(err) || 'Có lỗi xảy ra');
 
         return null;
@@ -238,7 +318,7 @@ export function useFridge(fridgeItemId?: number) {
         setIsMutating(false);
       }
     },
-    [addFridgeItem]
+    [addFridgeItem, fridgeItemList, updateFridgeItem]
   );
 
   const updateItem = useCallback(
@@ -335,18 +415,20 @@ export function useFridge(fridgeItemId?: number) {
   const refetch = () => {
     if (isFetching) return;
 
-    setStatus('stale');
+    void fetchFridgeItems();
   };
 
   return {
     fridgeItems: filteredList,
-    totalCount: fridgeItemList.length,
+    totalCount: pagination.total || fridgeItemList.length,
     filteredCount: filteredList.length,
     lastSyncAt: normalizedLastSyncAt,
 
     isLoading: !hasHydrated || isFetching,
+    isFetchingNextPage,
     isMutating,
     isStale: status === 'stale',
+    hasNextPage: pagination.hasNextPage,
     error,
 
     filters,
@@ -354,6 +436,7 @@ export function useFridge(fridgeItemId?: number) {
     setPriorityFilter,
     resetFilters,
     refetch,
+    fetchNextPage,
 
     createItem,
     updateItem,

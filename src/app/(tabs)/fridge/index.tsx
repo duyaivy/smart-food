@@ -1,31 +1,46 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, Tabs } from 'expo-router';
 import React from 'react';
-import { Alert, FlatList, Pressable, RefreshControl } from 'react-native';
+import { Alert, Pressable, RefreshControl } from 'react-native';
 
 import { FridgeItemCard } from '@/app/(stacks)/fridge/_components/fridge-item-card';
+import { FridgeItemFormSheet } from '@/app/(stacks)/fridge/_components/fridge-item-form-sheet';
 import { FridgeSearchBar } from '@/app/(stacks)/fridge/_components/fridge-search-bar';
 import {
   ActivityIndicator,
-  Button,
   FocusAwareStatusBar,
+  List,
   Text,
   View,
 } from '@/components/ui';
 import { ROUTE } from '@/constants/route';
-import { useFridge } from '@/lib/hooks/use-fridge';
+import { showMessage } from '@/lib/common/show-message';
+import { type EnrichedFridgeItem, useFridge } from '@/lib/hooks/use-fridge';
+import type { FridgeItemPriority } from '@/models/types/fridge';
+
+type SheetState =
+  | { mode: 'add'; item?: null }
+  | { mode: 'edit'; item: EnrichedFridgeItem };
 
 export default function FridgeScreen() {
   const {
+    createItem,
     deleteItem,
     error,
+    fetchNextPage,
     filters,
     fridgeItems,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading,
     isMutating,
     refetch,
     setSearch,
+    updateItem,
   } = useFridge();
+  const [sheetState, setSheetState] = React.useState<SheetState | null>(null);
+
+  const closeSheet = React.useCallback(() => setSheetState(null), []);
 
   const handleDelete = React.useCallback(
     (id: number) => {
@@ -43,15 +58,12 @@ export default function FridgeScreen() {
             onPress: async () => {
               const ok = await deleteItem(id);
               if (ok) {
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const { showMessage } = require('@/lib/common/show-message');
                 showMessage({
                   message: 'Đã xóa',
                   description: 'Nguyên liệu đã được xóa khỏi tủ lạnh',
                   type: 'success',
                 });
               } else {
-                const { showMessage } = require('@/lib/common/show-message');
                 showMessage({
                   message: 'Xóa thất bại',
                   description: 'Không thể xóa nguyên liệu.',
@@ -66,6 +78,67 @@ export default function FridgeScreen() {
     [deleteItem]
   );
 
+  const handleSubmitSheet = React.useCallback(
+    async (values: {
+      ingredientId: number;
+      quantity: number;
+      dueDate: string;
+      priority: FridgeItemPriority;
+    }) => {
+      if (sheetState?.mode === 'edit') {
+        const updatedItem = await updateItem(sheetState.item.id, {
+          quantity: values.quantity,
+          dueDate: values.dueDate,
+          priority: values.priority,
+        });
+
+        if (updatedItem) {
+          showMessage({
+            message: 'Cập nhật thành công',
+            description: 'Nguyên liệu đã được cập nhật',
+            type: 'success',
+          });
+
+          return true;
+        }
+
+        showMessage({
+          message: 'Cập nhật thất bại',
+          description: 'Không thể cập nhật nguyên liệu.',
+          type: 'error',
+        });
+
+        return false;
+      }
+
+      const createdItem = await createItem({
+        ingredientId: values.ingredientId,
+        quantity: values.quantity,
+        dueDate: values.dueDate,
+        priority: values.priority,
+      });
+
+      if (createdItem) {
+        showMessage({
+          message: 'Đã thêm vào tủ lạnh',
+          description: 'Nguyên liệu đã được thêm hoặc cập nhật trong tủ lạnh.',
+          type: 'success',
+        });
+
+        return true;
+      }
+
+      showMessage({
+        message: 'Thêm thất bại',
+        description: 'Không thể thêm nguyên liệu vào tủ lạnh.',
+        type: 'error',
+      });
+
+      return false;
+    },
+    [createItem, sheetState, updateItem]
+  );
+
   return (
     <View className="flex-1 bg-white px-8">
       <Tabs.Screen
@@ -74,18 +147,31 @@ export default function FridgeScreen() {
           headerShown: true,
           headerTitleAlign: 'center',
           headerShadowVisible: false,
+          headerRight: () => (
+            <Pressable
+              disabled={isMutating}
+              hitSlop={12}
+              className="mr-4 rounded-full px-3 py-2"
+              onPress={() => setSheetState({ mode: 'add' })}
+            >
+              <Text
+                className={`text-base font-semibold ${
+                  isMutating ? 'text-zinc-400' : 'text-secondary'
+                }`}
+              >
+                Thêm
+              </Text>
+            </Pressable>
+          ),
         }}
       />
 
       <FocusAwareStatusBar />
 
-      <View className="mt-4 flex-row items-start gap-3">
+      <View className="mt-4 flex-row items-center gap-3">
         <FridgeSearchBar value={filters.search} onChangeText={setSearch} />
 
-        <Pressable
-          hitSlop={12}
-          className="mt-1 size-12 items-center justify-center"
-        >
+        <Pressable hitSlop={12} className="size-12 items-center justify-center">
           <Ionicons name="filter-outline" size={36} color="#999999" />
         </Pressable>
       </View>
@@ -100,14 +186,25 @@ export default function FridgeScreen() {
         </View>
       ) : (
         <View className="flex-1">
-          <FlatList
+          <List
             data={fridgeItems}
             keyExtractor={(item) => item.id.toString()}
+            estimatedItemSize={112}
             showsVerticalScrollIndicator={false}
             style={{ flex: 1 }}
-            contentContainerStyle={{ paddingTop: 28, paddingBottom: 8, gap: 22 }}
+            contentContainerStyle={{ paddingTop: 28, paddingBottom: 8 }}
+            ItemSeparatorComponent={() => <View className="h-5" />}
             refreshControl={
               <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+            }
+            onEndReached={hasNextPage ? fetchNextPage : undefined}
+            onEndReachedThreshold={0.4}
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <View className="py-4">
+                  <ActivityIndicator />
+                </View>
+              ) : null
             }
             ListEmptyComponent={
               <View className="mt-16 items-center">
@@ -129,12 +226,7 @@ export default function FridgeScreen() {
                     params: { id: item.ingredientId },
                   })
                 }
-                onEdit={() =>
-                  router.push({
-                    pathname: ROUTE.STACK.FRIDGE.EDIT_INGREDIENT,
-                    params: { id: item.id },
-                  })
-                }
+                onEdit={() => setSheetState({ mode: 'edit', item })}
                 onDelete={() => handleDelete(item.id)}
               />
             )}
@@ -142,15 +234,14 @@ export default function FridgeScreen() {
         </View>
       )}
 
-      <View className="mt-4 pb-6">
-        <Button
-          disabled={isMutating}
-          className="h-[72px] rounded-[18px] bg-[#67BE70]"
-          onPress={() => router.push(ROUTE.STACK.FRIDGE.ADD_INGREDIENT)}
-        >
-          <Ionicons name="add" size={42} color="#FFFFFF" />
-        </Button>
-      </View>
+      <FridgeItemFormSheet
+        visible={Boolean(sheetState)}
+        mode={sheetState?.mode ?? 'add'}
+        item={sheetState?.mode === 'edit' ? sheetState.item : null}
+        loading={isMutating}
+        onClose={closeSheet}
+        onSubmit={handleSubmitSheet}
+      />
     </View>
   );
 }

@@ -1,6 +1,8 @@
+import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import EventSource from 'react-native-sse';
 
+import { ROUTE } from '@/constants/route';
 import { showMessage } from '@/lib/common/show-message';
 import { Env } from '@/lib/env';
 import { useIotScanStore } from '@/lib/stores/use-iot-scan-store';
@@ -24,6 +26,16 @@ function buildStreamUrl(deviceUid: string) {
   }
 
   return `${baseUrl}/iot/devices/${encodeURIComponent(deviceUid)}/stream`;
+}
+
+function openAddIngredientScreen(payload: IotSseScanResultPayload) {
+  router.push({
+    pathname: ROUTE.STACK.FRIDGE.ADD_INGREDIENT,
+    params: {
+      ingredientName: payload.ingredientName ?? '',
+      quantity: String(payload.weight),
+    },
+  });
 }
 
 export function useIotSse(deviceUid?: string | null) {
@@ -79,13 +91,29 @@ export function useIotSse(deviceUid?: string | null) {
           source: 'sse',
         });
 
+        if (payload.status === 'DONE') {
+          showMessage({
+            message: 'Đã nhận kết quả quét mới',
+            description:
+              payload.message ||
+              `${payload.ingredientName ?? 'Nguyên liệu'} - ${
+                payload.weight
+              } g`,
+            type: 'success',
+            duration: 10000,
+            actionLabel: 'Thêm vào tủ lạnh',
+            onActionPress: () => {
+              openAddIngredientScreen(payload);
+            },
+          });
+
+          return;
+        }
+
         showMessage({
-          message:
-            payload.status === 'DONE'
-              ? 'Đã nhận kết quả quét mới'
-              : 'Thiết bị gửi kết quả quét thất bại',
+          message: 'Thiết bị gửi kết quả quét thất bại',
           description: payload.message,
-          type: payload.status === 'DONE' ? 'success' : 'warning',
+          type: 'warning',
           duration: 2500,
         });
       } catch {

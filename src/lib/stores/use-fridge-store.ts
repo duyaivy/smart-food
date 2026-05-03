@@ -19,6 +19,7 @@ export type FridgeState = {
   status: FridgeStoreStatus;
 
   setFridgeItemList: (list: IFridgeItem[]) => void;
+  appendFridgeItemList: (list: IFridgeItem[]) => void;
   addFridgeItem: (item: IFridgeItem) => void;
   updateFridgeItem: (item: IFridgeItem) => void;
   removeFridgeItem: (itemId: number) => void;
@@ -60,6 +61,27 @@ const _useFridge = create<FridgeState>()(
           fridgeItemDetailsById: buildDetailsById(activeItems),
           lastSyncAt: new Date(),
           status: 'synced',
+        });
+      },
+
+      appendFridgeItemList: (fridgeItemList) => {
+        const activeItems = fridgeItemList.filter((item) => !item.deleteAt);
+
+        set((state) => {
+          const itemById = new Map<number, IFridgeItem>();
+
+          [...state.fridgeItemList, ...activeItems].forEach((item) => {
+            itemById.set(item.id, item);
+          });
+
+          const nextList = sortByCreatedAtDesc([...itemById.values()]);
+
+          return {
+            fridgeItemList: nextList,
+            fridgeItemDetailsById: buildDetailsById(nextList),
+            lastSyncAt: new Date(),
+            status: 'synced' as FridgeStoreStatus,
+          };
         });
       },
 

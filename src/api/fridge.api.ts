@@ -14,8 +14,11 @@ import type {
 
 const FRIDGE_ITEMS_URL = '/fridge/items';
 const FRIDGE_ITEM_DETAIL_URL = '/fridge/items/:id';
+const FRIDGE_URL = '/fridge';
 
 export const fridgeApi = {
+  createFridge: () => http.post<SuccessResponse<unknown>>(FRIDGE_URL),
+
   getFridgeItems: ({ page = 1, limit = 10 }: Partial<PaginationParams> = {}) =>
     http<SuccessResponse<PaginationResponse<IFridgeItem>>>(
       generatePath(FRIDGE_ITEMS_URL, {}, { page, limit })

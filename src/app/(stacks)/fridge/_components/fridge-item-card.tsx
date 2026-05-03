@@ -1,11 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
-import { Image, Pressable, Modal, findNodeHandle } from 'react-native';
+import { findNodeHandle, Modal, Pressable } from 'react-native';
 
-import { Text, View } from '@/components/ui';
+import { Image, Text, View } from '@/components/ui';
 import { getCategoryConfig } from '@/constants/common';
-import { formatUnitLabel } from '@/lib/utils/unit';
 import type { EnrichedFridgeItem } from '@/lib/hooks/use-fridge';
+import {
+  formatDateDisplay,
+  formatRemainingDueTime,
+  getRemainingDueDays,
+} from '@/lib/utils/date-time';
+import { formatUnitLabel } from '@/lib/utils/unit';
 import { FridgeItemPriority } from '@/models/types/fridge';
 
 const priorityIconMap: Record<
@@ -40,7 +45,7 @@ export function FridgeItemCard({
 }: FridgeItemCardProps) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0, width: 0, height: 0 });
-  const ellipsisRef = useRef<any>(null);
+  const ellipsisRef = useRef<React.ElementRef<typeof Pressable>>(null);
 
   const ingredient = item.ingredient;
   const isEmpty = item.quantity <= 0;
@@ -48,13 +53,16 @@ export function FridgeItemCard({
 
   const category = getCategoryConfig(item.ingredient?.categoryId);
   const unitLabel = formatUnitLabel(item.ingredient?.unit ?? '');
+  const dueDate = formatDateDisplay(item.dueDate);
+  const remainingDays = getRemainingDueDays(item.dueDate);
+  const isDueSoon = remainingDays !== null && remainingDays <= 1;
 
   return (
     <Pressable
       onPress={onPress}
-      className={`relative min-h-[72px] flex-row items-center rounded-lg px-5 py-3 shadow-md border border-neutral-100 ${
-        isEmpty ? 'bg-zinc-200' : 'bg-white'
-      }`}
+      className={`relative min-h-20 flex-row items-center rounded-lg border px-5 py-3 shadow-md ${
+        isDueSoon ? 'border-red-500' : 'border-neutral-100'
+      } ${isEmpty ? 'bg-zinc-200' : 'bg-white'}`}
       style={{ elevation: 2, overflow: 'visible' }}
     >
       {imageUrl ? (
@@ -79,28 +87,28 @@ export function FridgeItemCard({
           />
         </View>
 
-          <Text className="mt-1 text-sm text-zinc-950">{category.label}</Text>
+        <Text className="mt-1 text-sm text-zinc-950">{category.label}</Text>
       </View>
 
       <View className="items-end justify-between self-stretch">
         <Pressable
           ref={ellipsisRef}
           hitSlop={12}
-          onPress={async (event) => {
+          onPress={(event) => {
             event.stopPropagation();
             try {
               const node = findNodeHandle(ellipsisRef.current);
               if (node && ellipsisRef.current?.measureInWindow) {
-                ellipsisRef.current.measureInWindow(
-                  (x: number, y: number, width: number, height: number) => {
-                    setMenuPos({ x, y, width, height });
-                    setMenuVisible((prev) => !prev);
-                  }
-                );
+                ellipsisRef.current.measureInWindow((...layout) => {
+                  const [x, y, width, height] = layout;
+
+                  setMenuPos({ x, y, width, height });
+                  setMenuVisible((prev) => !prev);
+                });
               } else {
                 setMenuVisible((prev) => !prev);
               }
-            } catch (err) {
+            } catch {
               setMenuVisible((prev) => !prev);
             }
           }}
@@ -112,6 +120,18 @@ export function FridgeItemCard({
           className={`text-sm ${isEmpty ? 'text-red-500' : 'text-zinc-950'}`}
         >
           Còn lại: {item.quantity} {unitLabel}
+        </Text>
+
+        <Text className="mt-1 text-right text-xs text-zinc-500">
+          HSD: {dueDate || 'Chưa có'}
+        </Text>
+
+        <Text
+          className={`mt-1 text-right text-xs ${
+            isDueSoon ? 'font-semibold text-red-500' : 'text-zinc-500'
+          }`}
+        >
+          {formatRemainingDueTime(item.dueDate)}
         </Text>
       </View>
 
@@ -138,25 +158,39 @@ export function FridgeItemCard({
               }}
             >
               <Pressable
-                style={{ height: 40, justifyContent: 'center', paddingHorizontal: 12 }}
+                style={{
+                  height: 40,
+                  justifyContent: 'center',
+                  paddingHorizontal: 12,
+                }}
                 onPress={() => {
                   setMenuVisible(false);
                   onEdit();
                 }}
               >
-                <Text className="text-xs text-zinc-950">Sửa</Text>
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="create-outline" size={16} color="#111111" />
+                  <Text className="text-xs text-zinc-950">Sửa</Text>
+                </View>
               </Pressable>
 
               <View style={{ height: 1, backgroundColor: '#D1D5DB' }} />
 
               <Pressable
-                style={{ height: 40, justifyContent: 'center', paddingHorizontal: 12 }}
+                style={{
+                  height: 40,
+                  justifyContent: 'center',
+                  paddingHorizontal: 12,
+                }}
                 onPress={() => {
                   setMenuVisible(false);
                   onDelete();
                 }}
               >
-                <Text className="text-xs text-zinc-950">Xóa</Text>
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="trash-outline" size={16} color="#DC2626" />
+                  <Text className="text-xs text-red-600">Xóa</Text>
+                </View>
               </Pressable>
             </View>
           </Pressable>
