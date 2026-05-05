@@ -1,7 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, Tabs } from 'expo-router';
 import React from 'react';
-import { Alert, Pressable, RefreshControl } from 'react-native';
+import {
+  Alert,
+  DeviceEventEmitter,
+  Pressable,
+  RefreshControl,
+} from 'react-native';
 
 import { FridgeItemCard } from '@/app/(stacks)/fridge/_components/fridge-item-card';
 import { FridgeItemFormSheet } from '@/app/(stacks)/fridge/_components/fridge-item-form-sheet';
@@ -16,11 +21,23 @@ import {
 import { ROUTE } from '@/constants/route';
 import { showMessage } from '@/lib/common/show-message';
 import { type EnrichedFridgeItem, useFridge } from '@/lib/hooks/use-fridge';
+import {
+  IOT_ADD_TO_FRIDGE_EVENT,
+  type IotAddToFridgeEventPayload,
+} from '@/lib/hooks/use-iot-sse';
 import type { FridgeItemPriority } from '@/models/types/fridge';
 
 type SheetState =
-  | { mode: 'add'; item?: null }
-  | { mode: 'edit'; item: EnrichedFridgeItem };
+  | {
+      mode: 'add';
+      item?: null;
+      initialIngredientName?: string;
+      initialQuantity?: string;
+    }
+  | {
+      mode: 'edit';
+      item: EnrichedFridgeItem;
+    };
 
 export default function FridgeScreen() {
   const {
@@ -38,9 +55,27 @@ export default function FridgeScreen() {
     setSearch,
     updateItem,
   } = useFridge();
+
   const [sheetState, setSheetState] = React.useState<SheetState | null>(null);
 
   const closeSheet = React.useCallback(() => setSheetState(null), []);
+
+  React.useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener(
+      IOT_ADD_TO_FRIDGE_EVENT,
+      (payload: IotAddToFridgeEventPayload) => {
+        setSheetState({
+          mode: 'add',
+          initialIngredientName: payload.ingredientName,
+          initialQuantity: payload.quantity,
+        });
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   const handleDelete = React.useCallback(
     (id: number) => {
@@ -57,6 +92,7 @@ export default function FridgeScreen() {
             style: 'destructive',
             onPress: async () => {
               const ok = await deleteItem(id);
+
               if (ok) {
                 showMessage({
                   message: 'Đã xóa',
@@ -140,7 +176,7 @@ export default function FridgeScreen() {
   );
 
   return (
-    <View className="flex-1 bg-white px-8">
+    <View className="flex-1 bg-white px-4">
       <Tabs.Screen
         options={{
           title: 'Tủ lạnh',
@@ -168,11 +204,11 @@ export default function FridgeScreen() {
 
       <FocusAwareStatusBar />
 
-      <View className="mt-4 flex-row items-center gap-3">
+      <View className="mt-4 flex-row items-center gap-2">
         <FridgeSearchBar value={filters.search} onChangeText={setSearch} />
 
-        <Pressable hitSlop={12} className="size-12 items-center justify-center">
-          <Ionicons name="filter-outline" size={36} color="#999999" />
+        <Pressable hitSlop={12} className="size-11 items-center justify-center">
+          <Ionicons name="filter-outline" size={32} color="#999999" />
         </Pressable>
       </View>
 
@@ -192,8 +228,8 @@ export default function FridgeScreen() {
             estimatedItemSize={112}
             showsVerticalScrollIndicator={false}
             style={{ flex: 1 }}
-            contentContainerStyle={{ paddingTop: 28, paddingBottom: 8 }}
-            ItemSeparatorComponent={() => <View className="h-5" />}
+            contentContainerStyle={{ paddingTop: 20, paddingBottom: 8 }}
+            ItemSeparatorComponent={() => <View className="h-2" />}
             refreshControl={
               <RefreshControl refreshing={isLoading} onRefresh={refetch} />
             }
@@ -238,6 +274,14 @@ export default function FridgeScreen() {
         visible={Boolean(sheetState)}
         mode={sheetState?.mode ?? 'add'}
         item={sheetState?.mode === 'edit' ? sheetState.item : null}
+        initialIngredientName={
+          sheetState?.mode === 'add'
+            ? sheetState.initialIngredientName
+            : undefined
+        }
+        initialQuantity={
+          sheetState?.mode === 'add' ? sheetState.initialQuantity : undefined
+        }
         loading={isMutating}
         onClose={closeSheet}
         onSubmit={handleSubmitSheet}

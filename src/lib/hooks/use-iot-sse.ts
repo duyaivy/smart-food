@@ -1,8 +1,7 @@
-import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
+import { DeviceEventEmitter } from 'react-native';
 import EventSource from 'react-native-sse';
 
-import { ROUTE } from '@/constants/route';
 import { showMessage } from '@/lib/common/show-message';
 import { Env } from '@/lib/env';
 import { useIotScanStore } from '@/lib/stores/use-iot-scan-store';
@@ -10,6 +9,13 @@ import {
   type IotSseConnectedPayload,
   type IotSseScanResultPayload,
 } from '@/models/types/iot-sse';
+
+export const IOT_ADD_TO_FRIDGE_EVENT = 'iot:add-to-fridge';
+
+export type IotAddToFridgeEventPayload = {
+  ingredientName: string;
+  quantity: string;
+};
 
 const MOCK_NUTRITION = {
   protein: 12,
@@ -28,14 +34,14 @@ function buildStreamUrl(deviceUid: string) {
   return `${baseUrl}/iot/devices/${encodeURIComponent(deviceUid)}/stream`;
 }
 
-function openAddIngredientScreen(payload: IotSseScanResultPayload) {
-  router.push({
-    pathname: ROUTE.STACK.FRIDGE.ADD_INGREDIENT,
-    params: {
-      ingredientName: payload.ingredientName ?? '',
-      quantity: String(payload.weight),
-    },
-  });
+function openAddFridgeItemSheet(payload: IotSseScanResultPayload) {
+  DeviceEventEmitter.emit(IOT_ADD_TO_FRIDGE_EVENT, {
+    ingredientName: payload.ingredientName ?? '',
+    quantity:
+      payload.weight === null || payload.weight === undefined
+        ? ''
+        : String(payload.weight),
+  } satisfies IotAddToFridgeEventPayload);
 }
 
 export function useIotSse(deviceUid?: string | null) {
@@ -103,7 +109,7 @@ export function useIotSse(deviceUid?: string | null) {
             duration: 10000,
             actionLabel: 'Thêm vào tủ lạnh',
             onActionPress: () => {
-              openAddIngredientScreen(payload);
+              openAddFridgeItemSheet(payload);
             },
           });
 

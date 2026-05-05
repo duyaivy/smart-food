@@ -14,14 +14,6 @@ export default function FridgeStackLayout() {
         name="ingredient-detail"
         options={stackHeaderOptions({ title: 'Chi tiết nguyên liệu', dark })}
       />
-      <Stack.Screen
-        name="add-ingredient"
-        options={stackHeaderOptions({ title: 'Thêm nguyên liệu', dark })}
-      />
-      <Stack.Screen
-        name="edit-ingredient"
-        options={stackHeaderOptions({ title: 'Chỉnh sửa nguyên liệu', dark })}
-      />
     </Stack>
   );
 }

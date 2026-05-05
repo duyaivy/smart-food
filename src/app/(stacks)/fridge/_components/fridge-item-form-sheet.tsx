@@ -3,7 +3,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { Modal, Platform, Pressable, ScrollView } from 'react-native';
+import {
+  Modal,
+  PanResponder,
+  Platform,
+  Pressable,
+  ScrollView,
+} from 'react-native';
 
 import {
   Button,
@@ -74,6 +80,19 @@ export function FridgeItemFormSheet({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const isEdit = mode === 'edit';
   const lastResetKeyRef = useRef<string | null>(null);
+
+  const dragHandlePanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        gestureState.dy > 8 &&
+        Math.abs(gestureState.dy) > Math.abs(gestureState.dx),
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 40) {
+          onClose();
+        }
+      },
+    })
+  ).current;
 
   const schema = isEdit ? editFridgeItemFormSchema : addFridgeItemFormSchema;
 
@@ -147,9 +166,7 @@ export function FridgeItemFormSheet({
       return;
     }
 
-    if (lastResetKeyRef.current === resetKey) {
-      return;
-    }
+    if (lastResetKeyRef.current === resetKey) return;
 
     lastResetKeyRef.current = resetKey;
 
@@ -218,9 +235,7 @@ export function FridgeItemFormSheet({
   ) => {
     const parsedDueDate = toDueDateIso(values.dueDate);
 
-    if (!parsedDueDate) {
-      return;
-    }
+    if (!parsedDueDate) return;
 
     const selectedIngredientId = isEdit
       ? item?.ingredientId
@@ -228,9 +243,7 @@ export function FridgeItemFormSheet({
         ? values.ingredientId
         : undefined;
 
-    if (!selectedIngredientId) {
-      return;
-    }
+    if (!selectedIngredientId) return;
 
     const ok = await onSubmit({
       ingredientId: selectedIngredientId,
@@ -255,21 +268,22 @@ export function FridgeItemFormSheet({
         <Pressable className="flex-1" onPress={onClose} />
 
         <View
-          className="rounded-t-3xl bg-white px-6 pb-8 pt-3"
+          className="rounded-t-3xl bg-white px-6 pb-4 pt-3"
           style={{ maxHeight: '88%' }}
         >
-          <View className="mb-4 items-center">
+          <Pressable
+            hitSlop={12}
+            onPress={onClose}
+            className="mb-3 items-center pb-1"
+            {...dragHandlePanResponder.panHandlers}
+          >
             <View className="h-1.5 w-12 rounded-full bg-zinc-300" />
-          </View>
+          </Pressable>
 
-          <View className="mb-5 flex-row items-center justify-between">
-            <Text className="text-2xl font-bold text-zinc-950">
+          <View className="mb-4 items-center">
+            <Text className="text-center text-2xl font-bold text-zinc-950">
               {isEdit ? 'Chỉnh sửa nguyên liệu' : 'Thêm nguyên liệu'}
             </Text>
-
-            <Pressable hitSlop={12} onPress={onClose}>
-              <Ionicons name="close-outline" size={28} color="#18181B" />
-            </Pressable>
           </View>
 
           <ScrollView
@@ -341,6 +355,7 @@ export function FridgeItemFormSheet({
                             shouldValidate: true,
                             shouldDirty: true,
                           });
+
                           setValue('ingredientText', ingredient.name, {
                             shouldValidate: true,
                             shouldDirty: true,
@@ -462,13 +477,12 @@ export function FridgeItemFormSheet({
               )}
             />
 
-            <View className="mt-8 flex-row gap-4">
+            <View className="mt-6 flex-row gap-4">
               <Button
                 label="Hủy bỏ"
                 variant="outline"
                 className="flex-1 border-red-500"
                 textClassName="text-red-500"
-                disabled={loading || isSubmitting}
                 onPress={onClose}
               />
 

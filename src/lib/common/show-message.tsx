@@ -31,6 +31,9 @@ const MESSAGE_CONFIG = Object.freeze({
     titleColor: colors.success[800],
     descriptionColor: colors.success[700],
     iconColor: colors.success[700],
+    buttonBackgroundColor: colors.success[700],
+    buttonBorderColor: colors.success[700],
+    buttonTextColor: colors.white,
     iconName: 'checkmark-circle' as const,
   },
   error: {
@@ -38,6 +41,9 @@ const MESSAGE_CONFIG = Object.freeze({
     titleColor: colors.danger[800],
     descriptionColor: colors.danger[700],
     iconColor: colors.danger[700],
+    buttonBackgroundColor: colors.danger[700],
+    buttonBorderColor: colors.danger[700],
+    buttonTextColor: colors.white,
     iconName: 'close-circle' as const,
   },
   warning: {
@@ -45,6 +51,9 @@ const MESSAGE_CONFIG = Object.freeze({
     titleColor: colors.warning[800],
     descriptionColor: colors.warning[700],
     iconColor: colors.warning[700],
+    buttonBackgroundColor: colors.warning[700],
+    buttonBorderColor: colors.warning[700],
+    buttonTextColor: colors.white,
     iconName: 'warning' as const,
   },
   info: {
@@ -52,6 +61,9 @@ const MESSAGE_CONFIG = Object.freeze({
     titleColor: colors.primary[800],
     descriptionColor: colors.primary[700],
     iconColor: colors.primary[700],
+    buttonBackgroundColor: colors.primary[700],
+    buttonBorderColor: colors.primary[700],
+    buttonTextColor: colors.white,
     iconName: 'information-circle' as const,
   },
   default: {
@@ -59,6 +71,9 @@ const MESSAGE_CONFIG = Object.freeze({
     titleColor: colors.neutral[900],
     descriptionColor: colors.neutral[700],
     iconColor: colors.neutral[700],
+    buttonBackgroundColor: colors.neutral[800],
+    buttonBorderColor: colors.neutral[800],
+    buttonTextColor: colors.white,
     iconName: 'notifications' as const,
   },
 } as const);
@@ -121,27 +136,44 @@ export const showMessage = ({
           ) : null}
 
           <Pressable
+            accessibilityRole="button"
             hitSlop={8}
             onPress={() => {
               hideMessage();
               onActionPress?.();
             }}
             style={({ pressed }) => ({
-              alignSelf: 'flex-start',
-              marginTop: 8,
-              opacity: pressed ? 0.65 : 1,
-              paddingVertical: 2,
+              opacity: pressed ? 0.75 : 1,
             })}
           >
-            <Text
+            <View
               style={{
-                color: colors.primary[800],
-                fontSize: 13,
-                fontWeight: '800',
+                width: '100%',
+                minHeight: 42,
+                marginTop: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1.5,
+                borderColor: config.buttonBorderColor,
+                borderRadius: 12,
+                backgroundColor: config.buttonBackgroundColor,
+                paddingHorizontal: 14,
+                paddingVertical: 9,
               }}
             >
-              {actionLabel}
-            </Text>
+              <Text
+                numberOfLines={1}
+                style={{
+                  color: config.buttonTextColor,
+                  fontSize: 14,
+                  fontWeight: '800',
+                  lineHeight: 18,
+                  textAlign: 'center',
+                }}
+              >
+                {actionLabel}
+              </Text>
+            </View>
           </Pressable>
         </View>
       ) : null,
@@ -149,9 +181,9 @@ export const showMessage = ({
     style: {
       backgroundColor: config.backgroundColor,
       borderRadius: 14,
-      paddingVertical: 12,
+      paddingVertical: hasAction ? 14 : 12,
       paddingHorizontal: 14,
-      minHeight: 64,
+      minHeight: hasAction ? 118 : 64,
       alignItems: 'center',
     },
 

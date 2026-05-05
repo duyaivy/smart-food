@@ -31,8 +31,6 @@ export const ROUTE = {
 
     FRIDGE: {
       ROOT: '/(stacks)/fridge',
-      ADD_INGREDIENT: '/(stacks)/fridge/add-ingredient',
-      EDIT_INGREDIENT: '/(stacks)/fridge/edit-ingredient',
     },
 
     PROFILE: {
