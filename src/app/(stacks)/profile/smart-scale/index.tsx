@@ -7,18 +7,18 @@ import {
   ScrollView,
   View,
 } from '@/components/ui';
-import { useIotStore } from '@/lib/stores/use-iot-store';
 import {
   useGetDeviceStatusQuery,
   useGetMyDevicesQuery,
   usePairDeviceMutation,
   useUnpairDeviceMutation,
 } from '@/lib/hooks/queries/iot.query';
+import { useIotStore } from '@/lib/stores/use-iot-store';
 
-import { EmptyDeviceState } from './_components/empty-device-state';
-import { DevicePreviewCard } from './_components/device-preview-card';
-import { DeviceInfoCard } from './_components/device-info-card';
 import { DeviceActions } from './_components/device-actions';
+import { DeviceInfoCard } from './_components/device-info-card';
+import { DevicePreviewCard } from './_components/device-preview-card';
+import { EmptyDeviceState } from './_components/empty-device-state';
 
 const SAFE_AREA_EDGES = ['bottom'] as const;
 
@@ -133,10 +133,7 @@ export default function SmartScaleScreen(): React.JSX.Element {
           <View className="gap-4">
             <DevicePreviewCard />
             <DeviceInfoCard status={currentStatus} />
-            <DeviceActions
-              isUnpairing={isUnpairing}
-              onUnpair={handleUnpair}
-            />
+            <DeviceActions isUnpairing={isUnpairing} onUnpair={handleUnpair} />
           </View>
         )}
       </ScrollView>

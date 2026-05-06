@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Text, View } from '@/components/ui';
 import { formatRecordedAt } from '@/lib/utils/date-time';
+import { formatUnitLabel } from '@/lib/utils/unit';
 
 type Props = {
   ingredientName: string | null;
@@ -13,6 +14,7 @@ type Props = {
   weight: number;
   status: 'DONE' | 'FAILED';
   recordedAt: number;
+  unit?: string | null;
 };
 
 export function ScanRecordCard({
@@ -25,8 +27,10 @@ export function ScanRecordCard({
   weight,
   status,
   recordedAt,
+  unit,
 }: Props) {
   const isDone = status === 'DONE';
+  const unitLabel = formatUnitLabel(unit ?? 'g');
 
   return (
     <View className="rounded-2xl border border-neutral-200 bg-white p-4">
@@ -58,7 +62,9 @@ export function ScanRecordCard({
       <View className="mt-4 gap-2">
         <View className="flex-row justify-between">
           <Text className="text-neutral-600">Khối lượng</Text>
-          <Text className="font-medium text-black">{weight} g</Text>
+          <Text className="font-medium text-black">
+            {weight} {unitLabel}
+          </Text>
         </View>
 
         <View className="flex-row justify-between">
@@ -91,7 +97,7 @@ export function ScanRecordCard({
 
         <View className="flex-row justify-between">
           <Text className="text-neutral-600">Thời gian ghi nhận</Text>
-          <Text className="max-w-[55%] text-right font-medium text-black">
+          <Text className="w-1/2 text-right font-medium text-black">
             {formatRecordedAt(recordedAt)}
           </Text>
         </View>

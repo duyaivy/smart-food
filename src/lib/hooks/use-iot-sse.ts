@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { DeviceEventEmitter } from 'react-native';
 import EventSource from 'react-native-sse';
 
 import { showMessage } from '@/lib/common/show-message';
@@ -8,6 +9,13 @@ import {
   type IotSseConnectedPayload,
   type IotSseScanResultPayload,
 } from '@/models/types/iot-sse';
+
+export const IOT_ADD_TO_FRIDGE_EVENT = 'iot:add-to-fridge';
+
+export type IotAddToFridgeEventPayload = {
+  ingredientName: string;
+  quantity: string;
+};
 
 const MOCK_NUTRITION = {
   protein: 12,
@@ -24,6 +32,16 @@ function buildStreamUrl(deviceUid: string) {
   }
 
   return `${baseUrl}/iot/devices/${encodeURIComponent(deviceUid)}/stream`;
+}
+
+function openAddFridgeItemSheet(payload: IotSseScanResultPayload) {
+  DeviceEventEmitter.emit(IOT_ADD_TO_FRIDGE_EVENT, {
+    ingredientName: payload.ingredientName ?? '',
+    quantity:
+      payload.weight === null || payload.weight === undefined
+        ? ''
+        : String(payload.weight),
+  } satisfies IotAddToFridgeEventPayload);
 }
 
 export function useIotSse(deviceUid?: string | null) {
@@ -79,13 +97,29 @@ export function useIotSse(deviceUid?: string | null) {
           source: 'sse',
         });
 
+        if (payload.status === 'DONE') {
+          showMessage({
+            message: 'Đã nhận kết quả quét mới',
+            description:
+              payload.message ||
+              `${payload.ingredientName ?? 'Nguyên liệu'} - ${
+                payload.weight
+              } g`,
+            type: 'success',
+            duration: 10000,
+            actionLabel: 'Thêm vào tủ lạnh',
+            onActionPress: () => {
+              openAddFridgeItemSheet(payload);
+            },
+          });
+
+          return;
+        }
+
         showMessage({
-          message:
-            payload.status === 'DONE'
-              ? 'Đã nhận kết quả quét mới'
-              : 'Thiết bị gửi kết quả quét thất bại',
+          message: 'Thiết bị gửi kết quả quét thất bại',
           description: payload.message,
-          type: payload.status === 'DONE' ? 'success' : 'warning',
+          type: 'warning',
           duration: 2500,
         });
       } catch {
