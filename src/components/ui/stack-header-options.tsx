@@ -3,6 +3,8 @@ import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Platform, TouchableOpacity } from 'react-native';
 
+import { ROUTE } from '@/constants/route';
+
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
 const HEADER_BG_LIGHT = '#FFFFFF';
@@ -57,20 +59,22 @@ export function stackHeaderOptions({
       color: titleColor,
     },
     headerTintColor: iconColor,
-    headerLeft: () =>
-      router.canGoBack() ? (
-        <TouchableOpacity
-          onPress={() => router.back()}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          style={{
-            paddingHorizontal: Platform.OS === 'ios' ? 0 : 4,
-          }}
-          accessibilityLabel="Go back"
-          accessibilityRole="button"
-        >
-          <ChevronLeft size={BACK_ICON_SIZE} color={iconColor} />
-        </TouchableOpacity>
-      ) : null,
+    headerLeft: () => (
+      <TouchableOpacity
+        onPress={() => {
+          if (router.canGoBack()) router.back();
+          else router.push(ROUTE.STACK.DISCOVER.INGREDIENT);
+        }}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        style={{
+          paddingHorizontal: Platform.OS === 'ios' ? 0 : 4,
+        }}
+        accessibilityLabel="Go back"
+        accessibilityRole="button"
+      >
+        <ChevronLeft size={BACK_ICON_SIZE} color={iconColor} />
+      </TouchableOpacity>
+    ),
     ...extra,
   };
 }

@@ -15,10 +15,12 @@ export const ROUTE = {
     FRIDGE: '/(tabs)/fridge',
     PROFILE: '/(tabs)/profile',
   },
+
   STACK: {
     SEARCH: {
       ROOT: '/(stacks)/search',
     },
+
     DISCOVER: {
       ROOT: '/(stacks)/discover',
       DISH_LIST: '/(stacks)/discover/dishes',
