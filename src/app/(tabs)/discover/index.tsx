@@ -52,7 +52,9 @@ export default function DiscoverScreen() {
     setHasSeenDiscoverPrivacy(true);
     setOpenPrivacyModal(false);
   };
-
+  {
+    console.log({ currentDeviceRecords });
+  }
   return (
     <SafeAreaView className="flex-1 px-4">
       <FocusAwareStatusBar />
@@ -121,13 +123,13 @@ export default function DiscoverScreen() {
                 <View className="mt-3 gap-3">
                   {currentDeviceRecords.map((record) => (
                     <ScanRecordCard
-                      key={record.id}
+                      key={record.ingredientId}
                       ingredientName={record.ingredientName}
                       calories={record.calories}
                       protein={record.protein}
                       carb={record.carb}
                       fat={record.fat}
-                      confidence={record.confidence}
+                      confidence={record.predictedConfidence}
                       weight={record.weight}
                       status={record.status}
                       recordedAt={record.recordedAt}

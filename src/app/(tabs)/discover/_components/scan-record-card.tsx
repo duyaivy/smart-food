@@ -4,12 +4,12 @@ import { Text, View } from '@/components/ui';
 import { formatRecordedAt } from '@/lib/utils/date-time';
 
 type Props = {
-  ingredientName: string | null;
-  calories: number | null;
-  protein: number | null;
-  carb: number | null;
-  fat: number | null;
-  confidence: number | null;
+  ingredientName?: string;
+  calories?: number;
+  protein?: number;
+  carb?: number;
+  fat?: number;
+  confidence?: number;
   weight: number;
   status: 'DONE' | 'FAILED';
   recordedAt: number;
@@ -36,7 +36,7 @@ export function ScanRecordCard({
             {ingredientName ?? 'Chưa nhận diện được'}
           </Text>
           <Text className="mt-1 text-sm text-neutral-500">
-            Độ chính xác: {confidence ?? 50}%
+            Độ chính xác: {confidence ? (confidence * 100).toFixed(2) : 92}%
           </Text>
         </View>
 
@@ -71,14 +71,14 @@ export function ScanRecordCard({
         <View className="flex-row justify-between">
           <Text className="text-neutral-600">Protein</Text>
           <Text className="font-medium text-black">
-            {protein ?? 'Chưa có dữ liệu'} g
+            {protein?.toFixed(2) ?? 'Chưa có dữ liệu'} g
           </Text>
         </View>
 
         <View className="flex-row justify-between">
           <Text className="text-neutral-600">Carb</Text>
           <Text className="font-medium text-black">
-            {carb ?? 'Chưa có dữ liệu'} g
+            {carb?.toFixed(2) ?? 'Chưa có dữ liệu'} g
           </Text>
         </View>
 

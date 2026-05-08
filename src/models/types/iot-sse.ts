@@ -4,12 +4,13 @@ export type IotSseConnectedPayload = {
 
 export type IotSseScanResultPayload = {
   deviceUid: string;
-  ingredientName: string | null;
-  calories: number | null;
-  protein?: number | null;
-  carb?: number | null;
-  fat?: number | null;
-  confidence?: number | null;
+  ingredientName?: string;
+  ingredientId: string;
+  calories: number;
+  protein?: number;
+  carb?: number;
+  fat?: number;
+  predictedConfidence?: number;
   weight: number;
   status: 'DONE' | 'FAILED';
   message: string;
