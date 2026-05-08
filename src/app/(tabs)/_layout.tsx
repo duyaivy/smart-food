@@ -1,5 +1,5 @@
 import { Redirect, SplashScreen, Tabs } from 'expo-router';
-import React, { useCallback, useEffect } from 'react';
+import React, { type ComponentProps, useCallback, useEffect } from 'react';
 
 import { CustomTabBar } from '@/components/ui/tab-bar/custom-tab-bar';
 import { ROUTE } from '@/constants/route';
@@ -27,7 +27,9 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      tabBar={(props: any) => <CustomTabBar {...props} />}
+      tabBar={(props: ComponentProps<typeof CustomTabBar>) => (
+        <CustomTabBar {...props} />
+      )}
       screenOptions={{
         headerShown: false,
       }}
@@ -49,10 +51,10 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="cooking/index"
+        name="recommendation/index"
         options={{
-          title: 'Cooking',
-          tabBarButtonTestID: 'cooking-tab',
+          title: 'Gợi ý',
+          tabBarButtonTestID: 'recommendation-tab',
         }}
       />
 

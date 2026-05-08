@@ -6,11 +6,14 @@ import React, { type PropsWithChildren, useCallback, useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { dishApi } from '@/api/dish.api';
+import { recommendationApi } from '@/api/recommendation.api';
 import { userApi } from '@/api/user.api';
 import { ROUTE } from '@/constants/route';
+import { showMessage } from '@/lib/common/show-message';
 import { useDishStore } from '@/lib/stores/use-dish-store';
 import { useGlobalStore } from '@/lib/stores/use-global-store';
 import { useIngredientStore } from '@/lib/stores/use-ingredient-store';
+import { useRecommendationStore } from '@/lib/stores/use-recommendation-store';
 import { toIntegerId } from '@/lib/utils/format';
 import {
   NOTIFICATION_ACTION,
@@ -57,6 +60,36 @@ const isSupportedNotificationAction = (
     action === NOTIFICATION_ACTION.UPDATE ||
     action === NOTIFICATION_ACTION.DELETE
   );
+};
+
+const RECOMMENDATION_READY_TYPE = 'RECOMMENDATION_READY';
+
+const isRecommendationReadyPayload = (
+  payload: NotificationPayload
+): payload is NotificationPayload & { jobId: number | string; type: string } =>
+  payload.type === RECOMMENDATION_READY_TYPE && !!toIntegerId(payload.jobId);
+
+const syncRecommendationByNotification = async (
+  payload: NotificationPayload
+) => {
+  if (!isRecommendationReadyPayload(payload)) return;
+
+  const jobId = toIntegerId(payload.jobId);
+  if (!jobId) return;
+
+  showMessage({
+    message: 'Thực đơn đã sẵn sàng',
+    description: 'AvocadoAI đã tạo xong gợi ý thực đơn cho bạn.',
+    type: 'success',
+  });
+
+  try {
+    const { data } = await recommendationApi.getResult(jobId);
+    useRecommendationStore.getState().setResult(data.data);
+  } catch (error) {
+    useRecommendationStore.getState().setJobStatus('FAILED');
+    console.error('Sync gợi ý thực đơn từ notification thất bại:', error);
+  }
 };
 
 const syncIngredientByNotificationAction = async (
@@ -202,7 +235,14 @@ const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
         setHasRegisteredPushToken(true);
       })
       .catch((error) => {
-        console.error('Lỗi khi gửi push token lên server:', error);
+        console.log('Push token error:', {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+          url: error.config?.url,
+          method: error.config?.method,
+          payload: error.config?.data,
+        });
       });
   }, []);
 
@@ -210,6 +250,7 @@ const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
     (notification: Notifications.Notification) => {
       const data = notification.request.content.data as NotificationPayload;
       console.log('Notification nhận được:', data);
+      void syncRecommendationByNotification(data);
       void syncDishByNotificationAction(data);
       void syncIngredientByNotificationAction(data);
     },
@@ -221,6 +262,7 @@ const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
       const data = response.notification.request.content
         .data as NotificationPayload;
       console.log('User tap notification:', data);
+      void syncRecommendationByNotification(data);
       void syncDishByNotificationAction(data);
       void syncIngredientByNotificationAction(data);
       navigateByNotificationPayload(data);

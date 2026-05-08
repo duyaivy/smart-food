@@ -61,3 +61,5 @@ export const getCategoryConfig = (categoryId?: number) =>
   categoryId != null
     ? (CATEGORY_CONFIG[categoryId] ?? DEFAULT_CATEGORY)
     : DEFAULT_CATEGORY;
+
+export const MEAL_PERIODS = ['breakfast', 'lunch', 'dinner'];

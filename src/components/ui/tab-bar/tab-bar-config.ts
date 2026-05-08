@@ -1,9 +1,9 @@
 import {
-  Flame,
   Home,
   Lightbulb,
   type LucideIcon,
   Refrigerator,
+  Sparkles,
   User,
 } from 'lucide-react-native';
 
@@ -53,12 +53,12 @@ export const TAB_CONFIG: TabItem[] = [
     testID: 'discover-tab',
   },
   {
-    name: 'cooking/index',
-    href: ROUTE.TAB.COOKING,
-    label: 'Nấu ăn',
-    Icon: Flame,
+    name: 'recommendation/index',
+    href: ROUTE.TAB.RECOMMENDATION,
+    label: 'Gợi ý',
+    Icon: Sparkles,
     isCenter: true,
-    testID: 'cooking-tab',
+    testID: 'recommendation-tab',
   },
   {
     name: 'fridge/index',

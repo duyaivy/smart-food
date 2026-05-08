@@ -19,4 +19,6 @@ export type NotificationPayload = {
   dishId?: number | string;
   ingredientId?: number | string;
   action?: NotificationAction | string;
+  type?: string;
+  jobId?: number | string;
 };

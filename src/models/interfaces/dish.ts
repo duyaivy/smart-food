@@ -1,5 +1,5 @@
 import { type Difficulty } from '../types/dish';
-
+import { type IIngredient as IIngredientType } from './ingredient';
 export interface MiniDish {
   id: number;
   name: string;
@@ -9,12 +9,15 @@ export interface MiniDish {
   difficulty: Difficulty;
   images: string[];
   calories?: number | null;
+  type?: DishType | null;
+  ingredients?: IIngredient[];
 }
 
 export interface DishListResult {
   control: { total: number; page: number; limit: number };
   results: MiniDish[];
 }
+export type DishType = 'MAINDISH' | 'SOUP' | 'VEGETABLE';
 
 export interface IDishIngredient {
   // thành phần la nguyen lieu tho
@@ -32,6 +35,7 @@ export interface Instruction {
 }
 
 export interface IIngredient {
+  ingredient?: IIngredientType;
   id: number;
   name: string;
   quantity: string;
@@ -51,4 +55,5 @@ export interface IDish {
   createdAt: Date;
   updatedAt: Date;
   ingredients: IIngredient[];
+  type: DishType;
 }

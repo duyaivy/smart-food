@@ -31,9 +31,21 @@ export default function DishDetailScreen() {
 
   const ingredientData = useMemo(() => {
     const apiIngredients = dish?.ingredients ?? [];
-    const normalizedIngredients = apiIngredients.filter(
-      (item) => item.name.trim().length > 0 && item.quantity.trim().length > 0
-    );
+    const normalizedIngredients = apiIngredients
+      .map((item) => {
+        const name = item.name ?? item.ingredient?.name ?? '';
+        const quantity = item.quantity ?? '';
+
+        return {
+          ...item,
+          name,
+          quantity,
+          isAvailable: item.isAvailable ?? false,
+        };
+      })
+      .filter(
+        (item) => item.name.trim().length > 0 && item.quantity.trim().length > 0
+      );
 
     if (normalizedIngredients.length > 0) {
       return normalizedIngredients;

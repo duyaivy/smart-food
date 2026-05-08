@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import { HeaderNoBack } from '@/components/ui/header-no-back';
 import { ROUTE } from '@/constants/route';
 import { useGetDeviceStatusQuery } from '@/lib/hooks/queries/iot.query';
 import { useDiscoverPrivacy } from '@/lib/hooks/use-discover-privacy';
@@ -67,8 +68,7 @@ export default function DiscoverScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-2xl font-bold">Khám phá</Text>
-
+        <HeaderNoBack title="Khám phá" />
         <View className="mt-4 flex-row gap-2">
           <Pressable
             onPress={() => router.push(ROUTE.STACK.DISCOVER.DISH_LIST)}
