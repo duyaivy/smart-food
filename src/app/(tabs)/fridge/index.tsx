@@ -129,12 +129,6 @@ export default function FridgeScreen() {
       });
 
       if (createdItem) {
-        showMessage({
-          message: 'Đã thêm vào tủ lạnh',
-          description: 'Nguyên liệu đã được thêm hoặc cập nhật trong tủ lạnh.',
-          type: 'success',
-        });
-
         return true;
       }
 

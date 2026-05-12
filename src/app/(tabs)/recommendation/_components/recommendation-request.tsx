@@ -32,6 +32,7 @@ import {
 } from '@/constants/common';
 import { cn } from '@/lib/common/utils';
 import { useSubmitRecommendationMutation } from '@/lib/hooks/queries/recommendation.query';
+import { useRecommendationStore } from '@/lib/stores/use-recommendation-store';
 import { type RecommendationInput } from '@/models/interfaces/recommendation';
 import {
   recommendationSchema,
@@ -65,7 +66,7 @@ export const RecommendationRequest = () => {
       },
       mode: 'onSubmit', // Ensure validation only triggers on submit
     });
-
+  const setJobStatus = useRecommendationStore((state) => state.setJobStatus);
   const selectedGoal = watch('mealGoal');
   const weightChange = watch('weightChange');
   const selectedPlanDays = watch('planDays');
@@ -81,6 +82,7 @@ export const RecommendationRequest = () => {
       mealStructure: data.mealStructure,
     };
     try {
+      setJobStatus('PENDING');
       await submitRecommend(input);
     } catch (error) {
       // Error is handled in the mutation hook via showMessage

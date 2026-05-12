@@ -54,7 +54,7 @@ export default function RecommendationScreen() {
               onReset={reset}
             />
           </MotiView>
-        ) : jobStatus === 'PENDING' ? (
+        ) : jobStatus === 'PENDING' || jobStatus === 'PROCESSING' ? (
           <MotiView
             key="pending"
             from={{ opacity: 0 }}

@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import React from 'react';
+import { FlatList } from 'react-native';
 
 import {
   FocusAwareStatusBar,
@@ -52,9 +53,29 @@ export default function DiscoverScreen() {
     setHasSeenDiscoverPrivacy(true);
     setOpenPrivacyModal(false);
   };
-  {
-    console.log({ currentDeviceRecords });
-  }
+
+  const renderScanRecord = React.useCallback(
+    ({ item: record }: { item: (typeof currentDeviceRecords)[number] }) => (
+      <ScanRecordCard
+        ingredientName={record.ingredientName}
+        calories={record.calories}
+        protein={record.protein}
+        carb={record.carb}
+        fat={record.fat}
+        confidence={record.predictedConfidence}
+        weight={record.weight}
+        status={record.status}
+        recordedAt={record.recordedAt}
+      />
+    ),
+    []
+  );
+
+  const renderRecordSeparator = React.useCallback(
+    () => <View className="h-3" />,
+    []
+  );
+
   return (
     <SafeAreaView className="flex-1 px-4">
       <FocusAwareStatusBar />
@@ -120,22 +141,14 @@ export default function DiscoverScreen() {
                   </Text>
                 </View>
               ) : (
-                <View className="mt-3 gap-3">
-                  {currentDeviceRecords.map((record) => (
-                    <ScanRecordCard
-                      key={record.ingredientId}
-                      ingredientName={record.ingredientName}
-                      calories={record.calories}
-                      protein={record.protein}
-                      carb={record.carb}
-                      fat={record.fat}
-                      confidence={record.predictedConfidence}
-                      weight={record.weight}
-                      status={record.status}
-                      recordedAt={record.recordedAt}
-                    />
-                  ))}
-                </View>
+                <FlatList
+                  className="mt-3"
+                  data={currentDeviceRecords}
+                  renderItem={renderScanRecord}
+                  keyExtractor={(record) => String(record.recordedAt)}
+                  ItemSeparatorComponent={renderRecordSeparator}
+                  scrollEnabled={false}
+                />
               )}
             </View>
           </>

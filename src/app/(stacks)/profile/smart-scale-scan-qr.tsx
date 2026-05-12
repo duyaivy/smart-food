@@ -1,7 +1,7 @@
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import { router } from 'expo-router';
 import React from 'react';
 import { Alert } from 'react-native';
-import { router } from 'expo-router';
-import { CameraView, useCameraPermissions } from 'expo-camera';
 
 import {
   Button,
@@ -49,7 +49,10 @@ export default function SmartScaleScanQrScreen(): React.JSX.Element {
 
   if (!permission) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white px-6" edges={SAFE_AREA_EDGES}>
+      <SafeAreaView
+        className="flex-1 items-center justify-center bg-white px-6"
+        edges={SAFE_AREA_EDGES}
+      >
         <FocusAwareStatusBar />
         <Text className="text-center text-base text-neutral-600">
           Đang kiểm tra quyền camera...

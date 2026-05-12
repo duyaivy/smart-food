@@ -37,7 +37,6 @@ const AvatarPickerField = ({ image, name, setImage }: Props) => {
       result = await ImagePicker.launchCameraAsync(imagePickerOptions);
     }
     if (!result.canceled) {
-      console.log({ data: result.assets[0].uri });
       setImage?.(result.assets[0].uri);
     }
   };

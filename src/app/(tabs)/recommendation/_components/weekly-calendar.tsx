@@ -7,6 +7,7 @@ import { cn } from '@/lib/common/utils';
 import { type DailyPlan } from '@/models/interfaces/recommendation';
 
 const WEEK_LENGTH = 7;
+const DATE_PART_PATTERN = /^(\d{4})-(\d{2})-(\d{2})/;
 
 export type WeekDay = {
   date: Date;
@@ -14,21 +15,25 @@ export type WeekDay = {
   dayPlan: DailyPlan | null;
 };
 
-const formatDateKey = (date: Date): string => date.toISOString().slice(0, 10);
+const formatDateKey = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
 
 const toValidDate = (value?: string): Date | null => {
   if (!value) return null;
+  const datePart = value.match(DATE_PART_PATTERN);
+
+  if (datePart) {
+    const [, year, month, day] = datePart;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const getMondayOfWeek = (date: Date): Date => {
-  const monday = new Date(date);
-  const day = monday.getDay();
-  const distanceToMonday = day === 0 ? -6 : 1 - day;
-  monday.setDate(monday.getDate() + distanceToMonday);
-  monday.setHours(0, 0, 0, 0);
-  return monday;
 };
 
 export const buildWeekDays = (
@@ -46,9 +51,9 @@ export const buildWeekDays = (
 
   const inputStartDate = toValidDate(startDateValue);
   const firstPlanDate = toValidDate(plan[0]?.date);
-  const startDate = getMondayOfWeek(
-    firstPlanDate ?? inputStartDate ?? new Date()
-  );
+
+  const startDate = new Date(firstPlanDate ?? inputStartDate ?? new Date());
+  startDate.setHours(0, 0, 0, 0);
 
   return Array.from({ length: WEEK_LENGTH }, (_, index) => {
     const date = new Date(startDate);
@@ -67,12 +72,22 @@ type Props = {
   weekDays: WeekDay[];
   selectedDayKey?: string;
   onSelectDay: (dayKey: string) => void;
+  activeColor?: string;
+  borderColor?: string;
+  dayLabelFormatter?: (date: Date) => string;
+  hasDataBackgroundColor?: string;
+  hasDataDotColor?: string;
 };
 
 export const WeeklyCalendar = ({
   weekDays,
   selectedDayKey,
   onSelectDay,
+  activeColor = colors.voca.green,
+  borderColor,
+  dayLabelFormatter,
+  hasDataBackgroundColor = colors.voca.greenLight,
+  hasDataDotColor = colors.voca.secondary,
 }: Props) => (
   <View className="py-2">
     <View className="flex-row px-4">
@@ -89,11 +104,11 @@ export const WeeklyCalendar = ({
             )}
             style={{
               backgroundColor: isSelected
-                ? colors.voca.green
+                ? activeColor
                 : hasData
-                  ? colors.voca.greenLight
+                  ? hasDataBackgroundColor
                   : colors.white,
-              borderColor: hasData ? colors.voca.green : '#DADCE0',
+              borderColor: borderColor ?? (hasData ? activeColor : '#DADCE0'),
               opacity: hasData || isSelected ? 1 : 0.72,
             }}
           >
@@ -103,7 +118,8 @@ export const WeeklyCalendar = ({
                 color: isSelected ? colors.white : colors.voca.grey,
               }}
             >
-              {day.date.getDay() === 0 ? 'CN' : `T${day.date.getDay() + 1}`}
+              {dayLabelFormatter?.(day.date) ??
+                (day.date.getDay() === 0 ? 'CN' : `T${day.date.getDay() + 1}`)}
             </Text>
             <View
               className="mt-1 size-8 items-center justify-center overflow-hidden rounded-full"
@@ -114,7 +130,7 @@ export const WeeklyCalendar = ({
               <Text
                 className="text-sm font-bold"
                 style={{
-                  color: isSelected ? colors.voca.green : colors.voca.black,
+                  color: isSelected ? activeColor : colors.voca.black,
                 }}
               >
                 {day.date.getDate()}
@@ -125,8 +141,8 @@ export const WeeklyCalendar = ({
               style={{
                 backgroundColor: hasData
                   ? isSelected
-                    ? colors.voca.green
-                    : colors.voca.secondary
+                    ? activeColor
+                    : hasDataDotColor
                   : '#DADCE0',
               }}
             />

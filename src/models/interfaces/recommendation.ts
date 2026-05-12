@@ -64,7 +64,11 @@ export interface RecommendationPlan {
   shoppingList?: IMissingIngredient[];
 }
 
-export type RecommendationJobStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
+export type RecommendationJobStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'SUCCESS'
+  | 'FAILED';
 
 export interface RecommendationOutput {
   jobId: number;

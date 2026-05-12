@@ -5,7 +5,7 @@ import { Text } from '@/components/ui/text';
 import colors from '@/constants/colors';
 import { type Summary } from '@/models/interfaces/recommendation';
 
-const WEEK_LENGTH = 7;
+const WEEK_LENGTH = 10;
 
 type Props = {
   summary: Summary;

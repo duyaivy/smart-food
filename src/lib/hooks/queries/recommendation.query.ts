@@ -17,8 +17,8 @@ import {
  * Submit a new recommendation job.
  * On success, persists the jobId and input to the Zustand store (MMKV-backed).
  */
-export const useSubmitRecommendationMutation = () =>
-  useMutation({
+export const useSubmitRecommendationMutation = () => {
+  return useMutation({
     mutationFn: (input: RecommendationInput) => recommendationApi.create(input),
     onSuccess: (response, input) => {
       const { jobId } = response.data.data;
@@ -32,7 +32,7 @@ export const useSubmitRecommendationMutation = () =>
       showMessage({ message, type: 'error' });
     },
   });
-
+};
 // ─── Get Recommendation Result Query ──────────────────────────────────────────
 
 /**
@@ -54,7 +54,7 @@ export const useGetRecommendationQuery = (jobId: number | null) => {
       ? queryKeys.recommendation(jobId)
       : ['recommendation', null],
     queryFn: async () => {
-      if (!jobId) throw new Error('Thiếu jobId');
+      if (!jobId) throw new Error('Shortage jobId');
 
       const response = await recommendationApi.getResult(jobId);
       const data = response.data;
