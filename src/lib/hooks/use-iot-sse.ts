@@ -16,14 +16,6 @@ export type IotAddToFridgeEventPayload = {
   ingredientName: string;
   quantity: string;
 };
-
-const MOCK_NUTRITION = {
-  protein: 12,
-  carb: 8,
-  fat: 5,
-  confidence: 50,
-};
-
 function buildStreamUrl(deviceUid: string) {
   const baseUrl = Env.API_URL;
 
@@ -85,11 +77,12 @@ export function useIotSse(deviceUid?: string | null) {
         addRecord({
           deviceUid: payload.deviceUid,
           ingredientName: payload.ingredientName,
+          ingredientId: payload.ingredientId,
           calories: payload.calories,
-          protein: payload.protein ?? MOCK_NUTRITION.protein,
-          carb: payload.carb ?? MOCK_NUTRITION.carb,
-          fat: payload.fat ?? MOCK_NUTRITION.fat,
-          confidence: payload.confidence ?? MOCK_NUTRITION.confidence,
+          protein: payload.protein,
+          carb: payload.carb,
+          fat: payload.fat,
+          predictedConfidence: payload.predictedConfidence,
           weight: payload.weight,
           status: payload.status,
           message: payload.message,

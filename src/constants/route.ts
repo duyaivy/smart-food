@@ -11,7 +11,7 @@ export const ROUTE = {
   TAB: {
     HOME: '/(tabs)/',
     DISCOVER: '/(tabs)/discover',
-    COOKING: '/(tabs)/cooking',
+    RECOMMENDATION: '/(tabs)/recommendation',
     FRIDGE: '/(tabs)/fridge',
     PROFILE: '/(tabs)/profile',
   },
@@ -28,11 +28,10 @@ export const ROUTE = {
       INGREDIENT: '/(stacks)/discover/ingredients',
       INGREDIENT_DETAIL: '/(stacks)/discover/ingredients/[id]',
     },
-
-    FRIDGE: {
-      ROOT: '/(stacks)/fridge',
+    RECOMMENDATION: {
+      REQUEST: '/(tabs)/recommendation',
+      RESULT: '/(tabs)/recommendation',
     },
-
     PROFILE: {
       ABOUT_US: '/(stacks)/profile/about-us',
       EDIT: '/(stacks)/profile/edit',

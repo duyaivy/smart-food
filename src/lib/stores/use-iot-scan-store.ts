@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import type { IotScanRecord } from '@/models/interfaces/iot';
 import { storage } from '@/lib/common/storage';
 import { createSelectors } from '@/lib/common/utils';
 import { createMmkvZustandStorage } from '@/lib/stores/mmkv-zustand-storage';
+import type { IotScanRecord } from '@/models/interfaces/iot';
 
 export type IotScanStoreState = {
   hasHydrated: boolean;
@@ -34,8 +34,8 @@ const _useIotScanStore = create<IotScanStoreState>()(
       addRecord: (record) => {
         const nextRecord: IotScanRecord = {
           ...record,
-          id:
-            record.id ??
+          ingredientId:
+            record.ingredientId ??
             `${record.deviceUid}-${Date.now()}-${Math.random()
               .toString(36)
               .slice(2, 8)}`,

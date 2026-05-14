@@ -28,7 +28,7 @@ export type IotScanResultPayload = {
   protein?: number | null;
   carb?: number | null;
   fat?: number | null;
-  confidence?: number | null;
+  predictedConfidence?: number | null;
   weight: number;
   status: IotScanRecordStatus;
   message: string;
@@ -36,14 +36,14 @@ export type IotScanResultPayload = {
 };
 
 export type IotScanRecord = {
-  id: string;
+  ingredientId: string;
   deviceUid: string;
-  ingredientName: string | null;
-  calories: number | null;
-  protein: number | null;
-  carb: number | null;
-  fat: number | null;
-  confidence: number | null;
+  ingredientName?: string;
+  calories?: number;
+  protein?: number;
+  carb?: number;
+  fat?: number;
+  predictedConfidence?: number;
   weight: number;
   status: IotScanRecordStatus;
   message: string;

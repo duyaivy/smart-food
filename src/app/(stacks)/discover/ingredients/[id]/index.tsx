@@ -1,10 +1,9 @@
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useMemo } from 'react';
+import { Platform, TouchableOpacity } from 'react-native';
 
 import { ActivityIndicator, ScrollView, View } from '@/components/ui';
-import { TouchableOpacity, Platform } from 'react-native';
-import { ChevronLeft } from 'lucide-react-native';
-import { router } from 'expo-router';
 import { ROUTE } from '@/constants/route';
 import { useIngredient } from '@/lib/hooks/use-ingredient';
 

@@ -1,8 +1,9 @@
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { router } from 'expo-router';
-import { ROUTE } from '@/constants/route';
 import { ChevronLeft } from 'lucide-react-native';
 import { Platform, TouchableOpacity } from 'react-native';
+
+import { ROUTE } from '@/constants/route';
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 

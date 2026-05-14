@@ -1,8 +1,9 @@
-import React from 'react';
 import { router } from 'expo-router';
 import { Scale, Wifi, WifiOff } from 'lucide-react-native';
+import React from 'react';
 
 import { Pressable, Text, View } from '@/components/ui';
+import { ICON_SIZE_MEDIUM } from '@/constants/common';
 import { ROUTE } from '@/constants/route';
 import { formatLastSeenAt } from '@/lib/utils/date-time';
 
@@ -17,8 +18,10 @@ export function DeviceLiveCard({ deviceUid, isOnline, lastSeenAt }: Props) {
     <View className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <Scale size={20} color="#f97316" />
-          <Text className="text-lg font-semibold text-black">Cân thông minh</Text>
+          <Scale size={ICON_SIZE_MEDIUM} color="#f97316" />
+          <Text className="text-lg font-semibold text-black">
+            Cân thông minh
+          </Text>
         </View>
 
         <View

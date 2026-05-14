@@ -91,21 +91,7 @@ export default function FridgeScreen() {
             text: 'Xóa',
             style: 'destructive',
             onPress: async () => {
-              const ok = await deleteItem(id);
-
-              if (ok) {
-                showMessage({
-                  message: 'Đã xóa',
-                  description: 'Nguyên liệu đã được xóa khỏi tủ lạnh',
-                  type: 'success',
-                });
-              } else {
-                showMessage({
-                  message: 'Xóa thất bại',
-                  description: 'Không thể xóa nguyên liệu.',
-                  type: 'error',
-                });
-              }
+              await deleteItem(id);
             },
           },
         ]
@@ -129,20 +115,8 @@ export default function FridgeScreen() {
         });
 
         if (updatedItem) {
-          showMessage({
-            message: 'Cập nhật thành công',
-            description: 'Nguyên liệu đã được cập nhật',
-            type: 'success',
-          });
-
           return true;
         }
-
-        showMessage({
-          message: 'Cập nhật thất bại',
-          description: 'Không thể cập nhật nguyên liệu.',
-          type: 'error',
-        });
 
         return false;
       }
@@ -155,12 +129,6 @@ export default function FridgeScreen() {
       });
 
       if (createdItem) {
-        showMessage({
-          message: 'Đã thêm vào tủ lạnh',
-          description: 'Nguyên liệu đã được thêm hoặc cập nhật trong tủ lạnh.',
-          type: 'success',
-        });
-
         return true;
       }
 

@@ -18,7 +18,7 @@ const InfoSection = ({ user, isLoading = true }: InfoSectionProps) => {
     : null;
 
   return (
-    <View className="mt-24 flex items-center">
+    <View className="mt-20 flex items-center">
       {isLoading ? (
         <>
           <Skeleton className="size-36 rounded-full bg-secondary" />

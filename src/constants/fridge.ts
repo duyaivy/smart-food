@@ -7,4 +7,4 @@ export const priorityOptions = [
   FridgeItemPriority.LOW,
 ] as const;
 
-export type PriorityOption = typeof priorityOptions[number];
+export type PriorityOption = (typeof priorityOptions)[number];

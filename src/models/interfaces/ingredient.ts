@@ -1,4 +1,9 @@
 import { type UnitType } from '../types/dish';
+export interface IMissingIngredient {
+  ingredientId: number;
+  unit: UnitType;
+  quantity: number;
+}
 
 export interface IIngredient {
   id: number;

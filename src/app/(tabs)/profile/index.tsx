@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { FocusAwareStatusBar, SafeAreaView } from '@/components/ui';
+import { FocusAwareStatusBar, SafeAreaView, ScrollView } from '@/components/ui';
 import { useAuth } from '@/lib';
 import { useGetMeQuery } from '@/lib/hooks/queries/user.query';
 
@@ -18,10 +18,12 @@ export default function ProfileScreen() {
   }, [data, setUserInfor]);
 
   return (
-    <SafeAreaView className="flex min-h-screen w-full flex-col items-center bg-white px-6">
+    <SafeAreaView className="flex min-h-screen w-full flex-col items-center bg-white">
       <FocusAwareStatusBar />
-      <InfoSection isLoading={isLoading} user={data?.data} />
-      <UtilSection />
+      <ScrollView className=" w-full px-6">
+        <InfoSection isLoading={isLoading} user={data?.data} />
+        <UtilSection />
+      </ScrollView>
     </SafeAreaView>
   );
 }

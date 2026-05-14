@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import React from 'react';
+import { FlatList } from 'react-native';
 
 import {
   FocusAwareStatusBar,
@@ -9,14 +10,13 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import { HeaderNoBack } from '@/components/ui/header-no-back';
 import { ROUTE } from '@/constants/route';
 import { useGetDeviceStatusQuery } from '@/lib/hooks/queries/iot.query';
 import { useDiscoverPrivacy } from '@/lib/hooks/use-discover-privacy';
-import { useIngredient } from '@/lib/hooks/use-ingredient';
 import { useIotSse } from '@/lib/hooks/use-iot-sse';
 import { useIotScanStore } from '@/lib/stores/use-iot-scan-store';
 import { useIotStore } from '@/lib/stores/use-iot-store';
-import { normalizeText } from '@/lib/utils/format';
 
 import { DeviceLiveCard } from './_components/device-live-card';
 import { PrivacyModal } from './_components/privacy-modal';
@@ -41,8 +41,6 @@ export default function DiscoverScreen() {
     return records.filter((record) => record.deviceUid === device.deviceUid);
   }, [device?.deviceUid, records]);
 
-  const { ingredients } = useIngredient();
-
   const [openPrivacyModal, setOpenPrivacyModal] = React.useState(false);
 
   React.useEffect(() => {
@@ -55,6 +53,28 @@ export default function DiscoverScreen() {
     setHasSeenDiscoverPrivacy(true);
     setOpenPrivacyModal(false);
   };
+
+  const renderScanRecord = React.useCallback(
+    ({ item: record }: { item: (typeof currentDeviceRecords)[number] }) => (
+      <ScanRecordCard
+        ingredientName={record.ingredientName}
+        calories={record.calories}
+        protein={record.protein}
+        carb={record.carb}
+        fat={record.fat}
+        confidence={record.predictedConfidence}
+        weight={record.weight}
+        status={record.status}
+        recordedAt={record.recordedAt}
+      />
+    ),
+    []
+  );
+
+  const renderRecordSeparator = React.useCallback(
+    () => <View className="h-3" />,
+    []
+  );
 
   return (
     <SafeAreaView className="flex-1 px-4">
@@ -71,8 +91,7 @@ export default function DiscoverScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-2xl font-bold">Khám phá</Text>
-
+        <HeaderNoBack title="Khám phá" />
         <View className="mt-4 flex-row gap-2">
           <Pressable
             onPress={() => router.push(ROUTE.STACK.DISCOVER.DISH_LIST)}
@@ -122,33 +141,14 @@ export default function DiscoverScreen() {
                   </Text>
                 </View>
               ) : (
-                <View className="mt-3 gap-3">
-                  {currentDeviceRecords.map((record) => {
-                    const matched = record.ingredientName
-                      ? ingredients.find(
-                          (ing) =>
-                            normalizeText(ing.name) ===
-                            normalizeText(record.ingredientName ?? '')
-                        )
-                      : undefined;
-
-                    return (
-                      <ScanRecordCard
-                        key={record.id}
-                        ingredientName={record.ingredientName}
-                        calories={record.calories}
-                        protein={record.protein}
-                        carb={record.carb}
-                        fat={record.fat}
-                        confidence={record.confidence}
-                        weight={record.weight}
-                        status={record.status}
-                        recordedAt={record.recordedAt}
-                        unit={matched?.unit ?? 'g'}
-                      />
-                    );
-                  })}
-                </View>
+                <FlatList
+                  className="mt-3"
+                  data={currentDeviceRecords}
+                  renderItem={renderScanRecord}
+                  keyExtractor={(record) => String(record.recordedAt)}
+                  ItemSeparatorComponent={renderRecordSeparator}
+                  scrollEnabled={false}
+                />
               )}
             </View>
           </>

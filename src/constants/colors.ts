@@ -75,6 +75,22 @@ const colors = {
     800: '#991B1B',
     900: '#7F1D1D',
   },
+  voca: {
+    green: '#34A853',
+    greenLight: '#E6F4EA',
+    red: '#EA4335',
+    redLight: '#FCE8E6',
+    yellow: '#FBBC04',
+    yellowLight: '#FEF7E0',
+    blue: '#4285F4',
+    blueLight: '#E8F0FE',
+    grey: '#5F6368',
+    greyLight: '#F1F3F4',
+    black: '#202124',
+    white: '#FFFFFF',
+    primary: '#007A33',
+    secondary: '#67C276',
+  },
 } as const;
 
 export default colors;
