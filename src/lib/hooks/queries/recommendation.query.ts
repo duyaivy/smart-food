@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type AxiosError } from 'axios';
 
 import { recommendationApi } from '@/api/recommendation.api';
@@ -9,6 +9,8 @@ import { type SuccessResponse } from '@/models/interfaces/common';
 import {
   type RecommendationInput,
   type RecommendationOutput,
+  type SubRecommendationRequest,
+  type UpdateRecommendationRequest,
 } from '@/models/interfaces/recommendation';
 
 // ─── Submit Job Mutation ───────────────────────────────────────────────────────
@@ -70,5 +72,58 @@ export const useGetRecommendationQuery = (jobId: number | null) => {
     staleTime: Infinity, // push notification drives invalidation
     refetchOnWindowFocus: false,
     retry: 2,
+  });
+};
+
+// ─── Get Sub-Recommendations Mutation ─────────────────────────────────────────
+
+/**
+ * Fetch replacement candidates for specific dishes in a recommendation job.
+ * Used when user opens the dish swap modal.
+ */
+export const useGetSubRecommendationsMutation = () => {
+  return useMutation({
+    mutationFn: (request: SubRecommendationRequest) =>
+      recommendationApi.getSubRecommendations(request),
+    onError: (error: AxiosError<{ message: string }>) => {
+      const message =
+        error.response?.data?.message ??
+        (error instanceof Error ? error.message : 'Không thể tải món thay thế');
+
+      showMessage({ message, type: 'error' });
+    },
+  });
+};
+
+/**
+ * Submit dish swaps for a specific day and meal.
+ * On success, updates the local cache and shows success message.
+ */
+export const useUpdateRecommendationMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      jobId,
+      request,
+    }: {
+      jobId: number;
+      request: UpdateRecommendationRequest;
+    }) => recommendationApi.updateRecommendation(jobId, request),
+    onSuccess: (response, { jobId }) => {
+      const updatedResult = response.data.data;
+
+      // Update Zustand store
+      useRecommendationStore.getState().setResult(updatedResult);
+
+      queryClient.setQueryData(queryKeys.recommendation(jobId), response.data);
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      const message =
+        error.response?.data?.message ??
+        (error instanceof Error ? error.message : 'Không thể cập nhật món ăn');
+
+      showMessage({ message, type: 'error' });
+    },
   });
 };

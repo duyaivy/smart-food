@@ -101,6 +101,8 @@ export const RecommendationResult = ({
                 iconColor={colors.voca.yellow}
                 meals={selectedDayPlan.meals.breakfast}
                 ingredientsById={ingredientsById}
+                day={selectedDayPlan.day}
+                mealType="BREAKFAST"
               />
               <MealSection
                 title="Bữa trưa"
@@ -110,6 +112,8 @@ export const RecommendationResult = ({
                 ingredientsById={ingredientsById}
                 backgroundColor="#fffdf1"
                 borderColor="#F8D558"
+                day={selectedDayPlan.day}
+                mealType="LUNCH"
               />
               <MealSection
                 title="Bữa tối"
@@ -119,6 +123,8 @@ export const RecommendationResult = ({
                 ingredientsById={ingredientsById}
                 backgroundColor="#f0f9ff"
                 borderColor="#0563B5"
+                day={selectedDayPlan.day}
+                mealType="DINNER"
               />
             </View>
           </>

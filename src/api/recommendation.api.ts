@@ -6,6 +6,9 @@ import {
   type CreateRecommendationResponse,
   type RecommendationInput,
   type RecommendationOutput,
+  type SubRecommendationRequest,
+  type SubRecommendationResponse,
+  type UpdateRecommendationRequest,
 } from '@/models/interfaces/recommendation';
 
 const RECOMMENDATIONS_URL = '/recommendations';
@@ -25,5 +28,17 @@ export const recommendationApi = {
   getResult: (jobId: number) =>
     http.get<SuccessResponse<RecommendationOutput>>(
       generatePath(RECOMMENDATION_DETAIL_URL, { jobId: String(jobId) })
+    ),
+
+  getSubRecommendations: (request: SubRecommendationRequest) =>
+    http.post<SuccessResponse<SubRecommendationResponse>>(
+      `${RECOMMENDATIONS_URL}/subs`,
+      request
+    ),
+
+  updateRecommendation: (jobId: number, request: UpdateRecommendationRequest) =>
+    http.patch<SuccessResponse<RecommendationOutput>>(
+      generatePath(RECOMMENDATION_DETAIL_URL, { jobId: String(jobId) }),
+      request
     ),
 };
