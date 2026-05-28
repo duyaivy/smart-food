@@ -82,3 +82,39 @@ export interface CreateRecommendationResponse {
   jobId: number;
   status: RecommendationJobStatus;
 }
+export interface SubRecommendationRequest {
+  jobId: number;
+  dishIds: number[];
+}
+
+export interface DishCandidate {
+  dishId: number;
+  name: string;
+  calories: number;
+  role: DishType;
+  images: string[];
+  missingIngredient: IMissingIngredient[];
+}
+
+export interface SubRecommendationGroup {
+  originalDishId: number;
+  recommendations: DishCandidate[];
+}
+
+export type SubRecommendationResponse = SubRecommendationGroup[];
+
+export interface SwapItem {
+  originalDishId: number;
+  dishId: number;
+  role: DishType;
+  name: string;
+  calories: number;
+  images: string[];
+  missingIngredient: IMissingIngredient[];
+}
+
+export interface UpdateRecommendationRequest {
+  day: number;
+  meal: 'BREAKFAST' | 'LUNCH' | 'DINNER';
+  swaps: SwapItem[];
+}

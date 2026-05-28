@@ -1,12 +1,10 @@
 import { useRouter } from 'expo-router';
-import { ChevronDown, type LucideIcon } from 'lucide-react-native';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Image } from '@/components/ui';
 import { Text } from '@/components/ui/text';
 import colors from '@/constants/colors';
-import { ICON_SIZE_MEDIUM } from '@/constants/common';
 import { ROUTE } from '@/constants/route';
 import { useDishDetail } from '@/lib/hooks/use-dish-detail';
 import {
@@ -14,20 +12,6 @@ import {
   type IMissingIngredient,
 } from '@/models/interfaces/ingredient';
 import { type RecommendationMeal } from '@/models/interfaces/recommendation';
-
-import { DishSwapModal } from './dish-swap-modal';
-
-interface MealSectionProps {
-  title: string;
-  Icon: LucideIcon;
-  iconColor: string;
-  meals: RecommendationMeal[];
-  ingredientsById: Record<number, IIngredient>;
-  backgroundColor?: string;
-  borderColor?: string;
-  day: number;
-  mealType: 'BREAKFAST' | 'LUNCH' | 'DINNER';
-}
 
 type IngredientRow = {
   id: number;
@@ -44,111 +28,24 @@ const normalizeId = (value: string | number): number | null => {
 const getMissingIngredients = (
   meal: RecommendationMeal
 ): IMissingIngredient[] => meal.missingIngredient ?? [];
+
 enum Unit {
   GAM = 'gam',
   NUMBER = 'quả/củ',
 }
+
 const formatMissingQuantity = (ingredient: IMissingIngredient): string =>
   `${ingredient.quantity} ${Unit[ingredient.unit] ?? ''}`.trim();
 
-export const MealSection = ({
-  title,
-  Icon,
-  iconColor,
-  meals,
-  ingredientsById,
-  borderColor = colors.voca.green,
-  backgroundColor = '#F3FBF4',
-  day,
-  mealType,
-}: MealSectionProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [isSwapModalVisible, setIsSwapModalVisible] = useState(false);
+interface MealItemProps {
+  meal: RecommendationMeal;
+  ingredientsById?: Record<number, IIngredient>;
+  isSelected?: boolean;
+  onSelect?: () => void;
+}
 
-  return (
-    <View
-      className="overflow-hidden rounded-2xl border"
-      style={{
-        borderColor: borderColor,
-        backgroundColor: backgroundColor,
-      }}
-    >
-      <Pressable
-        onPress={() => setIsExpanded((current) => !current)}
-        className="flex-row items-center justify-between px-4 py-3"
-      >
-        <View className="flex-row items-center gap-3">
-          <Icon size={ICON_SIZE_MEDIUM} color={iconColor} />
-          <Text
-            className="text-base font-bold"
-            style={{ color: colors.voca.black }}
-          >
-            {title}
-          </Text>
-        </View>
-        <ChevronDown
-          size={ICON_SIZE_MEDIUM}
-          color={colors.voca.grey}
-          style={{ transform: [{ rotate: isExpanded ? '180deg' : '0deg' }] }}
-        />
-      </Pressable>
-
-      {isExpanded ? (
-        <View className="gap-3 px-3 pb-3">
-          {meals.length > 0 ? (
-            meals.map((meal, index) => (
-              <MealItem
-                key={`${meal.role}-${meal.dishId}-${index}`}
-                meal={meal}
-                ingredientsById={ingredientsById}
-              />
-            ))
-          ) : (
-            <Text className="text-sm" style={{ color: colors.voca.grey }}>
-              Chưa có món ăn cho bữa này.
-            </Text>
-          )}
-
-          <View className="flex-row gap-3 pt-1">
-            <Pressable
-              onPress={() => setIsSwapModalVisible(true)}
-              className="flex-1 items-center rounded-xl border py-3"
-              style={{ borderColor: colors.voca.red }}
-            >
-              <Text className="font-bold" style={{ color: colors.voca.red }}>
-                Món khác
-              </Text>
-            </Pressable>
-            <Pressable
-              className="flex-1 items-center rounded-xl py-3"
-              style={{ backgroundColor: colors.voca.secondary }}
-            >
-              <Text className="font-bold text-white">Nấu ăn ngay</Text>
-            </Pressable>
-          </View>
-        </View>
-      ) : null}
-
-      <DishSwapModal
-        visible={isSwapModalVisible}
-        onClose={() => setIsSwapModalVisible(false)}
-        meals={meals}
-        day={day}
-        mealType={mealType}
-        ingredientsById={ingredientsById}
-      />
-    </View>
-  );
-};
-
-const MealItem = memo(
-  ({
-    meal,
-    ingredientsById,
-  }: {
-    meal: RecommendationMeal;
-    ingredientsById: Record<number, IIngredient>;
-  }) => {
+export const MealItem = memo(
+  ({ meal, ingredientsById, isSelected, onSelect }: MealItemProps) => {
     const router = useRouter();
     const dishId = normalizeId(meal.dishId);
     const { dish, isLoading } = useDishDetail(dishId ?? meal.dishId);
@@ -162,7 +59,7 @@ const MealItem = memo(
 
       for (const missing of missingIngredients) {
         const name =
-          ingredientsById[missing.ingredientId]?.name ??
+          ingredientsById?.[missing.ingredientId]?.name ??
           `Nguyên liệu #${missing.ingredientId}`;
         if (!rows.has(name)) {
           rows.set(name, {
@@ -201,11 +98,17 @@ const MealItem = memo(
     );
 
     return (
-      <View
+      <Pressable
+        onPress={onSelect}
+        disabled={!onSelect}
         className="rounded-xl border p-3"
         style={{
-          backgroundColor: colors.white,
-          borderColor: hasMissingIngredients ? '#FCA5A5' : '#E5E7EB',
+          backgroundColor: isSelected ? colors.success[50] : colors.white,
+          borderColor: isSelected
+            ? colors.voca.primary
+            : hasMissingIngredients
+              ? '#FCA5A5'
+              : '#E5E7EB',
         }}
       >
         <View className="flex-row gap-3">
@@ -300,7 +203,7 @@ const MealItem = memo(
             ) : null}
           </View>
         </View>
-      </View>
+      </Pressable>
     );
   }
 );
