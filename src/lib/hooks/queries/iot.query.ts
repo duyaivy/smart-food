@@ -14,7 +14,11 @@ import { useIotScanStore } from '@/lib/stores/use-iot-scan-store';
 import { useIotStore } from '@/lib/stores/use-iot-store';
 import { type SuccessResponse } from '@/models/interfaces/common';
 
-export const useGetMyDevicesQuery = () => {
+type UseGetMyDevicesQueryOptions = {
+  enabled?: boolean;
+};
+
+export const useGetMyDevicesQuery = (options?: UseGetMyDevicesQueryOptions) => {
   const device = useIotStore((state) => state.device);
   const lastSyncedAt = useIotStore((state) => state.lastSyncedAt);
 
@@ -62,6 +66,7 @@ export const useGetMyDevicesQuery = () => {
       ...response,
       data: response.data[0] ?? null,
     }),
+    enabled: options?.enabled ?? true,
     initialData,
     initialDataUpdatedAt: lastSyncedAt ?? undefined,
     staleTime: 60 * 1000,
@@ -154,7 +159,7 @@ export const usePairDeviceMutation = () =>
         {
           message: response.data.message,
           data: [device],
-        },
+        }
       );
 
       await Promise.all([
@@ -181,8 +186,7 @@ export const usePairDeviceMutation = () =>
             const [rootKey, secondKey] = queryKey;
 
             return (
-              rootKey === 'iot-device-status' &&
-              secondKey === device.deviceUid
+              rootKey === 'iot-device-status' && secondKey === device.deviceUid
             );
           },
         }),
@@ -196,9 +200,7 @@ export const usePairDeviceMutation = () =>
     onError: (error: AxiosError<{ message: string }>) => {
       const message =
         error.response?.data?.message ??
-        (error instanceof Error
-          ? error.message
-          : 'Liên kết thiết bị thất bại');
+        (error instanceof Error ? error.message : 'Liên kết thiết bị thất bại');
 
       showMessage({
         message,
