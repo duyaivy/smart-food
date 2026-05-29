@@ -4,12 +4,20 @@ import React, { type ComponentProps, useCallback, useEffect } from 'react';
 import { CustomTabBar } from '@/components/ui/tab-bar/custom-tab-bar';
 import { ROUTE } from '@/constants/route';
 import { useAuth, useIsFirstTime } from '@/lib';
+import { useGetMyDevicesQuery } from '@/lib/hooks/queries/iot.query';
+
 export default function TabLayout() {
   const status = useAuth.use.status();
   const [isFirstTime] = useIsFirstTime();
+
+  const isAuthenticated = status !== 'signOut' && status !== 'idle';
+
+  useGetMyDevicesQuery({ enabled: isAuthenticated });
+
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
   }, []);
+
   useEffect(() => {
     if (status !== 'idle') {
       setTimeout(() => {
@@ -21,6 +29,7 @@ export default function TabLayout() {
   if (isFirstTime) {
     return <Redirect href={ROUTE.AUTH.ONBOARDING} />;
   }
+
   if (status === 'signOut') {
     return <Redirect href={ROUTE.AUTH.SIGNIN} />;
   }
