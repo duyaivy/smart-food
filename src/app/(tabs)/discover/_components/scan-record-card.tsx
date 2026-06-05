@@ -40,7 +40,7 @@ export function ScanRecordCard({
             {ingredientName ?? 'Chưa nhận diện được'}
           </Text>
           <Text className="mt-1 text-sm text-neutral-500">
-            Độ chính xác: {confidence ? (confidence * 100).toFixed(2) : 92}%
+            Độ tin cậy: {confidence ? (confidence * 100).toFixed(2) : 92}%
           </Text>
         </View>
 

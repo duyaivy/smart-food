@@ -1,4 +1,4 @@
-import { Link, type LinkProps } from 'expo-router';
+import { type LinkProps, router } from 'expo-router';
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 import { TouchableOpacity, View } from 'react-native';
 
@@ -23,11 +23,22 @@ const ListItemIcon = ({
   href,
   onPress,
 }: Props) => {
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+      return;
+    }
+
+    if (href) {
+      router.push(href);
+    }
+  };
+
   const content = (
     <TouchableOpacity
       activeOpacity={href ? 0.7 : 1}
       disabled={!href && !onPress}
-      onPress={onPress}
+      onPress={handlePress}
       className="mt-3.5 flex w-full flex-row justify-between gap-2"
     >
       <View className="flex flex-row gap-2">
@@ -39,14 +50,6 @@ const ListItemIcon = ({
       {isChevron && <ChevronRight size={ICON_SIZE_LARGE} color={color} />}
     </TouchableOpacity>
   );
-
-  if (href && !onPress) {
-    return (
-      <Link href={href} asChild>
-        {content}
-      </Link>
-    );
-  }
 
   return content;
 };

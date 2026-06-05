@@ -22,7 +22,11 @@ import { DeviceLiveCard } from './_components/device-live-card';
 import { PrivacyModal } from './_components/privacy-modal';
 import { ScanRecordCard } from './_components/scan-record-card';
 import { WarningConnectCard } from './_components/warning-connect-card';
-
+const mockDevice = {
+  deviceUid: 'esp32_kitchen_scale_001',
+  isOnline: true,
+  lastSeenAt: new Date().toISOString(),
+};
 export default function DiscoverScreen() {
   const device = useIotStore((state) => state.device);
   const records = useIotScanStore((state) => state.records);
@@ -34,6 +38,7 @@ export default function DiscoverScreen() {
 
   const { data: statusData } = useGetDeviceStatusQuery(device?.deviceUid);
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const currentStatus = statusData?.data;
 
   const currentDeviceRecords = React.useMemo(() => {
@@ -122,12 +127,16 @@ export default function DiscoverScreen() {
           <WarningConnectCard />
         ) : (
           <>
-            <DeviceLiveCard
+            {/* <DeviceLiveCard
               deviceUid={device.deviceUid}
               isOnline={currentStatus?.isOnline ?? false}
               lastSeenAt={currentStatus?.lastSeenAt}
+            /> */}
+            <DeviceLiveCard
+              deviceUid={mockDevice.deviceUid}
+              isOnline={mockDevice.isOnline ?? false}
+              lastSeenAt={mockDevice.lastSeenAt}
             />
-
             <View className="mt-5">
               <Text className="text-lg font-semibold text-black">
                 Kết quả nhận diện gần đây
