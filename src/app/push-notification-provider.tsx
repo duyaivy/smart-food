@@ -9,6 +9,7 @@ import { dishApi } from '@/api/dish.api';
 import { recommendationApi } from '@/api/recommendation.api';
 import { userApi } from '@/api/user.api';
 import { ROUTE } from '@/constants/route';
+import { useAuth } from '@/lib/auth';
 import { showMessage } from '@/lib/common/show-message';
 import { useDishStore } from '@/lib/stores/use-dish-store';
 import { useGlobalStore } from '@/lib/stores/use-global-store';
@@ -205,9 +206,18 @@ const registerForPushNotificationsAsync = async (): Promise<string | null> => {
 };
 
 const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
+  const authStatus = useAuth.use.status();
+  const accessToken = useAuth.use.token()?.access;
+
   const handleToken = useCallback(async () => {
+    if (authStatus !== 'signIn' || !accessToken) return;
+
     const token = await registerForPushNotificationsAsync();
     if (!token) return;
+
+    const latestAuth = useAuth.getState();
+    if (latestAuth.status !== 'signIn' || !latestAuth.token?.access) return;
+
     const {
       setPushToken,
       pushToken,
@@ -244,7 +254,7 @@ const PushNotificationManager: React.FC<PropsWithChildren> = ({ children }) => {
           payload: error.config?.data,
         });
       });
-  }, []);
+  }, [accessToken, authStatus]);
 
   const handleNotificationReceived = useCallback(
     (notification: Notifications.Notification) => {
