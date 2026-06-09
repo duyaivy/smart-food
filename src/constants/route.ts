@@ -36,6 +36,7 @@ export const ROUTE = {
       ABOUT_US: '/(stacks)/profile/about-us',
       EDIT: '/(stacks)/profile/edit',
       HISTORY_COOKING: '/(stacks)/profile/history-cooking',
+      MEAL_DETAIL: '/(stacks)/profile/meal-detail',
       PRIVACY: '/(stacks)/profile/privacy',
       SETTINGS: '/(stacks)/profile/settings',
       SMART_SCALE: '/(stacks)/profile/smart-scale',
