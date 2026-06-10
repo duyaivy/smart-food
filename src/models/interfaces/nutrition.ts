@@ -1,3 +1,5 @@
+import type { MealType } from '@/models/interfaces/meal';
+
 export interface DailyNutritionData {
   date: string;
   total: {
@@ -7,7 +9,7 @@ export interface DailyNutritionData {
     fat: number;
   };
   meals: {
-    mealType: 'BREAKFAST' | 'LUNCH' | 'DINNER';
+    mealType: MealType;
     calories: number;
     protein: number;
     carb: number;

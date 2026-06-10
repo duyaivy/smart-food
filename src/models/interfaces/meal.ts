@@ -1,15 +1,6 @@
 export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER';
 
-export type Unit =
-  | 'GRAM'
-  | 'KILOGRAM'
-  | 'MILLILITER'
-  | 'LITER'
-  | 'PIECE'
-  | 'SLICE'
-  | 'CUP'
-  | 'TABLESPOON'
-  | 'TEASPOON';
+export type Unit = 'GRAM' | 'NUMBER' | 'SPOON';
 
 export type MealHistorySortBy = 'CREATED_AT';
 

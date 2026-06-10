@@ -36,6 +36,9 @@ export const useCreateMealMutation = () => {
     mutationFn: (body: CreateMealInput) => mealApi.createMeal(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-history'] });
+      queryClient.invalidateQueries({ queryKey: ['nutrition-daily'] });
+      queryClient.invalidateQueries({ queryKey: ['nutrition-weekly'] });
+      queryClient.invalidateQueries({ queryKey: ['nutrition-remaining'] });
     },
   });
 };

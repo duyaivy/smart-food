@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { SlidersHorizontal, UtensilsCrossed } from 'lucide-react-native';
 import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
   FlatList,
@@ -40,6 +41,11 @@ const formatDateLabel = (date: Date) => {
   return { day: day.toString(), month: `Thg ${month}` };
 };
 
+type FilterForm = {
+  draftFrom: Date | undefined;
+  draftTo: Date | undefined;
+};
+
 export default function HistoryCookingScreen() {
   const router = useRouter();
   const navigation = useNavigation();
@@ -49,9 +55,12 @@ export default function HistoryCookingScreen() {
   // Applied dates — drive the actual API query
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
+
+  const { watch, setValue, getValues } = useForm<FilterForm>({
+    defaultValues: { draftFrom: undefined, draftTo: undefined },
+  });
+
   // Draft dates — only used inside the modal, committed on "Xác nhận"
-  const [draftFrom, setDraftFrom] = useState<Date | undefined>();
-  const [draftTo, setDraftTo] = useState<Date | undefined>();
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
@@ -86,8 +95,8 @@ export default function HistoryCookingScreen() {
       headerRight: () => (
         <TouchableOpacity
           onPress={() => {
-            setDraftFrom(fromDate);
-            setDraftTo(toDate);
+            setValue('draftFrom', fromDate);
+            setValue('draftTo', toDate);
             setFilterModalVisible(true);
           }}
           className="pr-2"
@@ -108,6 +117,7 @@ export default function HistoryCookingScreen() {
   };
 
   const handleApplyFilter = () => {
+    const { draftFrom, draftTo } = getValues();
     setFromDate(draftFrom);
     setToDate(draftTo);
     setPage(1);
@@ -115,8 +125,8 @@ export default function HistoryCookingScreen() {
   };
 
   const handleClearFromModal = () => {
-    setDraftFrom(undefined);
-    setDraftTo(undefined);
+    setValue('draftFrom', undefined);
+    setValue('draftTo', undefined);
     setFromDate(undefined);
     setToDate(undefined);
     setPage(1);
@@ -216,8 +226,8 @@ export default function HistoryCookingScreen() {
               {(fromDate || toDate) && (
                 <TouchableOpacity
                   onPress={() => {
-                    setDraftFrom(fromDate);
-                    setDraftTo(toDate);
+                    setValue('draftFrom', fromDate);
+                    setValue('draftTo', toDate);
                     setFilterModalVisible(true);
                   }}
                   className="mt-4 rounded-xl border border-primary px-6 py-3"
@@ -280,7 +290,7 @@ export default function HistoryCookingScreen() {
             <TouchableOpacity
               onPress={() => setShowFromPicker(true)}
               className={`flex-1 items-center rounded-xl border py-3 ${
-                draftFrom
+                watch('draftFrom')
                   ? 'border-primary bg-primary/10'
                   : 'bg-muted border-border'
               }`}
@@ -289,16 +299,20 @@ export default function HistoryCookingScreen() {
                 Từ ngày
               </Text>
               <Text
-                className={`text-sm font-semibold ${draftFrom ? 'text-primary' : 'text-foreground'}`}
+                className={`text-sm font-semibold ${
+                  watch('draftFrom') ? 'text-primary' : 'text-foreground'
+                }`}
               >
-                {draftFrom ? formatDisplayDate(draftFrom) : 'Chọn ngày'}
+                {watch('draftFrom')
+                  ? formatDisplayDate(watch('draftFrom') as Date)
+                  : 'Chọn ngày'}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setShowToPicker(true)}
               className={`flex-1 items-center rounded-xl border py-3 ${
-                draftTo
+                watch('draftTo')
                   ? 'border-primary bg-primary/10'
                   : 'bg-muted border-border'
               }`}
@@ -307,14 +321,18 @@ export default function HistoryCookingScreen() {
                 Đến ngày
               </Text>
               <Text
-                className={`text-sm font-semibold ${draftTo ? 'text-primary' : 'text-foreground'}`}
+                className={`text-sm font-semibold ${
+                  watch('draftTo') ? 'text-primary' : 'text-foreground'
+                }`}
               >
-                {draftTo ? formatDisplayDate(draftTo) : 'Chọn ngày'}
+                {watch('draftTo')
+                  ? formatDisplayDate(watch('draftTo') as Date)
+                  : 'Chọn ngày'}
               </Text>
             </TouchableOpacity>
           </View>
 
-          {(draftFrom || draftTo) && (
+          {(watch('draftFrom') || watch('draftTo')) && (
             <TouchableOpacity
               onPress={handleClearFromModal}
               className="mb-3 items-center rounded-xl border border-border py-3"
@@ -335,24 +353,24 @@ export default function HistoryCookingScreen() {
 
         {showFromPicker && (
           <DateTimePicker
-            value={draftFrom || new Date()}
+            value={watch('draftFrom') || new Date()}
             mode="date"
             display="default"
             onChange={(_, d) => {
               setShowFromPicker(false);
-              if (d) setDraftFrom(d);
+              if (d) setValue('draftFrom', d);
             }}
           />
         )}
 
         {showToPicker && (
           <DateTimePicker
-            value={draftTo || new Date()}
+            value={watch('draftTo') || new Date()}
             mode="date"
             display="default"
             onChange={(_, d) => {
               setShowToPicker(false);
-              if (d) setDraftTo(d);
+              if (d) setValue('draftTo', d);
             }}
           />
         )}
