@@ -18,16 +18,19 @@ import {
   Image,
   NutritionItem,
   Pressable,
-  SafeAreaView,
   ScrollView,
   Text,
   View,
 } from '@/components/ui';
 import { ICON_SIZE_LARGE, ICON_SIZE_MEDIUM } from '@/constants/common';
 import { useAuth } from '@/lib';
+import {
+  useGetDailyNutritionQuery,
+  useGetDailyRemainingQuery,
+  useGetWeeklyNutritionQuery,
+} from '@/lib/hooks/queries/nutrition.query';
 import { type DailyPlan } from '@/models/interfaces/recommendation';
 
-// `theme.ts` is CommonJS because Tailwind config requires it directly.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { colors } = require('@/constants/theme') as {
   colors: {
@@ -88,27 +91,16 @@ function getMonday(date: Date): Date {
   return monday;
 }
 
-function buildMockPlan(startDate: Date): DailyPlan[] {
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(startDate);
-    date.setDate(startDate.getDate() + index);
-
-    return {
-      day: index + 1,
-      date: formatDateKey(date),
-      meals: {
-        breakfast: [],
-        lunch: [],
-        dinner: [],
-      },
-      nutrition: {
-        calories: 0,
-        protein: 0,
-        fat: 0,
-        carb: 0,
-      },
-    };
-  });
+function getISOWeekString(date: Date): string {
+  const d = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  );
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNum = Math.ceil(
+    ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
+  );
+  return `${d.getUTCFullYear()}-W${String(weekNum).padStart(2, '0')}`;
 }
 
 function HeaderIcon({ Icon }: { Icon: LucideIcon }) {
@@ -119,7 +111,17 @@ function HeaderIcon({ Icon }: { Icon: LucideIcon }) {
   );
 }
 
-function EnergyMeter() {
+function EnergyMeter({
+  remainingKcal,
+  totalKcal,
+  percentConsumed,
+}: {
+  remainingKcal: number;
+  totalKcal: number;
+  percentConsumed: number;
+}) {
+  const arcFilled = Math.min((percentConsumed / 100) * 214, 214);
+
   return (
     <View
       className="mt-4 overflow-hidden rounded-3xl bg-primary px-5 pb-5 pt-4"
@@ -142,15 +144,15 @@ function EnergyMeter() {
               strokeWidth={24}
               strokeLinecap="round"
               fill="none"
-              strokeDasharray="148 214"
+              strokeDasharray={`${arcFilled} 214`}
             />
           </Svg>
           <View className="absolute bottom-0 w-full flex-row justify-between px-6">
             <Text className="text-sm text-white">0</Text>
-            <Text className="text-sm text-white">2330</Text>
+            <Text className="text-sm text-white">{Math.round(totalKcal)}</Text>
           </View>
           <Text className="absolute bottom-0 text-3xl font-bold text-white">
-            1672
+            {Math.round(remainingKcal)}
           </Text>
         </View>
         <Text className="text-base text-white">còn lại</Text>
@@ -191,11 +193,45 @@ export default function HomeScreen() {
     return date;
   }, []);
   const monday = useMemo(() => getMonday(today), [today]);
-  const weekDays = useMemo<WeekDay[]>(
-    () => buildWeekDays(buildMockPlan(monday), formatDateKey(monday)),
-    [monday]
-  );
+  const weekString = useMemo(() => getISOWeekString(today), [today]);
+
   const [selectedDayKey, setSelectedDayKey] = useState(formatDateKey(today));
+
+  const { data: dailyRemaining } = useGetDailyRemainingQuery(selectedDayKey);
+  const { data: dailyNutrition } = useGetDailyNutritionQuery(selectedDayKey);
+  const { data: weeklyNutrition } = useGetWeeklyNutritionQuery(weekString);
+
+  const weekDays = useMemo<WeekDay[]>(() => {
+    // Always anchor to Monday so the calendar shows the correct week
+    const baseDays = buildWeekDays([], formatDateKey(monday));
+
+    if (!weeklyNutrition) return baseDays;
+
+    const nutritionByDate = new Map(
+      (weeklyNutrition.dailyTotals ?? [])
+        .filter((d) => d.calories > 0)
+        .map((d) => [d.date, d])
+    );
+
+    return baseDays.map((day) => {
+      const n = nutritionByDate.get(day.key);
+      if (!n) return day;
+      return {
+        ...day,
+        dayPlan: {
+          day: 0,
+          date: n.date,
+          meals: { breakfast: [], lunch: [], dinner: [] },
+          nutrition: {
+            calories: n.calories,
+            protein: n.protein,
+            carb: n.carb,
+            fat: n.fat,
+          },
+        } satisfies DailyPlan,
+      };
+    });
+  }, [monday, weeklyNutrition]);
 
   return (
     <View className="flex-1 bg-white">
@@ -251,9 +287,21 @@ export default function HomeScreen() {
             Quản lý calo thông minh
           </Text>
 
-          <EnergyMeter />
+          <EnergyMeter
+            remainingKcal={dailyRemaining?.remaining.calories ?? 0}
+            totalKcal={
+              (dailyRemaining?.remaining.calories ?? 0) +
+              (dailyNutrition?.total.calories ?? 0)
+            }
+            percentConsumed={dailyRemaining?.percentageConsumed.calories ?? 0}
+          />
 
-          <NutritionItem protein={28} carb={12} fat={18} className="mt-4" />
+          <NutritionItem
+            protein={dailyNutrition?.total.protein ?? 0}
+            carb={dailyNutrition?.total.carb ?? 0}
+            fat={dailyNutrition?.total.fat ?? 0}
+            className="mt-4"
+          />
 
           <View className="mt-6 flex-row items-center justify-between">
             <Text className="text-2xl font-semibold text-neutral-800">

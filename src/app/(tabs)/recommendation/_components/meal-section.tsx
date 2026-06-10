@@ -1,13 +1,15 @@
 import { useRouter } from 'expo-router';
 import { ChevronDown, type LucideIcon } from 'lucide-react-native';
 import React, { memo, useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { Image } from '@/components/ui';
 import { Text } from '@/components/ui/text';
 import colors from '@/constants/colors';
 import { ICON_SIZE_MEDIUM } from '@/constants/common';
 import { ROUTE } from '@/constants/route';
+import { showMessage } from '@/lib/common/show-message';
+import { useCreateMealMutation } from '@/lib/hooks/queries/meal.query';
 import { useDishDetail } from '@/lib/hooks/use-dish-detail';
 import {
   type IIngredient,
@@ -64,6 +66,35 @@ export const MealSection = ({
 }: MealSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isSwapModalVisible, setIsSwapModalVisible] = useState(false);
+  const { mutateAsync: createMeal, isPending: isCreating } =
+    useCreateMealMutation();
+
+  const handleCookNow = async () => {
+    if (meals.length === 0) return;
+    try {
+      await Promise.all(
+        meals.map((m) =>
+          createMeal({
+            dishId: Number(m.dishId),
+            mealType,
+            eatenAt: new Date(),
+            missingIngredientIds: m.missingIngredient?.map(
+              (i) => i.ingredientId
+            ),
+          })
+        )
+      );
+      showMessage({
+        message: 'Đã ghi lại bữa ăn thành công!',
+        type: 'success',
+      });
+    } catch {
+      showMessage({
+        message: 'Không thể ghi lại bữa ăn. Thử lại sau.',
+        type: 'error',
+      });
+    }
+  };
 
   return (
     <View
@@ -120,10 +151,19 @@ export const MealSection = ({
               </Text>
             </Pressable>
             <Pressable
+              onPress={handleCookNow}
+              disabled={isCreating}
               className="flex-1 items-center rounded-xl py-3"
-              style={{ backgroundColor: colors.voca.secondary }}
+              style={{
+                backgroundColor: colors.voca.secondary,
+                opacity: isCreating ? 0.7 : 1,
+              }}
             >
-              <Text className="font-bold text-white">Nấu ăn ngay</Text>
+              {isCreating ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text className="font-bold text-white">Nấu ăn ngay</Text>
+              )}
             </Pressable>
           </View>
         </View>

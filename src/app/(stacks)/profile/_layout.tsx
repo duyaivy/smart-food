@@ -5,11 +5,7 @@ import { stackHeaderOptions } from '@/components/ui/stack-header-options';
 
 export default function ProfileStackLayout() {
   return (
-    <Stack
-      screenOptions={{
-        animation: 'slide_from_right',
-      }}
-    >
+    <Stack screenOptions={{ animation: 'slide_from_right' }}>
       <Stack.Screen
         name="edit/index"
         options={stackHeaderOptions({ title: 'Chỉnh sửa thông tin' })}
@@ -29,6 +25,10 @@ export default function ProfileStackLayout() {
       <Stack.Screen
         name="history-cooking"
         options={stackHeaderOptions({ title: 'Lịch sử nấu ăn' })}
+      />
+      <Stack.Screen
+        name="meal-detail"
+        options={stackHeaderOptions({ title: 'Chi tiết bữa ăn' })}
       />
       <Stack.Screen
         name="smart-scale/index"
