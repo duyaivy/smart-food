@@ -6,6 +6,7 @@ import type {
 import type { PaginateQuery } from '../types';
 
 type KeyParams = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
 export const DEFAULT_LIMIT = 10;
@@ -28,15 +29,17 @@ export function getUrlParameters(
   if (url === null) {
     return null;
   }
-  let regex = /[?&]([^=#]+)=([^&#]*)/g,
-    params = {},
-    match;
-  while ((match = regex.exec(url))) {
-    if (match[1] !== null) {
-      //@ts-ignore
-      params[match[1]] = match[2];
-    }
+
+  const regex = /[?&]([^=#]+)=([^&#]*)/g;
+  const params: Record<string, string> = {};
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(url)) !== null) {
+    const key = match[1];
+    const value = match[2];
+    if (key) params[key] = value;
   }
+
   return params;
 }
 

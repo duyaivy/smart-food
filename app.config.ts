@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 import type { ConfigContext, ExpoConfig } from '@expo/config';
 import type { AppIconBadgeConfig } from 'app-icon-badge/types';
 
@@ -26,7 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   description: `${Env.NAME} Mobile App`,
   owner: Env.EXPO_ACCOUNT_OWNER,
   scheme: Env.SCHEME,
-  slug: 'obytesapp',
+  slug: 'smartfood-ai',
   version: Env.VERSION.toString(),
   orientation: 'portrait',
   icon: './assets/icon.png',
@@ -34,11 +33,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   newArchEnabled: true,
   updates: {
     fallbackToCacheTimeout: 0,
+    url: `https://u.expo.dev/${Env.EAS_PROJECT_ID}`,
   },
   assetBundlePatterns: ['**/*'],
   ios: {
     supportsTablet: true,
     bundleIdentifier: Env.BUNDLE_ID,
+    runtimeVersion: {
+      policy: 'appVersion',
+    },
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
@@ -52,6 +55,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.PACKAGE,
+    runtimeVersion: '1.0.0',
+    googleServicesFile: './google-services.json',
   },
   web: {
     favicon: './assets/favicon.png',
@@ -69,13 +74,33 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-font',
       {
-        fonts: ['./assets/fonts/Inter.ttf'],
+        // Bundle custom fonts for native platforms.
+        // Using the Be_Vietnam_Pro directory ensures all weights are included.
+        fonts: ['./assets/fonts/Be_Vietnam_Pro/'],
       },
     ],
     'expo-localization',
     'expo-router',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
+    [
+      'expo-image-picker',
+      {
+        photosPermission:
+          'Cho phép $(PRODUCT_NAME) truy cập vào thư viện ảnh của bạn',
+        cameraPermission:
+          'Cho phép $(PRODUCT_NAME) truy cập vào máy ảnh của bạn',
+      },
+    ],
+    [
+      'expo-notifications',
+      {
+        icon: './assets/splash-icon.png',
+        color: '#ffffff',
+        defaultChannel: 'default',
+      },
+    ],
+    ['@react-native-community/datetimepicker'],
   ],
   extra: {
     ...ClientEnv,

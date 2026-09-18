@@ -35,6 +35,7 @@ module.exports = {
   ],
   coverageDirectory: '<rootDir>/coverage/',
   moduleNameMapper: {
+    '^@api/(.*)$': '<rootDir>/src/api/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
 };

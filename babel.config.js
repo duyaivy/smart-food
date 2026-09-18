@@ -12,7 +12,11 @@ module.exports = function (api) {
           root: ['./'],
           alias: {
             '@': './src',
+            '@api': './src/api',
             '@env': './src/lib/env.js',
+            '@assets': './assets',
+            '@components': './src/components',
+            '@hooks': './src/hooks',
           },
           extensions: [
             '.ios.ts',

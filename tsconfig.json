@@ -5,7 +5,11 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@env": ["./src/lib/env.js"]
+      "@env": ["src/lib/env.js"],
+      "@assets/*": ["./assets/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@api/*": ["./src/api/*"]
     },
     "esModuleInterop": true,
     "checkJs": true
