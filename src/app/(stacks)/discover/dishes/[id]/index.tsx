@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   NutritionItem,
   Pressable,
+  SafeAreaView,
   ScrollView,
   Text,
   View,
@@ -103,7 +104,7 @@ export default function DishDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 96 }}
@@ -161,6 +162,6 @@ export default function DishDetailScreen() {
       </ScrollView>
 
       <DetailFooterActions />
-    </View>
+    </SafeAreaView>
   );
 }

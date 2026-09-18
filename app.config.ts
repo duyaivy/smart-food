@@ -33,11 +33,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   newArchEnabled: true,
   updates: {
     fallbackToCacheTimeout: 0,
+    url: `https://u.expo.dev/${Env.EAS_PROJECT_ID}`,
   },
   assetBundlePatterns: ['**/*'],
   ios: {
     supportsTablet: true,
     bundleIdentifier: Env.BUNDLE_ID,
+    runtimeVersion: {
+      policy: 'appVersion',
+    },
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
@@ -51,6 +55,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.PACKAGE,
+    runtimeVersion: '1.0.0',
     googleServicesFile: './google-services.json',
   },
   web: {
